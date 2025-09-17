@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import logo from '../assets/ayto_almonte.png';
 
 const AccessDenied = () => {
 
@@ -10,7 +11,7 @@ const AccessDenied = () => {
         <div class="row vh-80 d-flex align-items-center justify-content-center">
             <div class="col">
                 <img
-                    src="/src/assets/ayto_almonte.png"
+                    src={logo}
                     alt="Logo Ayto"
                     class="mx-auto d-block"
                     style={{

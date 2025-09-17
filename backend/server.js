@@ -30,7 +30,7 @@ app.use('/api', SystemRoutes);
 // --------------------------------
 //            FRONTEND
 // --------------------------------
-app.use(express.static(path.join(__dirname, "../frontend/dist")));x
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 app.use((req, res, next) => {
     if (!req.path.startsWith('/api')) {

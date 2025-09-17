@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import logo from '../assets/ayto_almonte.png';
 
 /**
  * Página comodín usada para aparecer en caso de poner una dirección
@@ -11,7 +12,7 @@ const NotFound = () => {
         <div class="row vh-80 d-flex align-items-center justify-content-center">
             <div class="col">
                 <img
-                    src="/src/assets/ayto_almonte.png"
+                    src={logo}
                     alt="Logo Ayto"
                     className="mx-auto d-block"
                     style={{

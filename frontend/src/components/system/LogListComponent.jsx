@@ -21,7 +21,7 @@ import { faFileAlt, faDownload } from '@fortawesome/free-solid-svg-icons';
 export default function LogListComponent({ logs, selectedLog, onSelectLog, onDownloadLog }) {
     const [tooltipOpen, setTooltipOpen] = useState({});
 
-    if (logs.length === 0) return <p className="p-3 text-muted">Selecciona una carpeta</p>;
+    if (logs.length === 0) return <p className="p-3 text-muted">No existen logs</p>;
 
     const toggleTooltip = (id) => {
         setTooltipOpen(prev => ({ ...prev, [id]: !prev[id] }));

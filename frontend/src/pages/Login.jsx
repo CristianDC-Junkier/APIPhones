@@ -84,6 +84,7 @@ const Login = () => {
                     navigate('/home');
                 }
             } else {
+                console.error('Login error:', response.error);
                 Swal.fire('Error', response?.error?.response?.data?.message || 'Login fallido', 'error');
             }
         } catch (err) {

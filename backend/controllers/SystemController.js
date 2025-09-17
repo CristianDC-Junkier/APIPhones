@@ -1,6 +1,9 @@
 ﻿const fs = require("fs");
 const path = require("path");
 const os = require("os");
+const LoggerController = require('./LoggerController'); 
+
+
 const logBasePath = path.join(__dirname, '../logs'); 
 
 

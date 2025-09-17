@@ -1,12 +1,12 @@
-﻿// src/services/AxiosService.js
-import axios from 'axios';
+﻿import axios from 'axios';
 
 /**
  * Servicio encargado de conectar con el servidor
+ * baseURL cambia según el entorno (VITE_MODE)
  */
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_IP + '/api',
+    baseURL: '/visor-sig/api',
     withCredentials: false,
 });
 

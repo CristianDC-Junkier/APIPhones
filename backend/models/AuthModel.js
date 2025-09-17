@@ -1,6 +1,6 @@
 ﻿const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const { encrypt, decrypt } = require("../utils/crypto");
+const { encrypt, decrypt } = require("../utils/Crypto");
 
 /**
  * Modelo Sequelize para usuarios del sistema.

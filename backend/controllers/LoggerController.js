@@ -21,8 +21,9 @@ class LoggerController {
      * Crea la carpeta de logs si no existe.
      */
     static init() {
-        const baseDir = process.cwd().endsWith('backend') ? process.cwd() : path.join(process.cwd(), 'backend');
-        this.logsDir = path.join(baseDir, 'logs');
+        this.logsDir = path.join(__dirname, '../logs'); 
+
+
 
         if (!fs.existsSync(this.logsDir)) {
             fs.mkdirSync(this.logsDir, { recursive: true });
@@ -76,6 +77,19 @@ class LoggerController {
     }
 
     /**
+     * Escribe un mensaje de log en el archivo correspondiente al día actual, de forma síncrona.
+     * 
+     * @param {string} message - Mensaje ya formateado
+     * @private
+     */
+    static _writeToFileSync(message) {
+        const filePath = path.join(this.logsDir, `${new Date().toISOString().slice(0, 10)}.log`);
+        fs.appendFileSync(filePath, message + '\n', err => {
+            if (err) console.error('Error escribiendo el log:', err);
+        });
+    }
+
+    /**
      * Elimina los archivos de log más antiguos si se supera MAX_LOGS.
      * @private
      */
@@ -124,6 +138,17 @@ class LoggerController {
     static error(message) {
         const formatted = this._format('error', message);
         this._writeToFile(formatted);
+    }
+
+
+    /**
+     * Registra un mensaje de error crítico.
+     * 
+     * @param {string} message - Mensaje a registrar
+     */
+    static errorCritical(message) {
+        const formatted = this._format('error', message);
+        this._writeToFileSync(formatted);
     }
 }
 

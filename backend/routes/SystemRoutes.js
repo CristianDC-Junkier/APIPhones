@@ -2,7 +2,7 @@
 const router = express.Router();
 
 const SystemController = require("../controllers/SystemController");
-const { adminOnly } = require("../middlewares/auth");
+const { adminOnly } = require("../middlewares/Auth");
 
 /**
  * Rutas para administración y monitoreo del sistema.

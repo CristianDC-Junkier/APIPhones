@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const AuthController = require("../controllers/AuthController");
-const { adminOnly } = require("../middlewares/auth");
+const { adminOnly } = require("../middlewares/Auth");
 
 /**
  * Rutas para gestión de usuarios.

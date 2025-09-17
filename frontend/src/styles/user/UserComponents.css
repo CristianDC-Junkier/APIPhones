@@ -1,0 +1,182 @@
+﻿/* ------------------- */
+/*   Boton de Logout   */
+/* ------------------- */
+
+.logout-button {
+    width: 44px;
+    height: 44px;
+    border-radius: 0.3rem;
+    background-color: #dc3545;
+    border: none;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 12px;
+}
+
+    .logout-button:not(:hover) {
+        width: 44px;
+        border-radius: 0.3rem;
+        transition: width 0.3s ease, border-radius 0.3s ease;
+    }
+
+    .logout-button:hover, .logout-button:focus {
+        width: 140px;
+        height: 44px;
+        border-radius: 0.5rem;
+        justify-content: flex-start;
+        transition: width 0.3s ease, border-radius 0.3s ease;
+    }
+
+.logout-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.logout-icon {
+    flex-shrink: 0;
+}
+
+.logout-text {
+    margin-left: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.3s ease, transform 0.1s ease;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.logout-button:hover .logout-text,
+.logout-button:focus .logout-text {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.logout-button:hover .logout-content,
+.logout-button:focus .logout-content {
+    margin-left: 0px;
+}
+
+/* --- Media Query para pantallas pequeñas --- */
+@media (max-width: 576px) {
+    .logout-button {
+        width: 44px !important;
+        border-radius: 50% !important;
+        padding-left: 0 !important;
+        justify-content: center !important;
+    }
+
+        .logout-button:hover,
+        .logout-button:focus {
+            width: 44px !important;
+            border-radius: 50% !important;
+            padding-left: 0 !important;
+            justify-content: center !important;
+        }
+
+    .logout-text {
+        display: none !important;
+    }
+
+    .logout-content {
+        margin-left: 15px !important;
+    }
+}
+
+/* ------------------- */
+/*   Botones de Home   */
+/* ------------------- */
+
+.client-button {
+    height: 200px ;
+    width: 360px;
+    cursor: pointer;
+    border: none;
+    background: white;
+    padding: 25px 30px; /* Más padding */
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 900;
+    position: relative;
+    overflow: hidden;
+    color: black;
+    gap: 15px; /* Más espacio entre icono y texto */
+    transition: color 0.3s ease;
+    margin: 15px; /* Más margen */
+    font-size: 1.1rem; /* Texto más grande */
+}
+
+    .client-button .icon {
+        color: #262626;
+        font-size: 2.5rem !important; /* Icono más grande, el !important asegura que se aplique */
+    }
+
+    .client-button .label {
+        position: relative;
+        display: block;
+        width: 100%;
+        font-weight: 900;
+        font-size: 1.2rem; /* Más grande */
+    }
+
+    /* El resto igual, manteniendo los efectos */
+
+    .client-button:focus {
+        outline: 2px solid #262626;
+        outline-offset: 3px;
+    }
+
+    .client-button:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 4px;
+        width: 100%;
+        border-bottom: 4px solid transparent;
+        border-left: 4px solid transparent;
+        box-sizing: border-box;
+        transform: translateX(100%);
+        transition: transform 0.3s linear, height 0.3s linear 0.3s;
+        pointer-events: none;
+    }
+
+    .client-button:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 4px;
+        width: 100%;
+        border-top: 4px solid transparent;
+        border-right: 4px solid transparent;
+        box-sizing: border-box;
+        transform: translateX(-100%);
+        transition: transform 0.3s linear, height 0.3s linear 0.5s;
+        pointer-events: none;
+    }
+
+    .client-button:hover,
+    .client-button:focus {
+        color: #262626;
+    }
+
+        .client-button:hover:before,
+        .client-button:focus:before {
+            border-color: #262626;
+            height: 100%;
+            transform: translateX(0);
+        }
+
+        .client-button:hover:after,
+        .client-button:focus:after {
+            border-color: #262626;
+            height: 100%;
+            transform: translateX(0);
+        }

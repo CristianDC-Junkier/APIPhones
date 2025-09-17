@@ -1,0 +1,25 @@
+﻿body {
+    font-family: 'Trebuchet MS', sans-serif;
+}
+
+
+
+/* Estilo para scrollbars con color primario */
+.scrollbar-primary::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollbar-primary::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-primary::-webkit-scrollbar-thumb {
+    background-color: #0d6efd; /* Color primario de Bootstrap */
+    border-radius: 4px;
+}
+
+.cmaxW {
+    max-width: 525px !important; 
+    margin-left: auto;
+    margin-right: auto;
+}

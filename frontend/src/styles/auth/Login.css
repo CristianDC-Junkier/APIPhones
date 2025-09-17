@@ -1,0 +1,33 @@
+﻿/* Card-login - estilo común */
+.Card-login {
+    border-radius: 1rem; /* rounded-4 */
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    padding: 1.5rem 2rem;
+    transform: scale(0.90);
+    transform-origin: center;
+    margin: auto;
+    border: 1px solid transparent;
+    backdrop-filter: blur(10px);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+/* Tema oscuro para Card-login */
+body.dark-mode .Card-login {
+    background-color: rgba(33, 33, 33, 0.85);
+    color: #f8f9fa;
+    border-color: #444;
+    backdrop-filter: blur(15px);
+}
+
+/* Tema claro para Card-login */
+body:not(.dark-mode) .Card-login {
+    background-color: rgba(255, 255, 255, 0.5);
+    color: #212529;
+    border-color: rgba(0,0,0,0.125);
+    backdrop-filter: blur(10px);
+}
+
+
+
+
+

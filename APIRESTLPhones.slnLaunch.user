@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Nuevo perfil",
+    "Projects": [
+      {
+        "Path": "frontend\\frontend.esproj",
+        "Action": "Start",
+        "DebugTarget": "localhost (Edge)"
+      },
+      {
+        "Path": "backend\\backend.esproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

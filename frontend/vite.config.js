@@ -15,6 +15,6 @@ export default () => {
                 },
             },
         },
-        base: '/visor-sig',
+        base: '/listin-telefonico',
     });
 };

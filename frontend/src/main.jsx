@@ -9,7 +9,7 @@ import './styles/Global.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
-        <BrowserRouter basename='/visor-sig'>
+        <BrowserRouter basename='/listin-telefonico'>
             <App />
         </BrowserRouter>
     </React.StrictMode>

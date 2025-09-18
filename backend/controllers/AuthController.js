@@ -1,7 +1,4 @@
-﻿const UserAccount = require("../models/AuthModel");
-const UserData = require("../models/UserDataModel");
-const Department = require("../models/DepartmentModel");
-const Subdepartment = require("../models/SubDepartmentModel");
+﻿const { UserAccount, UserData, Department, SubDepartment } = require("../models/Relations");
 
 const LoggerController = require("../controllers/LoggerController");
 const { generateToken } = require("../utils/JWT");
@@ -41,7 +38,7 @@ class AuthController {
                         as: 'userData',
                         include: [
                             { model: Department, as: 'department' },
-                            { model: Subdepartment, as: 'subdepartment' }
+                            { model: SubDepartment, as: 'subdepartment' }
                         ]
                     }
                 ]
@@ -56,7 +53,7 @@ class AuthController {
             res.json({
                 success: true,
                 token,
-                data: {
+                user: {
                     id: user.id,
                     username: user.username,
                     usertype: user.usertype,
@@ -92,8 +89,8 @@ class AuthController {
      */
     static async listAll(req, res) {
         try {
-            const data = await UserAccount.findAll({ attributes: ["id", "username", "usertype"] });
-            res.json(data);
+            const users = await UserAccount.findAll({ attributes: ["id", "username", "usertype"] });
+            res.json(users);
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -171,7 +168,7 @@ class AuthController {
                 userAccountId: user.id
             });
 
-            res.json({ success: true, message: "Usuario registrado correctamente", data: user.id });
+            res.json({ success: true, message: "Usuario registrado correctamente", id: user.id });
             LoggerController.info('Nuevo usuario ' + username + ' creado correctamente');
         } catch (error) {
             LoggerController.error('Error en la creación de usuario: ' + error.message);

@@ -24,13 +24,13 @@ export const AuthProvider = ({ children }) => {
 
     /**
      * Guarda el usuario en storage cifrado con expiración.
-     * @param {Object} userData - Información del usuario.
+     * @param {Object} token - Token del usuario.
      * @param {boolean} rememberMe - true → localStorage, false → sessionStorage.
      */
-    const saveUserWithExpiry = (userData, rememberMe) => {
+    const saveUserWithExpiry = (token, rememberMe) => {
         const now = new Date();
         const item = {
-            value: userData,
+            value: token,
             expiry: now.getTime() + 60 * 60 * 1000, // Expira en 1 hora
         };
 
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
         const result = await login(credentials);
         if (result.success) {
             setUser(result.data.user);
-            saveUserWithExpiry(result.data.user, credentials.rememberMe);
+            saveUserWithExpiry(result.data.token, credentials.rememberMe);
         } else {
             setUser(null);
             sessionStorage.removeItem("user");

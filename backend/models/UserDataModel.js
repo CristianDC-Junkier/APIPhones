@@ -1,9 +1,7 @@
 ﻿const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 const { encrypt, decrypt } = require("../utils/Crypto");
-const UserAccount = require("./AuthModel");
-const Department = require("./DepartmentModel");
-const Subdepartment = require("./SubdepartmentModel");
+
 
 /**
  * Modelo Sequelize para almacenar información adicional de usuarios.
@@ -57,40 +55,11 @@ const UserData = sequelize.define("UserData", {
         allowNull: true,
         set(value) { this.setDataValue("email", encrypt(value)); },
         get() { const val = this.getDataValue("email"); return val ? decrypt(val) : null; },
-    },
-    departmentId: {
-        type: DataTypes.INTEGER,
-        references: { model: Department, key: "id" },
-        allowNull: true,
-    },
-    subdepartmentId: {
-        type: DataTypes.INTEGER,
-        references: { model: Subdepartment, key: "id" },
-        allowNull: true,
-    },
-    userAccountId: {
-        type: DataTypes.INTEGER,
-        references: { model: UserAccount, key: "id" },
-        allowNull: false,
-    },
+    }
 });
 
 // Relaciones
-UserData.belongsTo(UserAccount, {
-    foreignKey: "userAccountId",
-    as: "userAccount",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE"
-});
 
-UserData.belongsTo(Department, {
-    foreignKey: "departmentId",
-    as: "department"
-});
-UserData.belongsTo(Subdepartment, {
-    foreignKey: "subdepartmentId",
-    as: "subdepartment"
-});
 
 // Hook para incrementar la version del UserAccount al actualizar UserData
 UserData.afterUpdate(async (userdata, options) => {

@@ -78,7 +78,7 @@ const Login = () => {
 
             if (response.success) {
                 const user = response.data.user;
-                if (user.usertype === 'USER') {
+                if (user.usertype === 'WORKER') {
                     navigate('/app');
                 } else {
                     navigate('/home');

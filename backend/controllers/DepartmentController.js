@@ -1,4 +1,5 @@
-﻿const DepartmentModel = require('../models/DepartmentModel');
+﻿const { Department } = require("../models/Relations")
+
 const LoggerController = require('./LoggerController');
 
 class DepartmentController {
@@ -12,8 +13,8 @@ class DepartmentController {
      */
     static async listAll(req, res) {
         try {
-            const departments = await DepartmentModel.listAll();
-            res.json({ success: true, data: departments });
+            const departments = await Department.listAll();
+            res.json({ success: true, departments });
         } catch (error) {
             LoggerController.error('Error listando departamentos: ' + error.message);
             res.status(500).json({ success: false, message: 'Error al obtener los departamentos', error: error.message });
@@ -29,9 +30,9 @@ class DepartmentController {
      */
     static async getById(req, res) {
         try {
-            const department = await DepartmentModel.getById(req.params.id);
+            const department = await Department.getById(req.params.id);
             if (!department) return res.status(404).json({ success: false, message: 'Departamento no encontrado' });
-            res.json({ success: true, data: department });
+            res.json({ success: true, department });
         } catch (error) {
             LoggerController.error('Error obteniendo departamento: ' + error.message);
             res.status(500).json({ success: false, message: 'Error al obtener el departamento', error: error.message });
@@ -47,8 +48,8 @@ class DepartmentController {
      */
     static async create(req, res) {
         try {
-            const department = await DepartmentModel.create(req.body);
-            res.status(201).json({ success: true, message: 'Departamento creado correctamente', data: department });
+            const department = await Department.create(req.body);
+            res.status(201).json({ success: true, message: 'Departamento creado correctamente', department });
         } catch (error) {
             LoggerController.error('Error creando departamento: ' + error.message);
             res.status(500).json({ success: false, message: 'Error al crear el departamento', error: error.message });
@@ -64,9 +65,9 @@ class DepartmentController {
      */
     static async update(req, res) {
         try {
-            const updated = await DepartmentModel.update(req.params.id, req.body);
+            const updated = await Department.update(req.params.id, req.body);
             if (!updated) return res.status(404).json({ success: false, message: 'Departamento no encontrado' });
-            res.json({ success: true, message: 'Departamento actualizado correctamente', data: updated });
+            res.json({ success: true, message: 'Departamento actualizado correctamente', department: updated });
         } catch (error) {
             LoggerController.error('Error actualizando departamento: ' + error.message);
             res.status(500).json({ success: false, message: 'Error al actualizar el departamento', error: error.message });
@@ -82,7 +83,7 @@ class DepartmentController {
      */
     static async delete(req, res) {
         try {
-            const deleted = await DepartmentModel.delete(req.params.id);
+            const deleted = await Department.delete(req.params.id);
             if (!deleted) return res.status(404).json({ success: false, message: 'Departamento no encontrado' });
             res.json({ success: true, message: 'Departamento eliminado correctamente' });
         } catch (error) {

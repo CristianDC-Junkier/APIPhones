@@ -1,7 +1,4 @@
-﻿const UserAccount = require("../models/AuthModel");
-const UserData = require("../models/UserDataModel");
-const Department = require("../models/DepartmentModel");
-const Subdepartment = require("../models/SubDepartmentModel");
+﻿const { UserAccount, UserData, Department, SubDepartment } = require("../models/Relations")
 
 const LoggerController = require("../controllers/LoggerController");
 const { Op } = require("sequelize");
@@ -29,7 +26,7 @@ class UserDataController {
 
             res.json({
                 success: true,
-                data: formatted
+                users: formatted
             });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
@@ -57,7 +54,7 @@ class UserDataController {
                 }
             }));
 
-            res.json({ success: true, data: formatted });
+            res.json({ success: true, users: formatted });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -106,7 +103,7 @@ class UserDataController {
                 }
             }));
 
-            res.json({ success: true, data: formatted });
+            res.json({ success: true, users: formatted });
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }
@@ -127,7 +124,7 @@ class UserDataController {
                         as: 'userData',
                         include: [
                             { model: Department, as: 'department' },
-                            { model: Subdepartment, as: 'subdepartment' }
+                            { model: SubDepartment, as: 'subdepartment' }
                         ]
                     }
                 ]
@@ -137,7 +134,7 @@ class UserDataController {
 
             res.json({
                 success: true,
-                data: {
+                user: {
                     id: user.id,
                     username: user.username,
                     usertype: user.usertype,
@@ -191,7 +188,7 @@ class UserDataController {
 
             res.json({
                 success: true,
-                data: {
+                user: {
                     name: userdata.name,
                     extension: userdata.extension,
                     number: userdata.number,
@@ -230,7 +227,7 @@ class UserDataController {
             user.username = username;
             await user.save();
 
-            res.json({ success: true, data: user.username });
+            res.json({ success: true, username: user.username });
             LoggerController.info(`Usuario ${userId} cambió su username a ${username}`);
         } catch (error) {
             LoggerController.error(`Error actualizando username: ${error.message}`);
@@ -301,7 +298,7 @@ class UserDataController {
 
             res.json({
                 success: true,
-                data: {
+                user: {
                     id: user.id,
                     username: user.username,
                     usertype: user.usertype,
@@ -356,7 +353,7 @@ class UserDataController {
 
             await userData.update(updateFields);
 
-            res.json({ success: true, message: "UserData actualizado correctamente", data: userData });
+            res.json({ success: true, message: "UserData actualizado correctamente", user: userData });
             LoggerController.info(`UserData de usuarioId ${id} actualizado por ${requester.username}`);
         } catch (error) {
             LoggerController.error(`Error actualizando UserData: ${error.message}`);

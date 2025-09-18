@@ -4,8 +4,8 @@ const LoggerController = require("./controllers/LoggerController");
 const path = require("path");
 const dotenv = require('dotenv');
 
-
 dotenv.config({ path: path.resolve(__dirname, '.env') });
+const basePath = '/listin-telefonico';
 
 // --------------------------------
 //  DATABASE (Solo en Desarrollo)
@@ -25,27 +25,22 @@ const AuthRoutes = require('./routes/AuthRoutes');
 const SystemRoutes = require('./routes/SystemRoutes');
 const UserDataRoutes = require('./routes/UserDataRoutes');
 const DepartmentRoutes = require('./routes/DepartmentRoutes');
-app.use('/api', AuthRoutes);
-app.use('/api', SystemRoutes);
-app.use('/api/user', UserDataRoutes);
-app.use('/api/department', DepartmentRoutes);
+app.use(`${basePath}/api`, AuthRoutes);
+app.use(`${basePath}/api`, SystemRoutes);
+app.use(`${basePath}/api/user`, UserDataRoutes);
+app.use(`${basePath}/api/department`, DepartmentRoutes);
 
 
 // --------------------------------
 //            FRONTEND
 // --------------------------------
-//app.use(express.static(path.join(__dirname, "../dist")));
+//app.use(basePath, express.static(path.join(__dirname, "./dist")));
+//app.use(basePath, (req, res) => {
+//    res.sendFile(path.join(__dirname, "./dist/index.html"));
+//})
 
-//app.use((req, res, next) => {
-//    if (!req.path.startsWith('/api')) {
-//       res.sendFile(path.join(__dirname, "../dist/index.html"));
-//    } else {
-//        next();
-//    }
-//});
-
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: "Ruta de API no encontrada" });
+app.use('/', (req, res) => {
+    res.status(404).json({ success: false, message: "Ruta no encontrada" });
 });
 
 

@@ -8,8 +8,8 @@ export default () => {
         server: {
             port: 61938,
             proxy: {
-                '/visor-sig/api': {
-                    target: 'https://localhost:5001',  
+                '/listin-telefonico/api': {
+                    target: 'http://localhost:5001',  
                     changeOrigin: true,
                     secure: false,
                 },

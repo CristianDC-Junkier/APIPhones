@@ -18,6 +18,7 @@ import AccessDenied from '../pages/AccessDenied';
 import DashBoardUser from '../pages/users/DashboardUser';
 import DashboardSystem from '../pages/system/DashboardSystem';
 import ExternalWeb from '../pages/ExternalWeb';
+import UserProfile from '../pages/users/UserProfile';
 
 /**
  * Encargado de definir las rutas de acceso a las distintas páginas y
@@ -33,12 +34,14 @@ const AppRouter = () => {
                 
                 {/* Rutas publicas */}
                 <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+
                 {/* Rutas privadas */}
-                
+                <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+
                 {/* Rutas privadas por rol */}
-                <Route path="/home" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><HomePage /></RoleRoute>} />
                 <Route path="/users" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashBoardUser /></RoleRoute>} />
                 <Route path="/logs" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardSystem /></RoleRoute>} />
+                <Route path="/profile" element={<RoleRoute allowedRoles={['WORKER']}><UserProfile /></RoleRoute>} />
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>

@@ -8,9 +8,9 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
  * Rutas para la gestión de UserData.
  *
  * Endpoints:
- * - GET    /                  → Listar todos los UserData accesibles.
- * - GET    /list              → Listar todos los UserData (solo admins o superadmins).
- * - GET    /list-department   → Listar UserData del mismo departamento que el usuario que hace la petición (solo notWorker: departamento o superior).
+ * - GET    /                  → Listar todos los datos de usuario accesibles.
+ * - GET    /list              → Listar todos los datos de usuario usuario logueado.
+ * - GET    /list-department   → Listar todos los datos de usuario del mismo departamento que el usuario que hace la petición (solo notWorker: departamento o superior).
  * - GET    /profile           → Obtener el perfil del usuario logueado.
  * - PUT    /profile           → Modificar el perfil del usuario logueado.
  * - PUT    /profile-username  → Modificar el username del usuario logueado.

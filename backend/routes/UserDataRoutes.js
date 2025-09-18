@@ -1,0 +1,41 @@
+﻿const express = require("express");
+const router = express.Router();
+
+const UserDataController = require("../controllers/UserDataController");
+const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Auth");
+
+/**
+ * Rutas para la gestión de UserData.
+ *
+ * Endpoints:
+ * - GET    /                  → Listar todos los UserData accesibles.
+ * - GET    /list              → Listar todos los UserData (solo admins o superadmins).
+ * - GET    /list-department   → Listar UserData del mismo departamento que el usuario que hace la petición (solo notWorker: departamento o superior).
+ * - GET    /profile           → Obtener el perfil del usuario logueado.
+ * - PUT    /profile           → Modificar el perfil del usuario logueado.
+ * - PUT    /profile-username  → Modificar el username del usuario logueado.
+ * - PUT    /profile-pass      → Modificar la contraseña del usuario logueado.
+ * - GET    /:id               → Obtener un UserData por ID (solo notWorker: departamento o superior).
+ * - PUT    /:id               → Modificar un UserData por ID (solo notWorker: departamento o superior).
+ *
+ * Middleware:
+ * - `adminOnly`       → Restringe el acceso a usuarios con roles de administrador.
+ * - `notWorker`       → Restringe el acceso a los usuarios con el rol basico de trabajador.
+ * - `isAuthenticated` → Permite acceso a usuarios logeados.
+ * - `canModifyUser`   → Comprueba si el usuario puede ser modificado o borrado.
+ */
+
+
+router.get("/", UserDataController.list);
+router.get("/list", isAuthenticated, UserDataController.listAll);
+router.get("/list-department", notWorker, UserDataController.listByDepartment);
+
+router.get("/profile", isAuthenticated, UserDataController.getProfile);
+router.put("/profile-data", isAuthenticated, UserDataController.updateMyProfileData);
+router.put("/profile-username", isAuthenticated, UserDataController.updateMyUsername);
+router.put("/profile-pass", isAuthenticated, UserDataController.updateMyPassword);
+
+router.get("/:id", notWorker, UserDataController.getOne);
+router.put("/:id", notWorker, canModifyUser, UserDataController.update);
+
+module.exports = router;

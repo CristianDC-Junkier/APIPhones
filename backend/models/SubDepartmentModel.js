@@ -38,14 +38,17 @@ const SubDepartment = sequelize.define("SubDepartment", {
         references: { model: Department, key: "id" },
         allowNull: false,
     },
-});
-
-// Crear índice único compuesto
-SubDepartment.addIndex({
-    name: "unique_name_per_department",
-    unique: true,
-    fields: ["name", "departmentId"]
-});
+},
+    {
+    indexes: [
+        {
+            unique: true,
+            name: "unique_name_per_department",
+            fields: ["name", "departmentId"]
+        }
+    ]
+}
+);
 
 // Relaciones
 SubDepartment.belongsTo(Department, {

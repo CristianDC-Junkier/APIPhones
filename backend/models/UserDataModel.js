@@ -1,7 +1,7 @@
 ﻿const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
 const { encrypt, decrypt } = require("../utils/Crypto");
-const UserAccount = require("./UserAccount");
+const UserAccount = require("./AuthModel");
 const Department = require("./DepartmentModel");
 const Subdepartment = require("./SubdepartmentModel");
 
@@ -35,7 +35,7 @@ const UserData = sequelize.define("UserData", {
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true,
         set(value) { this.setDataValue("name", encrypt(value)); },
         get() { const val = this.getDataValue("name"); return val ? decrypt(val) : null; },
@@ -57,7 +57,6 @@ const UserData = sequelize.define("UserData", {
         allowNull: true,
         set(value) { this.setDataValue("email", encrypt(value)); },
         get() { const val = this.getDataValue("email"); return val ? decrypt(val) : null; },
-        validate: { isEmail: true },
     },
     departmentId: {
         type: DataTypes.INTEGER,
@@ -101,6 +100,20 @@ UserData.afterUpdate(async (userdata, options) => {
         await userAccount.save({ hooks: false });
     }
 });
+
+// Hook para validar campos antes de guardar
+UserData.beforeValidate((userData) => {
+    if (userData.extension && !/^\d+$/.test(userData.extension)) {
+        throw new Error("Extension debe ser numérica");
+    }
+    if (userData.number && !/^[0-9+\-\s()]*$/.test(userData.number)) {
+        throw new Error("Number no válido");
+    }
+    if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
+        throw new Error("Email no válido");
+    }
+});
+
 
 
 module.exports = UserData;

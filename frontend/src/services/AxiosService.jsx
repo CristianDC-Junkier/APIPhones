@@ -6,7 +6,7 @@
  */
 
 const api = axios.create({
-    baseURL: '/visor-sig/api',
+    baseURL: '/listin-telefonico/api',
     withCredentials: false,
 });
 

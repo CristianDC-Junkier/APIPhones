@@ -40,3 +40,5 @@ frontend/.env
 /backend/obj/Debug/backend.esproj.FileListAbsolute.txt
 /backend/obj/Debug/backend.esproj.CoreCompileInputs.cache
 /frontend/obj/Debug
+/.vs/API_Phones/v17
+/.vs/VSWorkspaceState.json

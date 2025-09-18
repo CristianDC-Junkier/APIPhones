@@ -3,17 +3,19 @@ const sequelize = require("../config/db");
 const { encrypt, decrypt } = require("../utils/Crypto");
 
 /**
- * Modelo Sequelize para usuarios del sistema.
+ * Modelo Sequelize para cuentas de usuario del sistema.
  * 
  * Campos:
- * - id        → Identificador único autoincremental.
- * - username  → Nombre de usuario único y obligatorio.
- * - password  → Contraseña cifrada automáticamente al guardar.
- *               - Al asignar (set): se cifra usando utilidades de crypto.
- *               - Al obtener (get): se descifra para su uso interno.
- * - usertype  → Rol del usuario. Valores posibles: 'USER' (por defecto), 'ADMIN', 'SUPERADMIN'.
+ * - id             → Identificador único autoincremental.
+ * - username       → Nombre de usuario único y obligatorio.
+ * - password       → Contraseña cifrada automáticamente al guardar.
+ *                    - Al asignar (set): se cifra usando utilidades de crypto.
+ *                    - Al obtener (get): se descifra para su uso interno.
+ * - usertype       → Rol del usuario. Valores posibles: 'WORKER' (por defecto), 'DEPARTMENT', 'ADMIN', 'SUPERADMIN'.
+ * - version        → Contador de modificaciones del usuario, entero entre 0 y 100.
+ *                    Se incrementa automáticamente con cada cambio en este modelo o en UserData asociado.
  */
-const User = sequelize.define("User", {
+const UserAccount = sequelize.define("UserAccount", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -27,20 +29,28 @@ const User = sequelize.define("User", {
     password: {
         type: DataTypes.STRING,
         allowNull: false,
-        set(value) {
-            this.setDataValue("password", encrypt(value));
-        },
+        set(value) { this.setDataValue("password", encrypt(value)); },
         get() {
             const encrypted = this.getDataValue("password");
-            if (!encrypted) return null;
-            return decrypt(encrypted);
+            return encrypted ? decrypt(encrypted) : null;
         },
     },
     usertype: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: "USER",
+        defaultValue: "WORKER",
+    },
+    version: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate: { min: 0, max: 100 },
     },
 });
 
-module.exports = User;
+// Hook para incrementar version en cada actualización directa
+UserAccount.beforeUpdate((user, options) => {
+    if (user.version < 100) user.version += 1;
+});
+
+module.exports = UserAccount;

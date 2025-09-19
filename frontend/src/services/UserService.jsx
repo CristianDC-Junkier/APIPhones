@@ -24,7 +24,7 @@ export const getUsersList = async (token) => {
         });
         return { success: true, users: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.message || error.message };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -40,7 +40,7 @@ export const getUserDataList = async (token) => {
         });
         return { success: true, users: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.message || error.message };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -56,7 +56,7 @@ export const getUserDataByDepartmentList = async (token) => {
         });
         return { success: true, users: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.message || error.message };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -73,7 +73,7 @@ export const createUser = async (user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.message || error.message };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -90,7 +90,7 @@ export const modifyUser = async (user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.message || error.message };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -107,7 +107,7 @@ export const deleteUser = async (userId, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.message || error.message };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 

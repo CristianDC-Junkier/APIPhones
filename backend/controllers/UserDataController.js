@@ -25,7 +25,7 @@ class UserDataController {
             res.json( formatted );
         } catch (error) {
             LoggerController.error(`Error obteniendo la lista pública: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -70,7 +70,7 @@ class UserDataController {
             res.json( formatted );
         } catch (error) {
             LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -126,7 +126,7 @@ class UserDataController {
             res.json( formatted );
         } catch (error) {
             LoggerController.error(`Error obteniendo la lista por departamento: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -151,10 +151,9 @@ class UserDataController {
                 ]
             });
 
-            if (!user) return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             res.json({
-                success: true,
                 user: {
                     id: user.id,
                     username: user.username,
@@ -176,7 +175,7 @@ class UserDataController {
 
         } catch (error) {
             LoggerController.error(`Error obteniendo perfil: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -196,7 +195,7 @@ class UserDataController {
             const userdata = await UserData.findOne({ where: { userAccountId: userId } });
 
             if (!userdata) {
-                return res.status(404).json({ success: false, message: "Datos de Usuario no encontrado" });
+                return res.status(404).json({ error: "Datos de Usuario no encontrado" });
             }
 
             // Actualizar solo campos permitidos
@@ -208,7 +207,6 @@ class UserDataController {
             await userdata.save();
 
             res.json({
-                success: true,
                 user: {
                     name: userdata.name,
                     extension: userdata.extension,
@@ -220,7 +218,7 @@ class UserDataController {
             LoggerController.info(`Datos del usuario ${userId} actualizados`);
         } catch (error) {
             LoggerController.error(`Error actualizando los Datos de Usuario: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -236,23 +234,23 @@ class UserDataController {
             const { username } = req.body;
 
             if (!username) {
-                return res.status(400).json({ success: false, message: "El nuevo nombre de usuario es requerido" });
+                return res.status(400).json({ error: "El nuevo nombre de usuario es requerido" });
             }
 
             // Verificar que el username no exista ya
             const exists = await UserAccount.findOne({ where: { username } });
-            if (exists) return res.status(400).json({ success: false, message: "El nombre de usuario ya existe" });
+            if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
 
             // Actualizar username
             const user = await UserAccount.findByPk(userId);
             user.username = username;
             await user.save();
 
-            res.json({ success: true, username: user.username });
+            res.json( user.username );
             LoggerController.info(`Usuario ${userId} cambió su username a ${username}`);
         } catch (error) {
             LoggerController.error(`Error actualizando username: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -268,14 +266,14 @@ class UserDataController {
             const { oldPassword, newPassword } = req.body;
 
             if (!oldPassword || !newPassword) {
-                return res.status(400).json({ success: false, message: "Contraseña actual y nueva son requeridas" });
+                return res.status(400).json({ error: "Contraseña actual y nueva son requeridas" });
             }
 
             const user = await UserAccount.findByPk(userId);
 
             // Validar contraseña actual
             if (user.password !== oldPassword) {
-                return res.status(401).json({ success: false, message: "Contraseña actual incorrecta" });
+                return res.status(401).json({ error: "Contraseña actual incorrecta" });
             }
 
             // Actualizar contraseña
@@ -287,7 +285,7 @@ class UserDataController {
             LoggerController.info(`Usuario ${userId} cambió su contraseña`);
         } catch (error) {
             LoggerController.error(`Error actualizando contraseña: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -339,7 +337,7 @@ class UserDataController {
             });
         } catch (error) {
             LoggerController.error(`Error obteniendo usuario: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -374,11 +372,11 @@ class UserDataController {
 
             await userData.update(updateFields);
 
-            res.json({ success: true, message: "UserData actualizado correctamente", user: userData });
+            res.json( id );
             LoggerController.info(`UserData de usuarioId ${id} actualizado por ${requester.username}`);
         } catch (error) {
             LoggerController.error(`Error actualizando UserData: ${error.message}`);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 

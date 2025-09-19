@@ -25,7 +25,7 @@ export const getDepartmentsList = async (token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -41,6 +41,6 @@ export const getSubDepartmentsList = async (token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.error };
     }
 };

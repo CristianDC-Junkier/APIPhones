@@ -23,7 +23,7 @@ export const getLogs = async (token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -40,7 +40,7 @@ export const getLog = async (log,token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -71,7 +71,7 @@ export const downloadLog = async (log,token) => {
 
         return { success: true };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.error };
     }
 };
 
@@ -87,6 +87,6 @@ export const getSystemMetrics = async (token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.error };
     }
 };

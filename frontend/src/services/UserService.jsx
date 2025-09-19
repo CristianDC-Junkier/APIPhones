@@ -30,6 +30,22 @@ export const getUsersList = async (token) => {
 };
 
 /**
+ * Solicitud para obtener la lista de todos los usuario existentes
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const getUserDataList = async (token) => {
+    try {
+        const res = await api.get('user/list/', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error };
+    }
+};
+
+/**
  * Solicitud de creación de un nuevo usuario
  * @param {Object} user - la información del usuario que se quiere crear
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización

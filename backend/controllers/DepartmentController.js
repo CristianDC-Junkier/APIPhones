@@ -13,8 +13,8 @@ class DepartmentController {
      */
     static async listAll(req, res) {
         try {
-            const departments = await Department.listAll();
-            res.json({ success: true, departments });
+            const departments = await Department.findAll();
+            res.json(departments);
         } catch (error) {
             LoggerController.error('Error listando departamentos: ' + error.message);
             res.status(500).json({ success: false, message: 'Error al obtener los departamentos', error: error.message });

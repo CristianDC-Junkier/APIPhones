@@ -10,7 +10,7 @@ import {
 } from 'reactstrap';
 import {
     faUserAlt,
-    faHotel,
+    faBriefcase,
     faAddressBook,
     faUsers,
     faScroll,
@@ -32,7 +32,7 @@ const Home = () => {
     [
         { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/app') },
         { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
-        { label: 'Gestión de Departamentos', icon: faHotel, action: () => alert('Departamentos') },
+        { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => alert('Departamentos') },
         { label: 'Acceder Logs', icon: faScroll, action: () => navigate('/logs') },
     ] :
     [

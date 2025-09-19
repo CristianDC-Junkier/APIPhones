@@ -7,7 +7,8 @@ import {
 } from "reactstrap";
 import Swal from 'sweetalert2';
 
-import { getUsersList, createUser, modifyUser, deleteUser } from "../../services/UserService";
+import { getUsersList, getUserDataList, createUser, modifyUser, deleteUser } from "../../services/UserService";
+import { getDepartmentsList } from "../../services/DepartmentService";
 import { useAuth } from "../../hooks/useAuth";
 
 import BackButton from "../../components/utils/BackButtonComponent";

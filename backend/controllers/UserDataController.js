@@ -40,21 +40,21 @@ class UserDataController {
         try {
             const allData = await UserData.findAll({
                 include: ["userAccount", "department", "subdepartment"],
-                where: { departmentId: { [Op.ne]: null } }
+                //where: { departmentId: { [Op.ne]: null } }
             });
 
             const formatted = allData.map(user => ({
-                userData: {
+                
                     name: user.name,
                     extension: user.extension,
                     number: user.number,
-                    email: user.email,
+                email: user.email,
+                userAccountId: user.userAccountId,
                     departmentName: user.department?.name || null,
                     subdepartmentName: user.subdepartment?.name || null
-                }
+                
             }));
-
-            res.json({ success: true, users: formatted });
+            res.json(formatted);
         } catch (error) {
             res.status(500).json({ success: false, error: error.message });
         }

@@ -10,7 +10,14 @@ import BackButton from "../../components/utils/BackButtonComponent";
 
 const UserProfile = () => {
     const navigate = useNavigate();
-    const { user, logout } = useAuth();
+    const { user, token, logout } = useAuth();
+
+    const handleError = (result) => {
+        if (result.error.response?.data?.message === "Token inválido") {
+            return true;
+        }
+        return false;
+    };
 
     const handleModify = async () => {
         /*const tipos = [
@@ -93,7 +100,7 @@ const UserProfile = () => {
 
         if (formValues) {
             const result = await modifyUser({ //comprobar funcion
-                id: userItem.id,
+                id: user.id,
                 username: formValues.username,
                 email: formValues.email,
                 name: formValues.name,

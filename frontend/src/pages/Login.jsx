@@ -71,7 +71,7 @@ const Login = () => {
 
         try {
             // Mostrar captcha obligatorio
-            await showCaptcha();
+            //await showCaptcha();                                                                          //SOLO DURANTE DESARROLLO
 
             // Hacer login
             const response = await login({ username, password, rememberMe });

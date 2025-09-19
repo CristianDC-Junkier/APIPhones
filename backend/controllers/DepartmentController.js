@@ -30,7 +30,7 @@ class DepartmentController {
      */
     static async getById(req, res) {
         try {
-            const department = await Department.getById(req.params.id);
+            const department = await Department.findOne({ where: { id: req.params.id } });
             if (!department) return res.status(404).json({ success: false, message: 'Departamento no encontrado' });
             res.json({ success: true, department });
         } catch (error) {

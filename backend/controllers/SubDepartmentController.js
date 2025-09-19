@@ -12,8 +12,8 @@ class SubDepartmentController {
      */
     static async listAll(req, res) {
         try {
-            const subDepartments = await SubDepartment.listAll();
-            res.json({ success: true, subDepartments });
+            const subDepartments = await SubDepartment.findAll();
+            res.json(subDepartments);
         } catch (error) {
             LoggerController.error('Error listando subdepartamentos: ' + error.message);
             res.status(500).json({ success: false, message: 'Error al obtener subdepartamentos', error: error.message });
@@ -29,7 +29,7 @@ class SubDepartmentController {
      */
     static async getById(req, res) {
         try {
-            const subDepartment = await SubDepartment.getById(req.params.id);
+            const subDepartment = await SubDepartment.findOne({ where: { id: req.params.id } });
             if (!subDepartment) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
             res.json({ success: true, subDepartment });
         } catch (error) {

@@ -1,6 +1,8 @@
 ﻿import Swal from "sweetalert2";
+import { getDepartmentsList, getSubDepartmentsList } from "../../services/DepartmentService";
 
-const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm }) => {
+const AddModifyUserComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
+
     const tipos = [{ label: "Trabajador", value: "WORKER" }];
     if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN") {
         tipos.push({ label: "Jefe de Departamento", value: "DEPARTMENT" });
@@ -9,17 +11,10 @@ const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm
     if (currentUser.usertype === "SUPERADMIN") {
         tipos.push({ label: "SuperAdmin", value: "SUPERADMIN" });
     }
-
-    const departments = [
-        { id: 1, name: "Ventas" },
-        { id: 2, name: "Marketing" },
-        { id: 3, name: "Soporte" },
-    ];
-    const subdepartments = [
-        { id: 1, name: "Sub1" },
-        { id: 2, name: "Sub2" },
-        { id: 3, name: "Sub3" },
-    ];
+    const response = await getDepartmentsList(token);
+    const departments = response.data;
+    const responseS = await getSubDepartmentsList(token);
+    const subdepartments = responseS.data;
 
     const optionsHtml = tipos.map(tipo => `<option value="${tipo.value}" ${userItem?.usertype === tipo.value ? "selected" : ""}>${tipo.label}</option>`).join("");
     const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");

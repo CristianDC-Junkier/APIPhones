@@ -28,3 +28,19 @@ export const getDepartmentsList = async (token) => {
         return { success: false, error };
     }
 };
+
+/**
+ * Solicitud para obtener la lista de todos los subdepartamentos existentes
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const getSubDepartmentsList = async (token) => {
+    try {
+        const res = await api.get('subdepartment/', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error };
+    }
+};

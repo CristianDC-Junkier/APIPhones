@@ -91,6 +91,7 @@ const UserList = () => {
 
     const handleCreate = async () => {
         await AddModifyUserComponent({
+            token,
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
@@ -108,6 +109,7 @@ const UserList = () => {
 
     const handleModify = async (userItem) => {
         await AddModifyUserComponent({
+            token,
             userItem,
             currentUser,
             action: "modify",

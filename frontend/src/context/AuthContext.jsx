@@ -20,17 +20,20 @@ const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
  */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null); // Usuario actual
+    const [token, setToken] = useState(null); // Token actual
     const [loading, setLoading] = useState(true); // Estado de carga inicial
 
     /**
      * Guarda el usuario en storage cifrado con expiración.
      * @param {Object} token - Token del usuario.
+     * @param {Object} user - Campos minimos del usuario.
      * @param {boolean} rememberMe - true → localStorage, false → sessionStorage.
      */
-    const saveUserWithExpiry = (token, rememberMe) => {
+    const saveUserWithExpiry = (token, user, rememberMe) => {
         const now = new Date();
         const item = {
-            value: token,
+            token,
+            user,
             expiry: now.getTime() + 60 * 60 * 1000, // Expira en 1 hora
         };
 
@@ -42,10 +45,6 @@ export const AuthProvider = ({ children }) => {
 
         const storage = rememberMe ? localStorage : sessionStorage;
         storage.setItem("user", encrypted);
-
-        console.log(
-            `✅ Usuario guardado en ${rememberMe ? "localStorage" : "sessionStorage"}`
-        );
     };
 
     /**
@@ -81,8 +80,11 @@ export const AuthProvider = ({ children }) => {
      * Restaurar usuario al cargar la app 
      */
     useEffect(() => {
-        const storedUser = getUserWithExpiry();
-        if (storedUser) setUser(storedUser);
+        const storedValues = getUserWithExpiry();
+        if (storedValues) {
+            setToken(storedValues.token);
+            setUser(storedValues.user); 
+        }
         setLoading(false);
     }, []);
 
@@ -96,7 +98,13 @@ export const AuthProvider = ({ children }) => {
         const result = await login(credentials);
         if (result.success) {
             setUser(result.data.user);
-            saveUserWithExpiry(result.data.token, credentials.rememberMe);
+            setToken(result.data.token);
+            const userLog = {
+                id: user.id,
+                username: user.username,
+                usertype: user.usertype,
+            };
+            saveUserWithExpiry(token, userLog, credentials.rememberMe);
         } else {
             setUser(null);
             sessionStorage.removeItem("user");
@@ -110,6 +118,7 @@ export const AuthProvider = ({ children }) => {
      */
     const contextLogout = async () => {
         setUser(null);
+        setToken(null);
         sessionStorage.removeItem("user");
         localStorage.removeItem("user");
     };
@@ -118,6 +127,7 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider
             value={{
                 user,
+                token,
                 loading,
                 login: contextLogin,
                 logout: contextLogout,

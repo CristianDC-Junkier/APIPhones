@@ -8,8 +8,8 @@ const AccessDenied = () => {
      */
 
     return (
-        <div class="row vh-80 d-flex align-items-center justify-content-center">
-            <div class="col">
+        <div className="row vh-80 d-flex align-items-center justify-content-center">
+            <div className="col">
                 <img
                     src={logo}
                     alt="Logo Ayto"
@@ -19,7 +19,7 @@ const AccessDenied = () => {
                     }}
                 />
             </div>
-            <div class="col">
+            <div className="col">
                 <h2 class="text-center" style={{ color: "#dc3545" }}>{"Error 403"}</h2>
                 <h3 class="text-center" style={{ color: "#666" }}>{"No tienes permisos suficientes para acceder a esta página."}</h3>
             </div>

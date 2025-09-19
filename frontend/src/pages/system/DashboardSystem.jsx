@@ -32,9 +32,8 @@ export default function DashboardSystem() {
     const [selectedLog, setSelectedLog] = useState(null);
     const [logContent, setLogContent] = useState('Selecciona un archivo para ver su contenido');
 
-    const { user: currentUser } = useAuth();
+    const { token } = useAuth();
     const [loading, setLoading] = useState(false);
-    const token = currentUser?.token;
 
     const [cpuUsage, setCpuUsage] = useState(null);
     const [memoryUsed, setMemoryUsed] = useState(null);

@@ -21,7 +21,6 @@ import '../styles/auth/Login.css';
 /**
  * Página de inicio de sesión
  */
-
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');

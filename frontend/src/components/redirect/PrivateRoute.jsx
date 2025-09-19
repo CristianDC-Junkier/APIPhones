@@ -17,6 +17,7 @@ import Spinner from '../utils/SpinnerComponent';
  */
 const PrivateRoute = ({ children }) => {
     const { user, loading } = useAuth();
+    console.log("PrivateRoute - user:", user, "loading:", loading);
     const navigate = useNavigate();
 
     useEffect(() => {

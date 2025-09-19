@@ -21,6 +21,7 @@ import '../styles/auth/Login.css';
 /**
  * Página de inicio de sesión
  */
+
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -78,15 +79,15 @@ const Login = () => {
             if (response.success) {
                 const user = response.data.user;
                 if (user.usertype === 'WORKER') {
-                    navigate('/app');
+                    navigate('/app'); 
                 } else {
                     navigate('/home');
                 }
             } else {
-                console.error('Login error:', response.error);
                 Swal.fire('Error', response?.error?.response?.data?.message || 'Login fallido', 'error');
             }
         } catch (err) {
+            console.log(err);
             Swal.fire('Error', err?.response?.data?.message || 'Captcha no completado', 'error');
         }
     };

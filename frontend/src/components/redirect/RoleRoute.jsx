@@ -17,6 +17,7 @@ import Spinner from '../utils/SpinnerComponent';
  */
 const RoleRoute = ({ allowedRoles, children }) => {
     const { user, loading } = useAuth();
+
     const navigate = useNavigate();
 
     useEffect(() => {

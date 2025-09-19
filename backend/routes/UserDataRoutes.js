@@ -15,8 +15,8 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
  * - PUT    /profile           → Modificar el perfil del usuario logueado.
  * - PUT    /profile-username  → Modificar el username del usuario logueado.
  * - PUT    /profile-pass      → Modificar la contraseña del usuario logueado.
- * - GET    /:id               → Obtener un UserData por ID (solo notWorker: departamento o superior).
- * - PUT    /:id               → Modificar un UserData por ID (solo notWorker: departamento o superior).
+ * - GET    /:id               → Obtener los datos de usuario por ID (solo notWorker: departamento o superior). //NO SE SI SE USARÁ
+ * - PUT    /:id               → Modificar un los datos de usuario por ID (solo notWorker: departamento o superior). //NO SE SI SE USARÁ
  *
  * Middleware:
  * - `adminOnly`       → Restringe el acceso a usuarios con roles de administrador.
@@ -35,7 +35,7 @@ router.put("/profile-data", isAuthenticated, UserDataController.updateMyProfileD
 router.put("/profile-username", isAuthenticated, UserDataController.updateMyUsername);
 router.put("/profile-pass", isAuthenticated, UserDataController.updateMyPassword);
 
-router.get("/:id", notWorker, UserDataController.getOne);
-router.put("/:id", notWorker, canModifyUser, UserDataController.update);
+router.get("/:id", notWorker, UserDataController.getOne);//NO SE SI SE USARÁ
+router.put("/:id", notWorker, canModifyUser, UserDataController.update);//NO SE SI SE USARÁ
 
 module.exports = router;

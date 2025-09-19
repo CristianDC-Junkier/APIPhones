@@ -54,20 +54,18 @@ export const AuthProvider = ({ children }) => {
     const getUserWithExpiry = () => {
         const encrypted =
             sessionStorage.getItem("user") || localStorage.getItem("user");
-
         if (!encrypted) return null;
 
         try {
             const bytes = CryptoJS.AES.decrypt(encrypted, SECRET_KEY);
             const decrypted = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-
             const now = new Date();
             if (now.getTime() > decrypted.expiry) {
                 sessionStorage.removeItem("user");
                 localStorage.removeItem("user");
                 return null;
             }
-            return decrypted.value;
+            return decrypted;
         } catch {
             // En caso de error de descifrado → limpiar storage
             sessionStorage.removeItem("user");
@@ -100,11 +98,11 @@ export const AuthProvider = ({ children }) => {
             setUser(result.data.user);
             setToken(result.data.token);
             const userLog = {
-                id: user.id,
-                username: user.username,
-                usertype: user.usertype,
+                id: result.data.user.id,
+                username: result.data.user.username,
+                usertype: result.data.user.usertype,
             };
-            saveUserWithExpiry(token, userLog, credentials.rememberMe);
+            saveUserWithExpiry(result.data.token, userLog, credentials.rememberMe);
         } else {
             setUser(null);
             sessionStorage.removeItem("user");

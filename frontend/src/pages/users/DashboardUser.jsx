@@ -1,7 +1,10 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
-import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Table } from "reactstrap";
+import {
+    Container, Row, Col, Card, CardBody, CardTitle, CardText,
+    Button, Table, Input
+} from "reactstrap";
 import Swal from 'sweetalert2';
 
 import { getUsersList, createUser, modifyUser, deleteUser } from "../../services/UserService";
@@ -11,38 +14,52 @@ import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
 import Pagination from "../../components/PaginationComponent";
 import CaptchaSlider from '../../components/utils/CaptchaSliderComponent';
-
-/**
- * Página encargada de mostrar la tabla de usuario y las acciones asociadas a la gestión de los mismos
- */
+import AddModifyUserComponent from "../../components/user/AddModifyUserComponent";
 
 const UserList = () => {
     const navigate = useNavigate();
-    const { user: currentUser, logout } = useAuth();
-    const token = currentUser?.token;
+    const { user: currentUser, token, logout } = useAuth();
 
     const [loading, setLoading] = useState(true);
     const [allUsers, setAllUsers] = useState([]);
-    const [selectedType, setSelectedType] = useState("All");
+    const [search, setSearch] = useState("");
+    const [selectedType, setSelectedType] = useState("Usuarios");
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 5;
+    const [rowsPerPage, setRowsPerPage] = useState(8);
 
-    //Función encargada de obtener la información para la tabla
+    // Ajustar filas por altura de ventana
+    useEffect(() => {
+        const updateRows = () => {
+            const vh = window.innerHeight;
+            const headerHeight = 220; // altura estimada de header + estadísticas
+            const rowHeight = 50; // altura estimada por fila
+            const footerHeight = 80; // altura del pagination
+            const availableHeight = vh - headerHeight - footerHeight;
+            const rows = Math.max(3, Math.floor(availableHeight / rowHeight));
+            setRowsPerPage(rows);
+        };
+
+        updateRows();
+        window.addEventListener("resize", updateRows);
+        return () => window.removeEventListener("resize", updateRows);
+    }, []);
+
     useEffect(() => {
         const fetchData = async () => {
             if (!token) return;
             setLoading(true);
-            const response = await getUsersList(token);
+            let response;
+            if (currentUser.usertype === "DEPARTMENT") {
+                response = await getUsersList(token);
+            } else {
+                response = await getUsersList(token);
+            }
             if (response.success) {
                 setAllUsers(response.data ?? []);
-            }
-            else {
-                if (handleError(response)) {
+            } else {
+                if (response.error?.response?.data?.message === "Token inválido") {
                     Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                        .then(() => {
-                            logout();
-                            navigate('/login');
-                        });
+                        .then(() => { logout(); navigate('/login'); });
                     return;
                 }
             }
@@ -51,266 +68,90 @@ const UserList = () => {
         fetchData();
     }, [token, logout, navigate]);
 
-    // Estadísticas
-    const stats = {
-        total: allUsers.length,
-        admin: allUsers.filter(u => u.usertype === "ADMIN" || u.usertype === "SUPERADMIN").length,
-        user: allUsers.filter(u => u.usertype === "USER").length,
-    };
+    const tipoLabels = {
+        ADMIN: "Administrador", SUPERADMIN: "Superadministrador", WORKER: "Trabajador", DEPARTMENT: "Jefe de Departamento"
+    }
 
-    // Filtrado y paginación
-    const filteredUsers = selectedType === "All"
-        ? allUsers
-        : allUsers.filter(user =>
-            selectedType === "Usuarios"
-                ? user.usertype === "USER"
-                : ["ADMIN", "SUPERADMIN"].includes(user.usertype)
-        );
+    const filteredUsers = useMemo(() => {
+        return allUsers
+            .filter(user =>
+            (selectedType === "Usuarios" ||
+                (selectedType === "Trabajadores" && ["DEPARTMENT", "WORKER"].includes(user.usertype)) ||
+                (selectedType === "Administradores" && ["DEPARTMENT", "ADMIN", "SUPERADMIN"].includes(user.usertype))
+            )
+            )
+            .filter(user =>
+                user.username.toLowerCase().includes(search.toLowerCase())
+            );
+    }, [allUsers, search, selectedType]);
+
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-    const handleError = (result) => {
-        if (result.error.response?.data?.message === "Token inválido") {
-            return true;
-        }
-        return false;
-    };
-
-
-    //Función que gestiona la creación de un usuario
     const handleCreate = async () => {
-        const tipos = [
-            { label: 'Usuario', value: 'USER' },
-            { label: 'Administrador', value: 'ADMIN' }
-        ];
-        if (currentUser.usertype === 'SUPERADMIN') {
-            tipos.push({ label: 'SuperAdmin', value: 'SUPERADMIN' });
-        }
-
-        const optionsHtml = tipos
-            .map(tipo => `<option value="${tipo.value}">${tipo.label}</option>`)
-            .join('');
-
-        const { value: formValues } = await Swal.fire({
-            title: 'Crear Usuario',
-            html: `
-                <input id="swal-username" class="swal2-input" placeholder="Usuario">
-                <input id="swal-password" type="password" class="swal2-input" placeholder="Contraseña">
-                <select id="swal-type" class="swal2-select">${optionsHtml}</select>
-                <style>
-                    .swal2-input, .swal2-select {
-                        width: 100%;
-                        padding: 0.5em 0.75em;
-                        margin: 0.25em 0;
-                        border: 1px solid #333;
-                        border-radius: 0.25em;
-                        font-size: 1em;
-                    }
-                    .swal2-select {
-                        margin-bottom: 1em;
-                        appearance: none;
-                        background-color: #fff;
-                    }
-                </style>`,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Crear',
-            cancelButtonText: 'Cancelar',
-            preConfirm: () => {
-                const username = document.getElementById('swal-username').value.trim();
-                const password = document.getElementById('swal-password').value.trim();
-                const usertype = document.getElementById('swal-type').value;
-
-                if (!username) {
-                    Swal.showValidationMessage('El nombre de usuario no puede estar vacío');
-                    return false;
+        await AddModifyUserComponent({
+            currentUser,
+            action: "create",
+            onConfirm: async (formValues) => {
+                const result = await createUser(formValues, token);
+                if (result.success) {
+                    Swal.fire("Éxito", "Usuario creado correctamente", "success");
+                    const response = await getUsersList(token);
+                    if (response.success) setAllUsers(response.data ?? []);
+                } else {
+                    Swal.fire("Error", result.error?.message || "No se pudo crear el usuario", "error");
                 }
-                if (!password) {
-                    Swal.showValidationMessage('La contraseña no puede estar vacía');
-                    return false;
-                }
-
-                return { username, password, usertype };
-            }
+            },
         });
-
-        if (formValues) {
-            const result = await createUser(formValues, token);
-            if (result.success) {
-                Swal.fire('Éxito', 'Usuario creado correctamente', 'success');
-                const response = await getUsersList(token);
-                if (response.success) setAllUsers(response.data ?? []);
-            } else {
-                if (handleError(result)) {
-                    Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                        .then(() => {
-                            logout();
-                            navigate('/login');
-                        });
-                    return;
-                }
-                else {
-                    Swal.fire('Error', 'No se pudo crear el usuario', 'error');
-                }
-            }
-        }
     };
 
-    //Función que gestiona la modificación de un usuario
     const handleModify = async (userItem) => {
-        const tipos = [
-            { label: 'Usuario', value: 'USER' },
-            { label: 'Administrador', value: 'ADMIN' }
-        ];
-        if (currentUser.usertype === 'SUPERADMIN') {
-            tipos.push({ label: 'SuperAdmin', value: 'SUPERADMIN' });
-        }
+        await AddModifyUserComponent({
+            userItem,
+            currentUser,
+            action: "modify",
+            onConfirm: async (formValues) => {
+                const result = await modifyUser({
+                    id: userItem.id,
+                    username: formValues.username,
+                    password: formValues.password,
+                    usertype: formValues.usertype,
+                }, token);
 
-        const optionsHtml = tipos
-            .map(tipo => `<option value="${tipo.value}" ${userItem.usertype === tipo.value ? 'selected' : ''}>${tipo.label}</option>`)
-            .join('');
-
-        const { value: formValues } = await Swal.fire({
-            title: `${userItem.id === currentUser.id ? "Modificar su Usuario" : "Modificar Usuario"}`,
-            html: `
-                <input id="swal-username" class="swal2-input" placeholder="Usuario" value="${userItem.username}">
-                <input id="swal-password" type="password" class="swal2-input" placeholder="Contraseña" value="">
-                <select id="swal-type" class="swal2-select">${optionsHtml}</select>
-                <style>
-                    .swal2-input, .swal2-select {
-                        width: 100%;
-                        padding: 0.5em 0.75em;
-                        margin: 0.25em 0;
-                        border: 1px solid #333;
-                        border-radius: 0.25em;
-                        font-size: 1em;
-                    }
-                    .swal2-select {
-                        margin-bottom: 1em;
-                        appearance: none;
-                        background-color: #fff;
-                    }
-                </style>`,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Aceptar',
-            cancelButtonText: 'Cancelar',
-            preConfirm: () => {
-                const username = document.getElementById('swal-username').value.trim();
-                const password = document.getElementById('swal-password').value.trim();
-                const usertype = document.getElementById('swal-type').value;
-
-                if (!username) {
-                    Swal.showValidationMessage('El nombre de usuario no puede estar vacío');
-                    return false;
+                if (result.success) {
+                    Swal.fire("Éxito", "Usuario modificado correctamente", "success");
+                    if (userItem.id === currentUser.id) { await logout(); navigate("/login"); }
+                    const response = await getUsersList(token);
+                    if (response.success) setAllUsers(response.data ?? []);
+                } else {
+                    Swal.fire("Error", result.error?.message || "No se pudo modificar el usuario", "error");
                 }
-                if (!password) {
-                    Swal.showValidationMessage('La contraseña no puede estar vacía');
-                    return false;
-                }
-
-                return { username, password, usertype };
-            }
+            },
         });
-
-        if (formValues) {
-            const result = await modifyUser({
-                id: userItem.id,
-                username: formValues.username,
-                password: formValues.password,
-                usertype: formValues.usertype
-            }, token);
-
-            if (result.success) {
-                Swal.fire('Éxito', 'Usuario modificado correctamente', 'success');
-                if (userItem.id === currentUser.id) {
-                    await logout();
-                    navigate('/login')
-                }
-                const response = await getUsersList(token);
-                if (response.success) setAllUsers(response.data ?? []);
-            } else {
-                if (handleError(result)) {
-                    Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                        .then(() => {
-                            logout();
-                            navigate('/login');
-                        });
-                    return;
-                }
-                else {
-                    Swal.fire('Error', 'No se pudo modificar el usuario', 'error');
-                }
-            }
-        }
     };
 
-    //Función que gestiona la eliminación de un usuario
     const handleDelete = async (userItem) => {
-        try {
-            await showCaptcha(userItem.id);
-        } catch (err) {
-            Swal.fire('Atención', err.message || 'Captcha no completado', 'warning');
-            return;
-        }
+        try { await showCaptcha(userItem.id); }
+        catch (err) { Swal.fire('Atención', err.message || 'Captcha no completado', 'warning'); return; }
 
-        try {
-            const result = await deleteUser(userItem.id, token);
-            if (result.success) {
-                Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
-                if (userItem.id === currentUser.id) {
-                    await logout();
-                    navigate('/login')
-                }
-                const response = await getUsersList(token);
-                if (response.success) setAllUsers(response.data ?? []);
-            }
-            else {
-                if (handleError(result)) {
-                    Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                        .then(() => {
-                            logout();
-                            navigate('/login');
-                        });
-                    return;
-                }
-                else {
-                    Swal.fire('Error', result.error?.message || 'No se pudo eliminar el usuario', 'error');
-                }
-            }
-        } catch (err) {
-            if (handleError(err)) {
-                Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                    .then(() => {
-                        logout();
-                        navigate('/login');
-                    });
-                return;
-            }
-            else {
-                Swal.fire('Error', err?.message || 'Error al eliminar el usuario', 'error');
-            }
+        const result = await deleteUser(userItem.id, token);
+        if (result.success) {
+            Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
+            if (userItem.id === currentUser.id) { await logout(); navigate('/login') }
+            const response = await getUsersList(token);
+            if (response.success) setAllUsers(response.data ?? []);
+        } else {
+            Swal.fire('Error', result.error?.message || 'No se pudo eliminar el usuario', 'error');
         }
     };
 
-    //Función que gestiona el Captcha
     const showCaptcha = (idd) => {
         return new Promise((resolve, reject) => {
             const container = document.createElement('div');
             const reactRoot = createRoot(container);
             let completed = false;
 
-            reactRoot.render(
-                <CaptchaSlider
-                    onSuccess={() => {
-                        completed = true;
-                        Swal.close();
-                        resolve(true);
-                        setTimeout(() => reactRoot.unmount(), 0);
-                    }}
-                />
-            );
-
+            reactRoot.render(<CaptchaSlider onSuccess={() => { completed = true; Swal.close(); resolve(true); setTimeout(() => reactRoot.unmount(), 0); }} />);
             Swal.fire({
                 title: `Eliminar ${idd === currentUser.id ? "su Usuario" : "el Usuario"}`,
                 html: container,
@@ -319,154 +160,166 @@ const UserList = () => {
                 showCancelButton: true,
                 cancelButtonText: 'Cancelar',
                 allowOutsideClick: false,
-                preConfirm: () => {
-                    if (!completed) {
-                        Swal.showValidationMessage('Debes completar el captcha antes de continuar');
-                        return false;
-                    }
-                }
-            }).then(() => {
-                if (!completed) {
-                    reject(new Error('Captcha no completado'));
-                    setTimeout(() => reactRoot.unmount(), 0);
-                }
-            });
+                preConfirm: () => { if (!completed) { Swal.showValidationMessage('Debes completar el captcha'); return false; } }
+            }).then(() => { if (!completed) { reject(new Error('Captcha no completado')); setTimeout(() => reactRoot.unmount(), 0); } });
         });
     };
 
-
-    const tipoLabels = {
-        USER: "Usuario",
-        ADMIN: "Administrador",
-        SUPERADMIN: "Super Administrador"
+    const stats = {
+        total: allUsers.length,
+        admin: allUsers.filter(u => u.usertype === "DEPARTMENT" || u.usertype === "ADMIN" || u.usertype === "SUPERADMIN").length,
+        worker: allUsers.filter(u => u.usertype === "WORKER").length,
     };
 
-    //Función encargada de mostrar la tabla
-    const renderUserTable = () => {
-        // Número de filas que deben aparecer
-        const emptyRows = rowsPerPage - currentUsers.length;
+    const renderUserTable = () => (
+        <div className="d-flex flex-column flex-grow-1">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+                <h5 className="mb-0">{selectedType}</h5>
+                <Input
+                    type="text"
+                    placeholder="Buscar por usuario..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{ width: "250px" }}
+                />
+            </div>
 
-        return (
-            <div className="mt-2 mb-2">
-                <h3 className="mb-3 p-2 text-center">
-                    {selectedType === "All" ? "Todos los Usuarios" : selectedType}
-                </h3>
-                <Table striped responsive>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Usuario</th>
-                            <th>Tipo</th>
-                            <th className="text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {currentUsers.map((userItem, idx) => {
-                            const isSuperAdminUser = userItem.usertype === "SUPERADMIN";
-                            const CanIModifySuperAdminUser = currentUser.usertype === "SUPERADMIN";
-                            const isCurrentUser = userItem.id === currentUser.id;
+            <Table striped hover responsive className="shadow-sm rounded flex-grow-1">
+                <thead className="table-primary">
+                    <tr>
+                        <th className="text-center">ID</th>
+                        <th className="text-center">Usuario</th>
+                        <th className="text-center">Tipo</th>
+                        <th className="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {currentUsers.map((userItem, idx) => {
+                        
+                        const isCurrentUser = userItem.id === currentUser.id;
+                        // Determinar permisos de modificación y borrado
+                        let canModify = false;
+                        let canDelete = false;
 
-                            return (
-                                <tr key={idx}>
-                                    <td style={isCurrentUser ? { color: "blue", fontWeight: "bold" } : {}}>
-                                        {userItem?.id || "\u00A0"}
-                                    </td>
-                                    <td style={isCurrentUser ? { color: "blue", fontWeight: "bold" } : {}}>
-                                        {userItem?.username || "\u00A0"}
-                                    </td>
-                                    <td style={isCurrentUser ? { color: "blue", fontWeight: "bold" } : {}}>
-                                        {tipoLabels[userItem?.usertype] || "\u00A0"}
-                                    </td>
-                                    <td className="text-center">
-                                        <div className="d-flex justify-content-center flex-wrap m">
-                                            {((CanIModifySuperAdminUser && isSuperAdminUser) || !isSuperAdminUser) && (
-                                                <Button
-                                                    color="warning"
-                                                    size="sm"
-                                                    style={{ padding: "0.2rem 0.4rem", margin: "0 0.25rem", fontSize: "0.8rem" }}
-                                                    onClick={() => handleModify(userItem)}
-                                                >
-                                                    ✏️
-                                                </Button>
-                                            )}
-                                            {!isSuperAdminUser && (
-                                                <Button
-                                                    color="danger"
-                                                    size="sm"
-                                                    style={{ padding: "0.2rem 0.4rem", margin: "0 0.25rem", fontSize: "0.8rem" }}
-                                                    onClick={() => handleDelete(userItem)}
-                                                >
-                                                    🗑️
-                                                </Button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
+                        switch (userItem.usertype) {
+                            case "SUPERADMIN":
+                                canModify = currentUser.usertype === "SUPERADMIN";
+                                canDelete = false;
+                                break;
+                            case "ADMIN":
+                                canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);;
+                                break;
+                            case "DEPARTMENT":
+                                canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);;
+                                break;
+                            case "WORKER":
+                                canModify = currentUser.usertype !== "WORKER";
+                                canDelete = currentUser.usertype !== "WORKER"; 
+                                break;
+                            default:
+                                break;
+                        }
 
-                        {/* Filas vacías */}
-                        {emptyRows > 0 && [...Array(emptyRows)].map((_, idx) => (
-                            <tr key={`empty-${idx}`} style={{ height: '44px' }}>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
-                                <td>&nbsp;</td>
+                        return (
+                            <tr key={idx} style={isCurrentUser ? { fontWeight: "bold" } : {}}>
+                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd"} : {}}>{userItem.id}</td>
+                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd"} : {}}>{userItem.username}</td>
+                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd"} : {}}>{tipoLabels[userItem.usertype]}</td>
+                                <td className="text-center">
+                                    <div className="d-flex justify-content-center flex-wrap">
+                                        {canModify && (
+                                            <Button
+                                                color="warning"
+                                                size="sm"
+                                                className="me-1 mb-1"
+                                                onClick={() => handleModify(userItem)}
+                                            >
+                                                ✏️
+                                            </Button>
+                                        )}
+                                        {canDelete && (
+                                            <Button
+                                                color="danger"
+                                                size="sm"
+                                                className="me-1 mb-1"
+                                                onClick={() => handleDelete(userItem)}
+                                            >
+                                                🗑️
+                                            </Button>
+                                        )}
+                                    </div>
+                                </td>
                             </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                        );
+                    })}
+
+                    {/* Filas vacías */}
+                    {rowsPerPage - currentUsers.length > 0 &&
+                        [...Array(rowsPerPage - currentUsers.length)].map((_, idx) => (
+                            <tr key={`empty-${idx}`} style={{ height: '50px' }}>
+                                <td colSpan={4}></td>
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </Table>
+
+
+            <div className="mt-auto">
                 {totalPages > 1 && (
                     <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 )}
             </div>
-        );
-    };
+        </div>
+    );
 
     if (loading) return <Spinner />;
 
     return (
-        <Container className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
-            {/* Botón Volver arriba a la izquierda */}
+        <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
+            {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
                 <BackButton back="/home" />
             </div>
 
-            {/* Botón Crear Usuario arriba a la derecha */}
+            {/* Botón Crear Usuario */}
             <div className="position-absolute top-0 end-0 p-3">
                 <Button
                     color="transparent"
-                    style={{ color: 'black', border: 'none', padding: 0, fontWeight: 'bold' }}
+                    style={{
+                        background: "none",
+                        border: "none",
+                        color: "black",
+                        fontWeight: "bold",
+                        padding: 0
+                    }}
                     onClick={handleCreate}
                 >
                     ➕ Crear Usuario
                 </Button>
             </div>
 
+
             {/* Tarjetas de estadísticas */}
-            <Row className="mb-1 mt-4 justify-content-center g-2">
+            <Row className="mb-3 mt-1 justify-content-center g-3">
                 {[
                     { label: "Total", value: stats.total },
-                    { label: "Admins", value: stats.admin },
-                    { label: "Usuarios", value: stats.user }
+                    { label: "Administradores", value: stats.admin },
+                    { label: "Trabajadores", value: stats.worker }
                 ].map((metric, idx) => (
-                    <Col key={idx} xs={6} md={3}>
+                    <Col key={idx} xs={6} sm={4} md={3}>
                         <Card
-                            className="shadow-sm border-info"
-                            style={{
-                                border: '2px solid blue',
-                                borderRadius: '0.5rem',
-                                height: '100px',
-                                backgroundColor: '#f8f9fa',
-                                cursor: 'pointer'
-                            }}
+                            className="shadow-lg mb-2 border-2"
+                            style={{ cursor: 'pointer', borderColor: '#0d6efd', borderRadius: '0.75rem' }}
                             onClick={() => {
-                                if (metric.label === "Total") setSelectedType("All");
-                                else if (metric.label === "Admins") setSelectedType("Admin");
-                                else if (metric.label === "Usuarios") setSelectedType("Usuarios");
+                                if (metric.label === "Total") setSelectedType("Todos");
+                                else if (metric.label === "Administradores") setSelectedType("Administradores");
+                                else setSelectedType("Trabajadores");
                             }}
                         >
-                            <CardBody className="p-2 text-center">
+                            <CardBody className="text-center pt-3">
                                 <CardTitle tag="h6">{metric.label}</CardTitle>
                                 <CardText className="fs-4 fw-bold">{metric.value}</CardText>
                             </CardBody>
@@ -476,7 +329,7 @@ const UserList = () => {
             </Row>
 
 
-            {/* Tabla de usuarios */}
+            {/* Tabla */}
             {renderUserTable()}
         </Container>
     );

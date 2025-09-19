@@ -84,11 +84,10 @@ const Login = () => {
                     navigate('/home');
                 }
             } else {
-                Swal.fire('Error', response?.error?.response?.data?.message || 'Login fallido', 'error');
+                Swal.fire('Error', response.error || 'Login fallido', 'error');
             }
         } catch (err) {
-            console.log(err);
-            Swal.fire('Error', err?.response?.data?.message || 'Captcha no completado', 'error');
+            Swal.fire('Error', err?.error || err?.message || 'Captcha no completado', 'error');
         }
     };
 

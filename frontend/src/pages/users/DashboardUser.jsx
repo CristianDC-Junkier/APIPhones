@@ -7,8 +7,7 @@ import {
 } from "reactstrap";
 import Swal from 'sweetalert2';
 
-import { getUsersList, getUserDataList, createUser, modifyUser, deleteUser } from "../../services/UserService";
-import { getDepartmentsList } from "../../services/DepartmentService";
+import { getUsersList, getUserDataList, getUserDataByDepartmentList, createUser, modifyUser, deleteUser } from "../../services/UserService";
 import { useAuth } from "../../hooks/useAuth";
 
 import BackButton from "../../components/utils/BackButtonComponent";
@@ -51,12 +50,12 @@ const UserList = () => {
             setLoading(true);
             let response;
             if (currentUser.usertype === "DEPARTMENT") {
-                response = await getUsersList(token);
+                response = await getUserDataByDepartmentList(token);
             } else {
-                response = await getUsersList(token);
+                response = await getUserDataList(token);
             }
             if (response.success) {
-                setAllUsers(response.data ?? []);
+                setAllUsers(response.users ?? []);
             } else {
                 if (response.error?.response?.data?.message === "Token inválido") {
                     Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
@@ -67,7 +66,7 @@ const UserList = () => {
             setLoading(false);
         };
         fetchData();
-    }, [token, logout, navigate]);
+    }, [token, logout, navigate, currentUser.usertype]);
 
     const tipoLabels = {
         ADMIN: "Administrador", SUPERADMIN: "Superadministrador", WORKER: "Trabajador", DEPARTMENT: "Jefe de Departamento"

@@ -12,36 +12,51 @@
  * 
  */
 
-
 /**
- * Solicitud para obtener la lista de todos los usuario existentes
+ * Solicitud para obtener la lista de todos los usuario existentes sin detalles
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
 export const getUsersList = async (token) => {
     try {
-        const res = await api.get('/', {
+        const res = await api.get('/user', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        return { success: true, data: res.data };
+        return { success: true, users: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.message || error.message };
     }
 };
 
 /**
- * Solicitud para obtener la lista de todos los usuario existentes
+ * Solicitud para obtener la lista de todos los usuario existentes con detalles
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
 export const getUserDataList = async (token) => {
     try {
-        const res = await api.get('user/list/', {
+        const res = await api.get('/user/list', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        return { success: true, data: res.data };
+        return { success: true, users: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.message || error.message };
+    }
+};
+
+/**
+ * Solicitud para obtener la lista de todos los usuario existentes por departamento
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const getUserDataByDepartmentList = async (token) => {
+    try {
+        const res = await api.get('/user/list-department', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, users: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.message || error.message };
     }
 };
 
@@ -58,7 +73,7 @@ export const createUser = async (user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error };
+        return { success: false, error: error.response?.data?.message || error.message };
     }
 };
 
@@ -75,7 +90,7 @@ export const modifyUser = async (user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data || error.message };
+        return { success: false, error: error.response?.data?.message || error.message };
     }
 };
 
@@ -92,7 +107,7 @@ export const deleteUser = async (userId, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data || error.message };
+        return { success: false, error: error.response?.data?.message || error.message };
     }
 };
 

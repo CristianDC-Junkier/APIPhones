@@ -17,18 +17,14 @@ class UserDataController {
             });
 
             const formatted = allData.map(user => ({
-                userData: {
-                    extension: user.extension,
-                    departmentName: user.department?.name || null,
-                    subdepartmentName: user.subdepartment?.name || null
-                }
+                extension: user.extension,
+                departmentName: user.department?.name || null,
+                subdepartmentName: user.subdepartment?.name || null
             }));
 
-            res.json({
-                success: true,
-                users: formatted
-            });
+            res.json( formatted );
         } catch (error) {
+            LoggerController.error(`Error obteniendo la lista pública: ${error.message}`);
             res.status(500).json({ success: false, error: error.message });
         }
     }
@@ -38,24 +34,42 @@ class UserDataController {
     */
     static async listAll(req, res) {
         try {
-            const allData = await UserData.findAll({
-                include: ["userAccount", "department", "subdepartment"],
-                //where: { departmentId: { [Op.ne]: null } }
+            const allData = await UserAccount.findAll({
+                include: [
+                    {
+                        model: UserData,
+                        as: "userData",
+                        include: [
+                            { model: Department, as: "department" },
+                            { model: SubDepartment, as: "subdepartment" }
+                        ]
+                    }
+                ]
             });
 
             const formatted = allData.map(user => ({
-                
-                    name: user.name,
-                    extension: user.extension,
-                    number: user.number,
-                email: user.email,
-                userAccountId: user.userAccountId,
-                    departmentName: user.department?.name || null,
-                    subdepartmentName: user.subdepartment?.name || null
-                
+                id: user.id,
+                username: user.username,
+                usertype: user.usertype,
+                forcePwdChange: user.forcePwdChange,
+                userData: user.userData
+                    ? {
+                        id: user.userData.id,
+                        name: user.userData.name,
+                        extension: user.userData.extension,
+                        number: user.userData.number,
+                        email: user.userData.email,
+                        departmentId: user.userData.departmentId,
+                        departmentName: user.userData.department?.name || null,
+                        subdepartmentId: user.userData.subdepartmentId,
+                        subdepartmentName: user.userData.subdepartment?.name || null
+                    }
+                    : null
             }));
-            res.json(formatted);
+
+            res.json( formatted );
         } catch (error) {
+            LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
             res.status(500).json({ success: false, error: error.message });
         }
     }
@@ -64,47 +78,54 @@ class UserDataController {
     * Listar UserData de todos los usuarios del mismo departamento que el que hace la petición.
     * Solo devuelve usuarios que tengan departmentId asignado.
     * 
-     * @param {Object} req - req.user viene del middleware isAuthenticated
+    * @param {Object} req - req.user viene del middleware isAuthenticated
     * @param {Object} res
      */
     static async listByDepartment(req, res) {
         try {
-            const requestingUserAccountId = req.user.id;
+            const { departmentId, requesterId } = req.params;
 
-            // Obtener el UserData del usuario que hace la petición
-            const requesterData = await UserData.findOne({
-                where: { userAccountId: requestingUserAccountId }
-            });
-
-            if (!requesterData || !requesterData.departmentId) {
-                return res.status(403).json({ success: false, message: "No tiene departamento asignado" });
-            }
-
-            const departmentId = requesterData.departmentId;
-
-            // Buscar todos los UserData que tengan el mismo departmentId
-            const usersInDepartment = await UserData.findAll({
-                include: ["department", "subdepartment"],
-                where: { departmentId, id: { [Op.ne]: requesterData.id } }
+            // Buscar usuarios por departamento, excluyendo al requester
+            const usersInDepartment = await UserAccount.findAll({
+                include: [
+                    {
+                        model: UserData,
+                        as: "userData",
+                        where: {
+                            departmentId,
+                            id: { [Op.ne]: requesterId } // Excluye al que hace la petición
+                        },
+                        include: [
+                            { model: Department, as: "department" },
+                            { model: SubDepartment, as: "subdepartment" }
+                        ]
+                    }
+                ]
             });
 
             const formatted = usersInDepartment.map(user => ({
-                userData: {
-                    id: user.id,
-                    name: user.name,
-                    extension: user.extension,
-                    number: user.number,
-                    email: user.email,
-                    departmentId: user.departmentId,
-                    departmentName: user.department?.name || null,
-                    subdepartmentId: user.subdepartmentId,
-                    subdepartmentName: user.subdepartment?.name || null,
-                    userAccountId: user.userAccountId
-                }
+                id: user.id,
+                username: user.username,
+                usertype: user.usertype,
+                forcePwdChange: user.forcePwdChange,
+                userData: user.userData
+                    ? {
+                        id: user.userData.id,
+                        name: user.userData.name,
+                        extension: user.userData.extension,
+                        number: user.userData.number,
+                        email: user.userData.email,
+                        departmentId: user.userData.departmentId,
+                        departmentName: user.userData.department?.name || null,
+                        subdepartmentId: user.userData.subdepartmentId,
+                        subdepartmentName: user.userData.subdepartment?.name || null
+                    }
+                    : null
             }));
 
-            res.json({ success: true, users: formatted });
+            res.json( formatted );
         } catch (error) {
+            LoggerController.error(`Error obteniendo la lista por departamento: ${error.message}`);
             res.status(500).json({ success: false, error: error.message });
         }
     }

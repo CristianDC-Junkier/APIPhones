@@ -14,19 +14,6 @@ export const login = async (credentials) => {
         const response = await api.post('/login', credentials);
         return { success: true, data: response.data };
     } catch (error) {
-        return { success: false, error };
-    }
-};
-
-/**
- * Solicitud de cierre de sesión del usuario actualmente conectado
- * @returns {JSNO} - Contiene un booleano con true en caso de exito y false en caso de error
- */
-export const logout = async () => {
-    try {
-        await api.post('/logout');
-        return { success: true };
-    } catch {
-        return { success: false };
+        return { success: false, error: error.response?.data?.error };
     }
 };

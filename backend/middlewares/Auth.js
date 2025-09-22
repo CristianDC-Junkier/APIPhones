@@ -1,7 +1,6 @@
 ﻿const LoggerController = require("../controllers/LoggerController");
 const { verifyToken } = require("../utils/JWT");
-const { UserAccount } = require("../models/AuthModel");
-const { UserData } = require("../models/UserDataModel");
+const { UserAccount, UserData } = require("../models/Relations");
 
 /**
  * Middleware que restringe el acceso únicamente a usuarios con rol de administrador.
@@ -143,7 +142,6 @@ async function canModifyUser(req, res, next) {
         if (targetUser.usertype === "SUPERADMIN" && req.method === "DELETE") {
             return res.status(403).json({ success: false, message: "No puedes eliminar al SUPERADMIN" });
         }
-
         // Buscar usuario que hace la petición
         const requester = await UserAccount.findByPk(requesterId, {
             include: [{ model: UserData, as: "userData" }]
@@ -155,7 +153,6 @@ async function canModifyUser(req, res, next) {
             // SUPERADMIN puede hacer todo
             return next();
         }
-
         if (requester.usertype === "ADMIN") {
             // ADMIN no puede modificar/eliminar SUPERADMIN
             if (targetUser.usertype === "SUPERADMIN") {

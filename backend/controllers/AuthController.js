@@ -120,11 +120,11 @@ class AuthController {
 
             // Validar que el subdepartamento pertenece al departamento indicado y que existe
             if (userData.subdepartmentId) {
-                const subdepartment = await Subdepartment.findByPk(userData.subdepartmentId);
+                const subdepartment = await SubDepartment.findByPk(userData.subdepartmentId);
                 if (!subdepartment) {
                     return res.status(400).json({ error: "Subdepartmento no válido" });
                 }
-                if (userData.departmentId && subdepartment.departmentId !== userData.departmentId) {
+                if (userData.departmentId && subdepartment.departmentId != userData.departmentId) {
                     return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
                 }
             }
@@ -150,8 +150,8 @@ class AuthController {
                 userAccountId: user.id
             });
 
+            LoggerController.info('Nuevo usuario ' + user.username + ' creado correctamente');
             res.json({ id: user.id });
-            LoggerController.info('Nuevo usuario ' + username + ' creado correctamente');
         } catch (error) {
             LoggerController.error('Error en la creación de usuario: ' + error.message);
             res.status(400).json({ error: error.message });
@@ -168,27 +168,47 @@ class AuthController {
     static async update(req, res) {
         try {
             const targetUserId = req.params.id;
-            const { username, usertype } = req.body;
+            const { userAccount, userData } = req.body;
+
+            if (!userAccount || !userData) {
+                return res.status(400).json({ error: "Los datos se aportaron de forma incompleta" });
+            }
 
             const targetUser = await UserAccount.findByPk(targetUserId);
             if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
+
             // Validar que el nuevo username sea único
-            if (username && username !== targetUser.username) {
-                const exists = await UserAccount.findOne({ where: { username } });
+            if (userAccount.username && userAccount.username !== targetUser.username) {
+                const exists = await UserAccount.findOne({ where: { username: userAccount.username } });
                 if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
-                targetUser.username = username;
+                targetUser.username = userAccount.username;
             }
 
             // Solo ADMIN/SUPERADMIN pueden cambiar usertype
-            if (usertype && ["ADMIN", "SUPERADMIN"].includes(req.user.usertype)) {
-                targetUser.usertype = usertype;
+            if (userAccount.usertype && ["ADMIN", "SUPERADMIN"].includes(req.user.usertype)) {
+                targetUser.usertype = userAccount.usertype;
             }
 
-            await targetUser.save();
+            //Comprobar si se a escrito una nueva contraseña
+            if (userAccount.password && userAccount.password !== "") {
+                targetUser.password = userAccount.password;
+            }
 
-            res.json({ id: targetUserId });
+            const targetUserData = await UserData.findOne({ where: { userAccountId: targetUserId } });
+
+            if (userData.name && userData.name !== "") targetUserData.name = userData.name;
+            if (userData.extension && userData.extension !== "") targetUserData.extension = userData.extension;
+            if (userData.number && userData.number !== "") targetUserData.number = userData.number;
+            if (userData.email && userData.email !== "") targetUserData.email = userData.email;
+            if (userData.departmentId && userData.departmentId !== "") targetUserData.departmentId = userData.departmentId;
+            if (userData.subdepartmentId && userData.subdepartmentId !== "") targetUserData.subdepartmentId = userData.subdepartmentId;
+
+            await targetUser.save();
+            await targetUserData.save();
+
             LoggerController.info(`Usuario ${targetUser.username} actualizado por ${req.user.username}`);
+            res.json({ id: targetUserId });
         } catch (error) {
             LoggerController.error('Error en modificar la cuenta de usuario: ' + error.message);
             res.status(500).json({ error: error.message });
@@ -206,15 +226,17 @@ class AuthController {
     static async forcePasswordChange(req, res) {
         try {
             const { id } = req.params;
+            const { password } = req.body;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             user.forcePwdChange = true;
+            user.password = password;
             await user.save();
 
-            res.json({ id });
             LoggerController.info(`Usuario ${user.username} marcado para cambio de contraseña por ${req.user.username}`);
+            res.json({ id });
         } catch (error) {
             LoggerController.error('Error en forzar cambio de contraseña: ' + error.message);
             res.status(500).json({ error: error.message });
@@ -231,14 +253,14 @@ class AuthController {
     static async delete(req, res) {
         try {
             const { id } = req.params;
-
+            
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             await user.destroy();
 
-            res.json({id} );
             LoggerController.info(`Usuario ${user.username} eliminado por ${req.user.username}`);
+            res.json({id} );
         } catch (error) {
             LoggerController.error('Error en la eliminación de usuario: ' + error.message);
             res.status(500).json({ error: error.message });

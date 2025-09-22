@@ -7,7 +7,7 @@ import {
 } from "reactstrap";
 import Swal from 'sweetalert2';
 
-import { getUsersList, getUserDataList, getUserDataByDepartmentList, createUser, modifyUser, deleteUser } from "../../services/UserService";
+import { markPWDCUser, getUserDataList, getUserDataByDepartmentList, createUser, modifyUser, deleteUser } from "../../services/UserService";
 import { useAuth } from "../../hooks/useAuth";
 
 import BackButton from "../../components/utils/BackButtonComponent";
@@ -97,7 +97,7 @@ const UserList = () => {
                 const result = await createUser(formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario creado correctamente", "success");
-                    const response = await getUsersList(token);
+                    const response = await getUserDataList(token);
                     if (response.success) setAllUsers(response.data.users ?? []);
                 } else {
                     Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
@@ -113,17 +113,13 @@ const UserList = () => {
             currentUser,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyUser({
-                    id: userItem.id,
-                    username: formValues.username,
-                    password: formValues.password,
-                    usertype: formValues.usertype,
-                }, token);
+                console.log(formValues)
+                const result = await modifyUser(userItem.id, formValues, token);
 
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
                     if (userItem.id === currentUser.id) { await logout(); navigate("/login"); }
-                    const response = await getUsersList(token);
+                    const response = await getUserDataList(token);
                     if (response.success) setAllUsers(response.data.users ?? []);
                 } else {
                     Swal.fire("Error", result.error || "No se pudo modificar el usuario", "error");
@@ -131,6 +127,38 @@ const UserList = () => {
             },
         });
     };
+
+    const rowStyleStep1 = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
+    const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
+    const inputStyleStep1 = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
+
+    const handlePWDC = async (userItem) => {
+        const swal = await Swal.fire({
+            title: "Cambio de contraseña",
+            html: `<div>${userItem.username} va a ser marcado para un cambio de contraseña.</div>
+            <div>Introduzca a continuación una contraseña temporal para el próximo inicio de sesión del usuario.</div>
+            <div style="${rowStyleStep1}">
+                   <label style="${labelStyle}">Contraseña <span style="color:red">*</span></label>
+                    <input id="swal-password" type="password" style="${inputStyleStep1}" placeholder="Contraseña">
+                    </div>`,
+            showCancelButton: true,
+            confirmButtonText: "Confirmar",
+            preConfirm: () => {
+                const password = document.getElementById("swal-password").value.trim();
+                if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
+
+                return password;
+            }
+        });
+        if (!swal.value) return;
+
+        const result = await markPWDCUser(userItem.id, { password: swal.value }, token);
+        if (result.success) {
+            Swal.fire('Éxito', 'Usuario marcado correctamente', 'success');
+        } else {
+            Swal.fire('Error', result.error || 'No se pudo marcar al usuario', 'error');
+        }
+    }
 
     const handleDelete = async (userItem) => {
         try { await showCaptcha(userItem.id); }
@@ -140,7 +168,7 @@ const UserList = () => {
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
             if (userItem.id === currentUser.id) { await logout(); navigate('/login') }
-            const response = await getUsersList(token);
+            const response = await getUserDataList(token);
             if (response.success) setAllUsers(response.data.users ?? []);
         } else {
             Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
@@ -202,23 +230,28 @@ const UserList = () => {
                         // Determinar permisos de modificación y borrado
                         let canModify = false;
                         let canDelete = false;
+                        let canPWDC = false;
 
                         switch (userItem.usertype) {
                             case "SUPERADMIN":
                                 canModify = currentUser.usertype === "SUPERADMIN";
                                 canDelete = false;
+                                canPWDC = false;
                                 break;
                             case "ADMIN":
                                 canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);;
+                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
                                 break;
                             case "DEPARTMENT":
                                 canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);;
+                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
                                 break;
                             case "WORKER":
                                 canModify = currentUser.usertype !== "WORKER";
                                 canDelete = currentUser.usertype !== "WORKER"; 
+                                canPWDC = currentUser.usertype !== "WORKER";
                                 break;
                             default:
                                 break;
@@ -239,6 +272,16 @@ const UserList = () => {
                                                 onClick={() => handleModify(userItem)}
                                             >
                                                 ✏️
+                                            </Button>
+                                        )}
+                                        {canPWDC && (
+                                            <Button
+                                                color="warning"
+                                                size="sm"
+                                                className="me-1 mb-1"
+                                                onClick={() => handlePWDC(userItem)}
+                                            >
+                                                🔑
                                             </Button>
                                         )}
                                         {canDelete && (

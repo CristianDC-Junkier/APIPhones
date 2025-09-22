@@ -138,7 +138,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 
     if (!swalStep2.value) return;
 
-    onConfirm({ ...step1Values, ...swalStep2.value, userAccountId: userItem?.userAccountId || null });
+    onConfirm({ userAccount: step1Values, userData:swalStep2.value, userAccountId: userItem?.userAccountId || null });
 };
 
 export default AddModifyUserComponent;

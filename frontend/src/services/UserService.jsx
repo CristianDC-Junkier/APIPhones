@@ -83,9 +83,9 @@ export const createUser = async (user, token) => {
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const modifyUser = async (user, token) => {
+export const modifyUser = async (id, user, token) => {
     try {
-        const res = await api.put(`/${user.id}`, user, {
+        const res = await api.put(`/${id}`, user, {
             headers: { Authorization: `Bearer ${token}` },
         });
         return { success: true, data: res.data };
@@ -110,4 +110,33 @@ export const deleteUser = async (userId, token) => {
         return { success: false, error: error.response?.data?.error };
     }
 };
+
+/**
+ * Solicitud para marcar a un usuario para forzar un cambio de contraseña
+ * @param {Object} userId - el ID del usuario que se quiere va a marcar
+ * @param {Object} password - la constraseña temporal establecida por el usuario que realizó la marcación 
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const markPWDCUser = async (userId, password, token) => {
+    try {
+        const res = await api.put(`/${userId}/forcepwd`, password, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+}
+
+export const changePassword = async (passwords, token) => {
+    try {
+        const res = await api.put(`/user/profile-pass`, passwords, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+}
 

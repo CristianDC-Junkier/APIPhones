@@ -28,7 +28,7 @@ const Login = () => {
     const [rememberMe, setRememberMe] = useState(false);
 
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login} = useAuth();
 
     //Función que gestiona el Captcha
     const showCaptcha = () => {
@@ -65,6 +65,8 @@ const Login = () => {
         });
     };
 
+    
+
     //Función encargada de gestionar la información aportada por el usuario
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -77,12 +79,10 @@ const Login = () => {
             const response = await login({ username, password, rememberMe });
 
             if (response.success) {
-                const user = response.data.user;
-                if (user.usertype === 'WORKER') {
-                    navigate('/app'); 
-                } else {
+                //const user = response.data.user;
+                
                     navigate('/home');
-                }
+                
             } else {
                 Swal.fire('Error', response.error || 'Login fallido', 'error');
             }

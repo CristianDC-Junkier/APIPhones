@@ -12,11 +12,11 @@ class SubDepartmentController {
      */
     static async listAll(req, res) {
         try {
-            const subDepartments = await SubDepartment.findAll();
-            res.json(subDepartments);
+            const subdepartments = await SubDepartment.findAll();
+            res.json({ subdepartments });
         } catch (error) {
             LoggerController.error('Error listando subdepartamentos: ' + error.message);
-            res.status(500).json({ success: false, message: 'Error al obtener subdepartamentos', error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -29,12 +29,12 @@ class SubDepartmentController {
      */
     static async getById(req, res) {
         try {
-            const subDepartment = await SubDepartment.findOne({ where: { id: req.params.id } });
-            if (!subDepartment) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
-            res.json({ success: true, subDepartment });
+            const subdepartments = await SubDepartment.findOne({ where: { id: req.params.id } });
+            if (!subdepartments) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
+            res.json({ subdepartments });
         } catch (error) {
             LoggerController.error('Error obteniendo subdepartamento: ' + error.message);
-            res.status(500).json({ success: false, message: 'Error al obtener el subdepartamento', error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -47,11 +47,11 @@ class SubDepartmentController {
      */
     static async create(req, res) {
         try {
-            const subDepartment = await SubDepartment.create(req.body);
-            res.status(201).json({ success: true, message: 'Subdepartamento creado correctamente', subDepartment });
+            const subdepartments = await SubDepartment.create(req.body);
+            res.status(201).json({ id: subdepartments.id });
         } catch (error) {
             LoggerController.error('Error creando subdepartamento: ' + error.message);
-            res.status(500).json({ success: false, message: 'Error al crear el subdepartamento', error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -65,11 +65,11 @@ class SubDepartmentController {
     static async update(req, res) {
         try {
             const updated = await SubDepartment.update(req.params.id, req.body);
-            if (!updated) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
-            res.json({ success: true, message: 'Subdepartamento actualizado correctamente', subDepartment: updated });
+            if (!updated) return res.status(404).json({ error: 'Subdepartamento no encontrado' });
+            res.json({ id: updated.id });
         } catch (error) {
             LoggerController.error('Error actualizando subdepartamento: ' + error.message);
-            res.status(500).json({ success: false, message: 'Error al actualizar el subdepartamento', error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 
@@ -83,11 +83,11 @@ class SubDepartmentController {
     static async delete(req, res) {
         try {
             const deleted = await SubDepartment.delete(req.params.id);
-            if (!deleted) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
-            res.json({ success: true, message: 'Subdepartamento eliminado correctamente' });
+            if (!deleted) return res.status(404).json({ error: 'Subdepartamento no encontrado' });
+            res.json({ id:req.params.id });
         } catch (error) {
             LoggerController.error('Error eliminando subdepartamento: ' + error.message);
-            res.status(500).json({ success: false, message: 'Error al eliminar el subdepartamento', error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 }

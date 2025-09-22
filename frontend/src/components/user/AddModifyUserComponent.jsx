@@ -3,20 +3,20 @@ import { getDepartmentsList, getSubDepartmentsList } from "../../services/Depart
 
 const AddModifyUserComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
 
-    const tipos = [{ label: "Trabajador", value: "WORKER" }];
+    const types = [{ label: "Trabajador", value: "WORKER" }];
     if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN") {
-        tipos.push({ label: "Jefe de Departamento", value: "DEPARTMENT" });
-        tipos.push({ label: "Administrador", value: "ADMIN" });
+        types.push({ label: "Jefe de Departamento", value: "DEPARTMENT" });
+        types.push({ label: "Administrador", value: "ADMIN" });
     }
     if (currentUser.usertype === "SUPERADMIN") {
-        tipos.push({ label: "SuperAdmin", value: "SUPERADMIN" });
+        types.push({ label: "SuperAdmin", value: "SUPERADMIN" });
     }
-    const response = await getDepartmentsList(token);
-    const departments = response.data;
-    const responseS = await getSubDepartmentsList(token);
-    const subdepartments = responseS.data;
+    let response = await getDepartmentsList(token);
+    const departments = response.data.departments;
+    response = await getSubDepartmentsList(token);
+    const subdepartments = response.data.subdepartments;
 
-    const optionsHtml = tipos.map(tipo => `<option value="${tipo.value}" ${userItem?.usertype === tipo.value ? "selected" : ""}>${tipo.label}</option>`).join("");
+    const optionsHtml = types.map(tipo => `<option value="${tipo.value}" ${userItem?.usertype === tipo.value ? "selected" : ""}>${tipo.label}</option>`).join("");
     const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");
     const subdepartmentOptions = subdepartments.map(s => `<option value="${s.id}" ${userItem?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
 

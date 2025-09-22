@@ -22,7 +22,7 @@ export const getUsersList = async (token) => {
         const res = await api.get('/user', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        return { success: true, users: res.data };
+        return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
     }
@@ -38,7 +38,7 @@ export const getUserDataList = async (token) => {
         const res = await api.get('/user/list', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        return { success: true, users: res.data };
+        return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
     }
@@ -54,7 +54,7 @@ export const getUserDataByDepartmentList = async (token) => {
         const res = await api.get('/user/list-department', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        return { success: true, users: res.data };
+        return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
     }

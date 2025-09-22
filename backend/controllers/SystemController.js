@@ -34,13 +34,10 @@ const SystemController = {
                 .map((dirent) => dirent.name)
                 .sort((a, b) => b.localeCompare(a));
 
-            res.json(logs);
+            res.json({ logs });
         } catch (error) {
             LoggerController.error('Error en el acceso a los archivo de logs: ' + error.message);
-            res.status(500).json({
-                success: false,
-                error: error.message
-            });
+            res.status(500).json({error: error.message});
         }
     },
 
@@ -59,22 +56,19 @@ const SystemController = {
 
 
             if (!fs.existsSync(logPath)) {
-                return res.status(404).json({ code: "Archivo log no encontrado" });
+                return res.status(404).json({ error: "Archivo log no encontrado" });
             }
             try {
                 const content = fs.readFileSync(logPath, "utf-8");
                 res.type("text/plain").send(content);
             } catch (err) {
                 LoggerController.error('Error al leer el archivo log: ' + err.message);
-                res.status(500).json({ code: "No se pudo leer el archivo log" });
+                res.status(500).json({ error: "No se pudo leer el archivo log" });
             }
 
         } catch (error) {
             LoggerController.error('Error al abrir archivo de log: ' + error.message);
-            res.status(500).json({
-                success: false,
-                error: error.message
-            });
+            res.status(500).json({ error: error.message });
         }
     },
 
@@ -91,21 +85,18 @@ const SystemController = {
             const logPath = path.resolve(logBasePath, log);
 
             if (!fs.existsSync(logPath)) {
-                return res.status(404).json({ code: "Archivo log no encontrado" });
+                return res.status(404).json({ error: "Archivo log no encontrado" });
             }
 
             try {
                 res.download(logPath, log);
             } catch (err) {
                 LoggerController.error('Error al descargar el archivo log: ' + err.message);
-                res.status(500).json({ code: "No se pudo descargar el archivo log" });
+                res.status(500).json({ error: "No se pudo descargar el archivo log" });
             }
         } catch (error) {
             LoggerController.error('Error al descargar el archivo log: ' + error.message);
-            res.status(500).json({
-                success: false,
-                error: error.message
-            });
+            res.status(500).json({ error: error.message });
         }
     },
 
@@ -136,7 +127,7 @@ const SystemController = {
             });
         } catch (error) {
             LoggerController.error('Error al obtener las métricas del sistema: ' + err.message);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ error: error.message });
         }
     },
 };

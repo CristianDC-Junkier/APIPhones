@@ -22,7 +22,7 @@ class UserDataController {
                 subdepartmentName: user.subdepartment?.name || null
             }));
 
-            res.json( formatted );
+            res.json({ users: formatted });
         } catch (error) {
             LoggerController.error(`Error obteniendo la lista pública: ${error.message}`);
             res.status(500).json({ error: error.message });
@@ -67,7 +67,7 @@ class UserDataController {
                     : null
             }));
 
-            res.json( formatted );
+            res.json({ users: formatted });
         } catch (error) {
             LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
             res.status(500).json({ error: error.message });
@@ -93,7 +93,7 @@ class UserDataController {
                         as: "userData",
                         where: {
                             departmentId,
-                            id: { [Op.ne]: requesterId } // Excluye al que hace la petición
+                            //id: { [Op.ne]: requesterId } // Excluye al que hace la petición
                         },
                         include: [
                             { model: Department, as: "department" },
@@ -123,7 +123,7 @@ class UserDataController {
                     : null
             }));
 
-            res.json( formatted );
+            res.json({ users: formatted });
         } catch (error) {
             LoggerController.error(`Error obteniendo la lista por departamento: ${error.message}`);
             res.status(500).json({ error: error.message });
@@ -246,7 +246,7 @@ class UserDataController {
             user.username = username;
             await user.save();
 
-            res.json( user.username );
+            res.json({ username:user.username });
             LoggerController.info(`Usuario ${userId} cambió su username a ${username}`);
         } catch (error) {
             LoggerController.error(`Error actualizando username: ${error.message}`);
@@ -281,7 +281,7 @@ class UserDataController {
             user.forcePwdChange = false;
             await user.save();
 
-            res.json({ success: true, message: "Contraseña actualizada correctamente" });
+            res.json({ id:userId });
             LoggerController.info(`Usuario ${userId} cambió su contraseña`);
         } catch (error) {
             LoggerController.error(`Error actualizando contraseña: ${error.message}`);
@@ -313,10 +313,9 @@ class UserDataController {
                 ]
             });
 
-            if (!user) return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             res.json({
-                success: true,
                 user: {
                     id: user.id,
                     username: user.username,
@@ -354,7 +353,7 @@ class UserDataController {
             const { name, extension, number, email, departmentId, subdepartmentId } = req.body;
 
             const userData = await UserData.findOne({ where: { userAccountId: id } });
-            if (!userData) return res.status(404).json({ success: false, message: "UserData no encontrado" });
+            if (!userData) return res.status(404).json({ error: "UserData no encontrado" });
 
             const requester = req.user; // viene del middleware de autenticación
 
@@ -372,7 +371,7 @@ class UserDataController {
 
             await userData.update(updateFields);
 
-            res.json( id );
+            res.json({ id });
             LoggerController.info(`UserData de usuarioId ${id} actualizado por ${requester.username}`);
         } catch (error) {
             LoggerController.error(`Error actualizando UserData: ${error.message}`);

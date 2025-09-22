@@ -26,7 +26,7 @@ class AuthController {
             const { username, password } = req.body;
 
             if (!username || !password) {
-                return res.status(400).json({ success: false, message: "Usuario y contraseña requeridos" });
+                return res.status(400).json({ error: "Usuario y contraseña requeridos" });
             }
 
             // Buscar usuario junto con UserData, Department y Subdepartment
@@ -45,7 +45,7 @@ class AuthController {
             });
 
             if (!user || user.password !== password) {
-                return res.status(401).json({ message: "Credenciales incorrectas" });
+                return res.status(401).json({ error: "Credenciales incorrectas" });
             }
 
             const token = generateToken({ id: user.id, username: user.username, usertype: user.usertype });
@@ -92,46 +92,46 @@ class AuthController {
             const { userAccount, userData } = req.body;
 
             if (!userAccount || !userData) {
-                return res.status(400).json({ message: "Los datos se aportaron de forma incompleta" });
+                return res.status(400).json({ error: "Los datos se aportaron de forma incompleta" });
             }
 
             if (!userAccount.username || !userAccount.password) {
-                return res.status(400).json({ message: "Usuario y contraseña requeridos" });
+                return res.status(400).json({ error: "Usuario y contraseña requeridos" });
             }
 
             // Verificar que el username no exista
             const existingUser = await UserAccount.findOne({ where: { username: userAccount.username } });
             if (existingUser) {
-                return res.status(400).json({ message: "El nombre de usuario ya está en uso" });
+                return res.status(400).json({ error: "El nombre de usuario ya está en uso" });
             }
 
             // Validar que el departamento y subdepartamento existen si se proporcionan
             if (userData.departmentId) {
                 const department = await Department.findByPk(userData.departmentId);
                 if (!department) {
-                    return res.status(400).json({ message: "Departmento no válido" });
+                    return res.status(400).json({ error: "Departmento no válido" });
                 }
             }
 
             // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
             if (!userData.departmentId && userData.subdepartmentId) {
-                return res.status(400).json({ message: "Departmento no válido" });
+                return res.status(400).json({ error: "Departmento no válido" });
             }
 
             // Validar que el subdepartamento pertenece al departamento indicado y que existe
             if (userData.subdepartmentId) {
                 const subdepartment = await Subdepartment.findByPk(userData.subdepartmentId);
                 if (!subdepartment) {
-                    return res.status(400).json({ message: "Subdepartmento no válido" });
+                    return res.status(400).json({ error: "Subdepartmento no válido" });
                 }
                 if (userData.departmentId && subdepartment.departmentId !== userData.departmentId) {
-                    return res.status(400).json({ message: "subdepartmentId no pertenece al departmentId indicado" });
+                    return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
                 }
             }
 
             // Validar SUPERADMIN
             if ((userAccount.usertype === "SUPERADMIN") && req.user.usertype !== "SUPERADMIN") {
-                return res.status(403).json({ message: "Solo un SUPERADMIN puede crear a otro SUPERADMIN" });
+                return res.status(403).json({ error: "Solo un SUPERADMIN puede crear a otro SUPERADMIN" });
             }
 
             const forcePwdChange = (userAccount.usertype === "SUPERADMIN" || userAccount.usertype === "ADMIN");
@@ -171,12 +171,12 @@ class AuthController {
             const { username, usertype } = req.body;
 
             const targetUser = await UserAccount.findByPk(targetUserId);
-            if (!targetUser) return res.status(404).json({ message: "Usuario no encontrado" });
+            if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
             // Validar que el nuevo username sea único
             if (username && username !== targetUser.username) {
                 const exists = await UserAccount.findOne({ where: { username } });
-                if (exists) return res.status(400).json({ message: "El nombre de usuario ya existe" });
+                if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
                 targetUser.username = username;
             }
 
@@ -208,7 +208,7 @@ class AuthController {
             const { id } = req.params;
 
             const user = await UserAccount.findByPk(id);
-            if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             user.forcePwdChange = true;
             await user.save();
@@ -233,7 +233,7 @@ class AuthController {
             const { id } = req.params;
 
             const user = await UserAccount.findByPk(id);
-            if (!user) return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             await user.destroy();
 

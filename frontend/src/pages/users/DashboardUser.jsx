@@ -55,9 +55,9 @@ const UserList = () => {
                 response = await getUserDataList(token);
             }
             if (response.success) {
-                setAllUsers(response.users ?? []);
+                setAllUsers(response.data.users ?? []);
             } else {
-                if (response.error?.response?.data?.message === "Token inválido") {
+                if (response.error === "Token inválido") {
                     Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
                         .then(() => { logout(); navigate('/login'); });
                     return;
@@ -98,9 +98,9 @@ const UserList = () => {
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario creado correctamente", "success");
                     const response = await getUsersList(token);
-                    if (response.success) setAllUsers(response.data ?? []);
+                    if (response.success) setAllUsers(response.data.users ?? []);
                 } else {
-                    Swal.fire("Error", result.error?.message || "No se pudo crear el usuario", "error");
+                    Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
                 }
             },
         });
@@ -124,9 +124,9 @@ const UserList = () => {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
                     if (userItem.id === currentUser.id) { await logout(); navigate("/login"); }
                     const response = await getUsersList(token);
-                    if (response.success) setAllUsers(response.data ?? []);
+                    if (response.success) setAllUsers(response.data.users ?? []);
                 } else {
-                    Swal.fire("Error", result.error?.message || "No se pudo modificar el usuario", "error");
+                    Swal.fire("Error", result.error || "No se pudo modificar el usuario", "error");
                 }
             },
         });
@@ -141,9 +141,9 @@ const UserList = () => {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
             if (userItem.id === currentUser.id) { await logout(); navigate('/login') }
             const response = await getUsersList(token);
-            if (response.success) setAllUsers(response.data ?? []);
+            if (response.success) setAllUsers(response.data.users ?? []);
         } else {
-            Swal.fire('Error', result.error?.message || 'No se pudo eliminar el usuario', 'error');
+            Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
         }
     };
 
@@ -316,7 +316,7 @@ const UserList = () => {
                             className="shadow-lg mb-2 border-2"
                             style={{ cursor: 'pointer', borderColor: '#0d6efd', borderRadius: '0.75rem' }}
                             onClick={() => {
-                                if (metric.label === "Total") setSelectedType("Todos");
+                                if (metric.label === "Total") setSelectedType("Usuarios");
                                 else if (metric.label === "Administradores") setSelectedType("Administradores");
                                 else setSelectedType("Trabajadores");
                             }}

@@ -1,94 +1,76 @@
-﻿import React, { useEffect, useState, useMemo } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { createRoot } from 'react-dom/client';
-import {
-    Container, Row, Col, Card, CardBody, CardTitle, CardText,
-    Button, Table, Input
-} from "reactstrap";
-import Swal from 'sweetalert2';
+import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input } from "reactstrap";
+import Swal from "sweetalert2";
 
-import { markPWDCUser, getUserDataList, getUserDataByDepartmentList, createUser, modifyUser, deleteUser } from "../../services/UserService";
 import { useAuth } from "../../hooks/useAuth";
+import { getUserDataList, getUserDataByDepartmentList, createUser } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
-import Pagination from "../../components/PaginationComponent";
-import CaptchaSlider from '../../components/utils/CaptchaSliderComponent';
+import TableUserComponent from "../../components/user/TableUserComponent";
 import AddModifyUserComponent from "../../components/user/AddModifyUserComponent";
 
-const UserList = () => {
-    const navigate = useNavigate();
+const DashboardUser = () => {
     const { user: currentUser, token, logout } = useAuth();
+    const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
-    const [allUsers, setAllUsers] = useState([]);
+    const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
-    const [selectedType, setSelectedType] = useState("Usuarios");
+    const [selectedType, setSelectedType] = useState("Todos los usuarios");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
 
-    // Ajustar filas por altura de ventana
+    // Ajuste filas según altura de ventana
     useEffect(() => {
         const updateRows = () => {
             const vh = window.innerHeight;
-            const headerHeight = 220; // altura estimada de header + estadísticas
-            const rowHeight = 70; // altura estimada por fila
-            const footerHeight = 80; // altura del pagination
-            const availableHeight = vh - headerHeight - footerHeight;
-            const rows = Math.max(3, Math.floor(availableHeight / rowHeight));
-            setRowsPerPage(rows);
+            const headerHeight = 220;
+            const rowHeight = 50;
+            const footerHeight = 150;
+            setRowsPerPage(Math.max(3, Math.floor((vh - headerHeight - footerHeight) / rowHeight)));
         };
-
         updateRows();
         window.addEventListener("resize", updateRows);
         return () => window.removeEventListener("resize", updateRows);
     }, []);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!token) return;
-            setLoading(true);
+    const fetchUsers = async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
             let response;
             if (currentUser.usertype === "DEPARTMENT") {
                 response = await getUserDataByDepartmentList(token);
             } else {
                 response = await getUserDataList(token);
             }
+
             if (response.success) {
-                setAllUsers(response.data.users ?? []);
-            } else {
-                if (response.error === "Token inválido") {
-                    Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                        .then(() => { logout(); navigate('/login'); });
-                    return;
+                const fetchedUsers = response.data.users ?? [];
+                setUsers(fetchedUsers);
+
+                // Ajustar currentPage si la página actual quedó vacía
+                const totalPages = Math.ceil(fetchedUsers.length / rowsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    setCurrentPage(totalPages);
                 }
             }
-            setLoading(false);
-        };
-        fetchData();
-    }, [token, logout, navigate, currentUser.usertype]);
+            else if (response.error === "Token inválido") {
+                Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
+                    .then(() => { logout(); navigate('/login'); });
+                return;
+            }
+        } catch (err) {
+            Swal.fire("Error", "No se pudo obtener la lista de usuarios", err);
+        }
+        setLoading(false);
+    };
 
-    const tipoLabels = {
-        ADMIN: "Administrador", SUPERADMIN: "Superadministrador", WORKER: "Trabajador", DEPARTMENT: "Jefe de Departamento"
-    }
+    useEffect(() => { fetchUsers(); }, [token, currentUser, logout, navigate]);
 
-    const filteredUsers = useMemo(() => {
-        return allUsers
-            .filter(user =>
-            (selectedType === "Usuarios" ||
-                (selectedType === "Trabajadores" && ["DEPARTMENT", "WORKER"].includes(user.usertype)) ||
-                (selectedType === "Administradores" && ["DEPARTMENT", "ADMIN", "SUPERADMIN"].includes(user.usertype))
-            )
-            )
-            .filter(user =>
-                user.username.toLowerCase().includes(search.toLowerCase())
-            );
-    }, [allUsers, search, selectedType]);
-
-    const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
-    const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-
-    const handleCreate = async () => {
+    const handleCreateUser = async () => {
         await AddModifyUserComponent({
             token,
             currentUser,
@@ -97,232 +79,30 @@ const UserList = () => {
                 const result = await createUser(formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario creado correctamente", "success");
-                    const response = await getUserDataList(token);
-                    if (response.success) setAllUsers(response.data.users ?? []);
+                    await fetchUsers();
                 } else {
                     Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
                 }
-            },
-        });
-    };
-
-    const handleModify = async (userItem) => {
-        await AddModifyUserComponent({
-            token,
-            userItem,
-            currentUser,
-            action: "modify",
-            onConfirm: async (formValues) => {
-                console.log(formValues)
-                const result = await modifyUser(userItem.id, formValues, token);
-
-                if (result.success) {
-                    Swal.fire("Éxito", "Usuario modificado correctamente", "success");
-                    if (userItem.id === currentUser.id) { await logout(); navigate("/login"); }
-                    const response = await getUserDataList(token);
-                    if (response.success) setAllUsers(response.data.users ?? []);
-                } else {
-                    Swal.fire("Error", result.error || "No se pudo modificar el usuario", "error");
-                }
-            },
-        });
-    };
-
-    const rowStyleStep1 = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
-    const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
-    const inputStyleStep1 = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
-
-    const handlePWDC = async (userItem) => {
-        const swal = await Swal.fire({
-            title: "Cambio de contraseña",
-            html: `<div>${userItem.username} va a ser marcado para un cambio de contraseña.</div>
-            <div>Introduzca a continuación una contraseña temporal para el próximo inicio de sesión del usuario.</div>
-            <div style="${rowStyleStep1}">
-                   <label style="${labelStyle}">Contraseña <span style="color:red">*</span></label>
-                    <input id="swal-password" type="password" style="${inputStyleStep1}" placeholder="Contraseña">
-                    </div>`,
-            showCancelButton: true,
-            confirmButtonText: "Confirmar",
-            preConfirm: () => {
-                const password = document.getElementById("swal-password").value.trim();
-                if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
-
-                return password;
             }
         });
-        if (!swal.value) return;
-
-        const result = await markPWDCUser(userItem.id, { password: swal.value }, token);
-        if (result.success) {
-            Swal.fire('Éxito', 'Usuario marcado correctamente', 'success');
-        } else {
-            Swal.fire('Error', result.error || 'No se pudo marcar al usuario', 'error');
-        }
-    }
-
-    const handleDelete = async (userItem) => {
-        try { await showCaptcha(userItem.id); }
-        catch (err) { Swal.fire('Atención', err.message || 'Captcha no completado', 'warning'); return; }
-
-        const result = await deleteUser(userItem.id, token);
-        if (result.success) {
-            Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
-            if (userItem.id === currentUser.id) { await logout(); navigate('/login') }
-            const response = await getUserDataList(token);
-            if (response.success) setAllUsers(response.data.users ?? []);
-        } else {
-            Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
-        }
     };
-
-    const showCaptcha = (idd) => {
-        return new Promise((resolve, reject) => {
-            const container = document.createElement('div');
-            const reactRoot = createRoot(container);
-            let completed = false;
-
-            reactRoot.render(<CaptchaSlider onSuccess={() => { completed = true; Swal.close(); resolve(true); setTimeout(() => reactRoot.unmount(), 0); }} />);
-            Swal.fire({
-                title: `Eliminar ${idd === currentUser.id ? "su Usuario" : "el Usuario"}`,
-                html: container,
-                showConfirmButton: true,
-                confirmButtonText: 'Continuar',
-                showCancelButton: true,
-                cancelButtonText: 'Cancelar',
-                allowOutsideClick: false,
-                preConfirm: () => { if (!completed) { Swal.showValidationMessage('Debes completar el captcha'); return false; } }
-            }).then(() => { if (!completed) { reject(new Error('Captcha no completado')); setTimeout(() => reactRoot.unmount(), 0); } });
-        });
-    };
-
-    const stats = {
-        total: allUsers.length,
-        admin: allUsers.filter(u => u.usertype === "DEPARTMENT" || u.usertype === "ADMIN" || u.usertype === "SUPERADMIN").length,
-        worker: allUsers.filter(u => u.usertype === "WORKER").length,
-    };
-
-    const renderUserTable = () => (
-        <div className="d-flex flex-column flex-grow-1">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-                <h5 className="mb-0">{selectedType}</h5>
-                <Input
-                    type="text"
-                    placeholder="Buscar por usuario..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    style={{ width: "250px" }}
-                />
-            </div>
-
-            <Table striped hover responsive className="shadow-sm rounded flex-grow-1">
-                <thead className="table-primary">
-                    <tr>
-                        <th className="text-center">ID</th>
-                        <th className="text-center">Usuario</th>
-                        <th className="text-center">Tipo</th>
-                        <th className="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentUsers.map((userItem, idx) => {
-                        
-                        const isCurrentUser = userItem.id === currentUser.id;
-                        // Determinar permisos de modificación y borrado
-                        let canModify = false;
-                        let canDelete = false;
-                        let canPWDC = false;
-
-                        switch (userItem.usertype) {
-                            case "SUPERADMIN":
-                                canModify = currentUser.usertype === "SUPERADMIN";
-                                canDelete = false;
-                                canPWDC = false;
-                                break;
-                            case "ADMIN":
-                                canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                break;
-                            case "DEPARTMENT":
-                                canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                break;
-                            case "WORKER":
-                                canModify = currentUser.usertype !== "WORKER";
-                                canDelete = currentUser.usertype !== "WORKER"; 
-                                canPWDC = currentUser.usertype !== "WORKER";
-                                break;
-                            default:
-                                break;
-                        }
-
-                        return (
-                            <tr key={idx} style={isCurrentUser ? { fontWeight: "bold" } : {}}>
-                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd"} : {}}>{userItem.id}</td>
-                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd"} : {}}>{userItem.username}</td>
-                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd"} : {}}>{tipoLabels[userItem.usertype]}</td>
-                                <td className="text-center">
-                                    <div className="d-flex justify-content-center flex-wrap">
-                                        {canModify && (
-                                            <Button
-                                                color="warning"
-                                                size="sm"
-                                                className="me-1 mb-1"
-                                                onClick={() => handleModify(userItem)}
-                                            >
-                                                ✏️
-                                            </Button>
-                                        )}
-                                        {canPWDC && (
-                                            <Button
-                                                color="warning"
-                                                size="sm"
-                                                className="me-1 mb-1"
-                                                onClick={() => handlePWDC(userItem)}
-                                            >
-                                                🔑
-                                            </Button>
-                                        )}
-                                        {canDelete && (
-                                            <Button
-                                                color="danger"
-                                                size="sm"
-                                                className="me-1 mb-1"
-                                                onClick={() => handleDelete(userItem)}
-                                            >
-                                                🗑️
-                                            </Button>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-
-                    {/* Filas vacías */}
-                    {rowsPerPage - currentUsers.length > 0 &&
-                        [...Array(rowsPerPage - currentUsers.length)].map((_, idx) => (
-                            <tr key={`empty-${idx}`} style={{ height: '50px' }}>
-                                <td colSpan={4}></td>
-                            </tr>
-                        ))
-                    }
-                </tbody>
-            </Table>
-
-
-            <div className="mt-auto" style={{ minHeight: '40px' }}>
-                {totalPages > 1 ? (
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                ) : (
-                    <div style={{ height: '40px' }}></div>
-                )}
-            </div>
-        </div>
-    );
 
     if (loading) return <Spinner />;
+
+    // Filtrar usuarios según tipo seleccionado
+    const filteredByType = users.filter(u => {
+        if (selectedType === "Todos los usuarios") return true;
+        if (selectedType === "Administradores") return ["DEPARTMENT", "ADMIN", "SUPERADMIN"].includes(u.usertype);
+        if (selectedType === "Trabajadores") return u.usertype === "WORKER";
+        return true;
+    });
+
+    // Estadísticas
+    const stats = {
+        total: users.length,
+        admin: users.filter(u => ["DEPARTMENT", "ADMIN", "SUPERADMIN"].includes(u.usertype)).length,
+        worker: users.filter(u => u.usertype === "WORKER").length,
+    };
 
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
@@ -335,36 +115,25 @@ const UserList = () => {
             <div className="position-absolute top-0 end-0 p-3">
                 <Button
                     color="transparent"
-                    style={{
-                        background: "none",
-                        border: "none",
-                        color: "black",
-                        fontWeight: "bold",
-                        padding: 0
-                    }}
-                    onClick={handleCreate}
+                    style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
+                    onClick={handleCreateUser}
                 >
                     ➕ Crear Usuario
                 </Button>
             </div>
 
-
             {/* Tarjetas de estadísticas */}
             <Row className="mb-3 mt-1 justify-content-center g-3">
                 {[
-                    { label: "Total", value: stats.total },
-                    { label: "Administradores", value: stats.admin },
-                    { label: "Trabajadores", value: stats.worker }
+                    { label: "Total", value: stats.total, type: "Todos los usuarios" },
+                    { label: "Administradores", value: stats.admin, type: "Administradores" },
+                    { label: "Trabajadores", value: stats.worker, type: "Trabajadores" }
                 ].map((metric, idx) => (
                     <Col key={idx} xs={6} sm={4} md={3}>
                         <Card
-                            className="shadow-lg mb-2 border-2"
-                            style={{ cursor: 'pointer', borderColor: '#0d6efd', borderRadius: '0.75rem' }}
-                            onClick={() => {
-                                if (metric.label === "Total") setSelectedType("Usuarios");
-                                else if (metric.label === "Administradores") setSelectedType("Administradores");
-                                else setSelectedType("Trabajadores");
-                            }}
+                            className={`shadow-lg mb-2 border-2 ${selectedType === metric.type ? "border-primary" : ""}`}
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => { setSelectedType(metric.type); setCurrentPage(1); }}
                         >
                             <CardBody className="text-center pt-3">
                                 <CardTitle tag="h6">{metric.label}</CardTitle>
@@ -375,11 +144,32 @@ const UserList = () => {
                 ))}
             </Row>
 
+            {/* Fila con tipo de usuario seleccionado + búsqueda */}
+            <div className="d-flex justify-content-between mb-3 align-items-center">
+                <div style={{ fontWeight: "bold", fontSize: "1rem" }}>{selectedType}</div>
+                <Input
+                    type="text"
+                    placeholder="Buscar por usuario..."
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    style={{ width: "250px" }}
+                />
+            </div>
 
-            {/* Tabla */}
-            {renderUserTable()}
+            {/* Tabla de usuarios modular */}
+            <TableUserComponent
+                users={filteredByType}
+                currentUser={currentUser}
+                token={token}
+                search={search}
+                setSearch={setSearch}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                rowsPerPage={rowsPerPage}
+                refreshData={fetchUsers}
+            />
         </Container>
     );
 };
 
-export default UserList;
+export default DashboardUser;

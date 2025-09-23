@@ -2,7 +2,7 @@
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../utils/SpinnerComponent';
-
+import PWDChangeComponent from '../user/PWDChangeComponent';
 
 /**
  * Componente de ruta privada.
@@ -26,7 +26,15 @@ const PrivateRoute = ({ children }) => {
     }, [loading, user, navigate]);
 
     if (loading) return <Spinner />;
-    return user ? children : <Spinner />;
+
+    return (
+        <>
+            {/* Prompt para cambio de contraseña si es necesario */}
+            {user?.forcePwdChange && <PWDChangeComponent />}
+            {user ? children : <Spinner />}
+        </>
+    );
+
 };
 
 export default PrivateRoute;

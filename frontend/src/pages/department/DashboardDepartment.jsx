@@ -35,8 +35,8 @@ const DashboardDepartment = () => {
         const updateRows = () => {
             const vh = window.innerHeight;
             const headerHeight = 220;
-            const rowHeight = 70;
-            const footerHeight = 80;
+            const rowHeight = 50;
+            const footerHeight = 150;
             const availableHeight = vh - headerHeight - footerHeight;
             const rows = Math.max(3, Math.floor(availableHeight / rowHeight));
             setRowsPerPage(rows);
@@ -75,7 +75,8 @@ const DashboardDepartment = () => {
             setLoading(false);
         };
         fetchData();
-    }, [token, currentUser]);
+    }, [token, currentUser, currentView]);
+
 
     /** Crear departamento */
     const handleCreateDepartment = async () => {
@@ -86,7 +87,9 @@ const DashboardDepartment = () => {
                 if (result.success) {
                     Swal.fire("Éxito", "Departamento creado correctamente", "success");
                     const resp = await getDepartmentsList(token);
-                    if (resp.success) setDepartments(resp.data.departments ?? []);
+                    if (resp.success) {
+                        setDepartments(resp.data.departments ?? []);
+                    }
                 } else {
                     Swal.fire("Error", result.error || "No se pudo crear el departamento", "error");
                 }
@@ -201,7 +204,13 @@ const DashboardDepartment = () => {
                     setCurrentPage={setCurrentPage}
                     refreshData={async () => {
                         const resp = await getDepartmentsList(token);
-                        if (resp.success) setDepartments(resp.data ?? []);
+                        if (resp.success) {
+                            setDepartments(resp.data.departments ?? []);
+                            const totalPages = Math.ceil(resp.data.departments?.length / rowsPerPage);
+                            if (currentPage > totalPages && totalPages > 0) {
+                                setCurrentPage(totalPages);
+                            }
+                        }
                     }}
                 />
             )}
@@ -209,6 +218,7 @@ const DashboardDepartment = () => {
             {/* Tabla de subdepartamentos */}
             {currentView === "subdepartments" && (
                 <TableSubDepartmentComponent
+                    token={token}
                     departments={departments ?? []}
                     subdepartments={subdepartments ?? []}
                     search={search}
@@ -219,9 +229,13 @@ const DashboardDepartment = () => {
                         const resp = await getSubDepartmentsList(token);
                         if (resp.success) {
                             if (currentUser?.usertype === "DEPARTMENT") {
-                                setSubdepartments(resp.data?.filter(sd => sd.departmentId === currentUser.departmentId) ?? []);
+                                setSubdepartments(resp.data?.subdepartments.filter(sd => sd.departmentId === currentUser.departmentId) ?? []);
                             } else {
-                                setSubdepartments(resp.data ?? []);
+                                setSubdepartments(resp.data.subdepartments ?? []);
+                            }
+                            const totalPages = Math.ceil(resp.data.subdepartments?.length / rowsPerPage);
+                            if (currentPage > totalPages && totalPages > 0) {
+                                setCurrentPage(totalPages);
                             }
                         }
                     }}

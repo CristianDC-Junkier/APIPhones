@@ -17,7 +17,7 @@ import Pagination from "../../components/PaginationComponent";
  * @param {Function} props.setCurrentPage - Función para cambiar la página
  * @param {Function} props.refreshData - Función para recargar los datos
  */
-const TableSubDepartmentComponent = ({ departments, subdepartments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
+const TableSubDepartmentComponent = ({ token, departments, subdepartments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
     const filteredSubdepartments = useMemo(
         () => subdepartments.filter(d => d.name.toLowerCase().includes(search.toLowerCase())),
         [subdepartments, search]
@@ -63,7 +63,7 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, search, rows
             subdepartment: sub,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifySubDepartment({ id: sub.id, name: formValues.name, departmentId: formValues.departmentId });
+                const result = await modifySubDepartment({ id: sub.id, name: formValues.name, departmentId: formValues.departmentId }, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Subdepartamento modificado correctamente", "success");
                     await refreshData();
@@ -78,7 +78,7 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, search, rows
         try { await showCaptcha(sub.id); }
         catch (err) { Swal.fire('Atención', err.message || 'Captcha no completado', 'warning'); return; }
 
-        const result = await deleteSubDepartment(sub.id);
+        const result = await deleteSubDepartment(sub.id, token);
         if (result.success) {
             Swal.fire('Éxito', 'Subdepartamento eliminado correctamente', 'success');
             await refreshData();

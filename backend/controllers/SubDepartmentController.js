@@ -47,9 +47,9 @@ class SubDepartmentController {
      */
     static async getById(req, res) {
         try {
-            const subdepartments = await SubDepartment.findOne({ where: { id: req.params.id } });
-            if (!subdepartments) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
-            res.json({ subdepartments });
+            const subdepartment = await SubDepartment.findOne({ where: { id: req.params.id } });
+            if (!subdepartment) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
+            res.json({ subdepartment });
         } catch (error) {
             LoggerController.error('Error obteniendo subdepartamento: ' + error.message);
             res.status(500).json({ error: error.message });
@@ -65,8 +65,9 @@ class SubDepartmentController {
      */
     static async create(req, res) {
         try {
-            const subdepartments = await SubDepartment.create(req.body);
-            res.status(201).json({ id: subdepartments.id });
+            const subdepartment = await SubDepartment.create(req.body);
+            LoggerController.info(`Subdepartamento ${subdepartment.name} creado`);
+            res.status(201).json({ id: subdepartment.id });
         } catch (error) {
             LoggerController.error('Error creando subdepartamento: ' + error.message);
             res.status(500).json({ error: error.message });
@@ -74,17 +75,25 @@ class SubDepartmentController {
     }
 
     /**
-     * Actualizar un subdepartamento existente
-     * 
-     * @param {Object} req - req.params.id es el ID del subdepartamento, req.body contiene los campos a actualizar
-     * @param {Object} res
-     * @returns {JSON} - Subdepartamento actualizado o error si no existe
-     */
+  * Actualizar un subdepartamento existente
+  * 
+  * @param {Object} req - req.params.id es el ID del subdepartamento, req.body contiene los campos a actualizar
+  * @param {Object} res
+  * @returns {JSON} - Subdepartamento actualizado o error si no existe
+  */
     static async update(req, res) {
         try {
-            const updated = await SubDepartment.update(req.params.id, req.body);
-            if (!updated) return res.status(404).json({ error: 'Subdepartamento no encontrado' });
-            res.json({ id: updated.id });
+            const subdepartment = await SubDepartment.findOne({ where: { id: req.params.id } });
+
+            if (!subdepartment) {
+                return res.status(404).json({ error: 'Subdepartamento no encontrado' });
+            }
+
+            await subdepartment.update(req.body);
+
+            LoggerController.info(`Subdepartamento ${subdepartment.name} actualizado`);
+
+            res.json({ id: subdepartment.id });
         } catch (error) {
             LoggerController.error('Error actualizando subdepartamento: ' + error.message);
             res.status(500).json({ error: error.message });
@@ -100,14 +109,23 @@ class SubDepartmentController {
      */
     static async delete(req, res) {
         try {
-            const deleted = await SubDepartment.delete(req.params.id);
-            if (!deleted) return res.status(404).json({ error: 'Subdepartamento no encontrado' });
-            res.json({ id:req.params.id });
+            const subdepartment = await SubDepartment.findOne({ where: { id: req.params.id } });
+
+            if (!subdepartment) {
+                return res.status(404).json({ error: 'Subdepartamento no encontrado' });
+            }
+
+            await subdepartment.destroy();
+
+            LoggerController.info(`Subdepartamento ${subdepartment.name} eliminado`);
+
+            res.json({ id: req.params.id });
         } catch (error) {
             LoggerController.error('Error eliminando subdepartamento: ' + error.message);
             res.status(500).json({ error: error.message });
         }
     }
+
 }
 
 module.exports = SubDepartmentController;

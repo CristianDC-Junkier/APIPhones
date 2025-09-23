@@ -18,7 +18,7 @@ import Pagination from "../../components/PaginationComponent";
  * @param {Function} props.setCurrentPage - Función para cambiar la página
  * @param {Function} props.refreshData - Función para recargar los datos
  */
-const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
+const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
 
     const filteredDepartments = useMemo(
         () => departments.filter(d => d.name.toLowerCase().includes(search.toLowerCase())),
@@ -64,7 +64,7 @@ const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPag
             department: dept,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyDepartment({ id: dept.id, name: formValues.name });
+                const result = await modifyDepartment({ id: dept.id, name: formValues.name },token);
                 if (result.success) {
                     Swal.fire("Éxito", "Departamento modificado correctamente", "success");
                     await refreshData();
@@ -79,7 +79,7 @@ const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPag
         try { await showCaptcha(dept.id); }
         catch (err) { Swal.fire('Atención', err.message || 'Captcha no completado', 'warning'); return; }
 
-        const result = await deleteDepartment(dept.id);
+        const result = await deleteDepartment(dept.id, token);
         if (result.success) {
             Swal.fire('Éxito', 'Departamento eliminado correctamente', 'success');
             await refreshData();

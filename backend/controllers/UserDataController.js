@@ -263,18 +263,13 @@ class UserDataController {
     static async updateMyPassword(req, res) {
         try {
             const userId = req.user.id;
-            const { oldPassword, newPassword } = req.body;
+            const { newPassword } = req.body;
 
-            if (!oldPassword || !newPassword) {
-                return res.status(400).json({ error: "Contraseña actual y nueva son requeridas" });
+            if (!newPassword) {
+                return res.status(400).json({ error: "Nueva contraseña requerida" });
             }
 
             const user = await UserAccount.findByPk(userId);
-
-            // Validar contraseña actual
-            if (user.password !== oldPassword) {
-                return res.status(401).json({ error: "Contraseña actual incorrecta" });
-            }
 
             // Actualizar contraseña
             user.password = newPassword;

@@ -134,14 +134,12 @@ class AuthController {
                 return res.status(403).json({ error: "Solo un SUPERADMIN puede crear a otro SUPERADMIN" });
             }
 
-            const forcePwdChange = (userAccount.usertype === "SUPERADMIN" || userAccount.usertype === "ADMIN");
-
             // Crear UserAccount
             const user = await UserAccount.create({
                 username: userAccount.username,
                 password: userAccount.password,
                 usertype: userAccount.usertype,
-                forcePwdChange
+                forcePwdChange : true
             });
 
             // Crear UserData 

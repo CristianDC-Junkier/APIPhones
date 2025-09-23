@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
     const [token, setToken] = useState(null); // Token actual
     const [loading, setLoading] = useState(true); // Estado de carga inicial
 
+
     /**
      * Guarda el usuario en storage cifrado con expiración.
      * @param {Object} token - Token del usuario.
@@ -81,7 +82,7 @@ export const AuthProvider = ({ children }) => {
         const storedValues = getUserWithExpiry();
         if (storedValues) {
             setToken(storedValues.token);
-            setUser(storedValues.user); 
+            setUser(storedValues.user);
         }
         setLoading(false);
     }, []);
@@ -91,7 +92,7 @@ export const AuthProvider = ({ children }) => {
      * 
      * @param {Object} credentials - { username, password, rememberMe }
      * @return {Object} Resultado del login { success: boolean, data/message }
-     */ 
+     */
     const contextLogin = async (credentials) => {
         const result = await login(credentials);
         if (result.success) {
@@ -101,15 +102,48 @@ export const AuthProvider = ({ children }) => {
                 id: result.data.user.id,
                 username: result.data.user.username,
                 usertype: result.data.user.usertype,
+                forcePwdChange: result.data.user.forcePwdChange || false,
             };
             saveUserWithExpiry(result.data.token, userLog, credentials.rememberMe);
-        } else {
+        }
+        else {
             setUser(null);
             sessionStorage.removeItem("user");
             localStorage.removeItem("user");
         }
         return result;
     };
+
+    /**
+    * Actualiza el usuario en el contexto y en el storage correspondiente.
+    * @param {Object} newUser - Usuario actualizado.
+    */
+    const updateUser = (newUser) => {
+        setUser(newUser);
+
+        // Determinar dónde estaba guardado
+        const storage = localStorage.getItem("user") ? localStorage : sessionStorage;
+        const existingEncrypted = storage.getItem("user");
+        if (existingEncrypted) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(existingEncrypted, SECRET_KEY);
+                const decrypted = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                const updatedItem = {
+                    ...decrypted,
+                    user: newUser
+                };
+                const encrypted = CryptoJS.AES.encrypt(
+                    JSON.stringify(updatedItem),
+                    SECRET_KEY
+                ).toString();
+                storage.setItem("user", encrypted);
+            } catch {
+                // Si hay error, limpiar storage
+                storage.removeItem("user");
+            }
+        }
+    };
+
 
     /**
      * Cerrar sesión
@@ -129,6 +163,7 @@ export const AuthProvider = ({ children }) => {
                 loading,
                 login: contextLogin,
                 logout: contextLogout,
+                updateUser,
             }}
         >
             {children}

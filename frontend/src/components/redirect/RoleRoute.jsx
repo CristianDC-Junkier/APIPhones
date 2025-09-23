@@ -2,6 +2,7 @@
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import Spinner from '../utils/SpinnerComponent';
+import PWDChangeComponent from '../user/PWDChangeComponent';
 
 /**
  * Componente de ruta por roles.
@@ -31,8 +32,13 @@ const RoleRoute = ({ allowedRoles, children }) => {
 
     if (loading) return <Spinner />;
     if (!user || !allowedRoles.includes(user.usertype)) return null;
-
-    return children;
+    return (
+        <>
+            {/* Prompt para cambio de contraseña si es necesario */}
+            {user?.forcePwdChange && <PWDChangeComponent />}
+            {children}
+        </>
+    );
 };
 
 export default RoleRoute;

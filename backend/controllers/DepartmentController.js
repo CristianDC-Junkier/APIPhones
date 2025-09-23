@@ -63,6 +63,8 @@ class DepartmentController {
     static async create(req, res) {
         try {
             const department = await Department.create(req.body);
+            LoggerController.info(`Departamento ${department.name} creado`);
+
             res.status(201).json({ id: department.id });
         } catch (error) {
             LoggerController.error('Error creando departamento: ' + error.message);
@@ -79,9 +81,15 @@ class DepartmentController {
      */
     static async update(req, res) {
         try {
-            const updated = await Department.update(req.params.id, req.body);
-            if (!updated) return res.status(404).json({ error: 'Departamento no encontrado' });
-            res.json({ id: updated.id });
+            const department = await Department.findOne({ where: { id: req.params.id } });
+            if (!department) {
+                return res.status(404).json({ error: 'Departamento no encontrado' });
+            }
+
+            await department.update(req.body);
+            LoggerController.info(`Departamento ${department.name} actualizado`);
+
+            res.json({ id: department.id });
         } catch (error) {
             LoggerController.error('Error actualizando departamento: ' + error.message);
             res.status(500).json({ error: error.message });
@@ -97,12 +105,14 @@ class DepartmentController {
      */
     static async delete(req, res) {
         try {
-            const deleted = await Department.delete(req.params.id);
+            const deleted = await Department.findOne({ where: { id: req.params.id } });
             if (!deleted) return res.status(404).json({ error: 'Departamento no encontrado' });
+            await deleted.destroy();
+            LoggerController.info(`Departamento ${deleted.name} eliminado`);
             res.json({ id: req.params.id });
         } catch (error) {
             LoggerController.error('Error eliminando departamento: ' + error.message);
-            res.status(500).json({ success: false, message: 'Error al eliminar el departamento', error: error.message });
+            res.status(500).json({ error: error.message });
         }
     }
 }

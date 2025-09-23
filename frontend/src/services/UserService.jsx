@@ -129,9 +129,9 @@ export const markPWDCUser = async (userId, password, token) => {
     }
 }
 
-export const changePassword = async (passwords, token) => {
+export const changePassword = async (newPassword, token) => {
     try {
-        const res = await api.put(`/user/profile-pass`, passwords, {
+        const res = await api.put(`/user/profile-pass`, newPassword, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };

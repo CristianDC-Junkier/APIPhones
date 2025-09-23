@@ -1,7 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HomeButtonComponent from '../components/user/HomeButtonComponent';
-import LogoutButton from '../components/user/LogoutComponent';
+import HomeButtonComponent from '../components/utils/HomeButtonComponent';
+import LogoutButton from '../components/utils/LogoutComponent';
 import { useAuth } from '../hooks/useAuth';
 import {
     Container,
@@ -32,7 +32,7 @@ const Home = () => {
     [
         { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/app') },
         { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
-        { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => alert('Departamentos') },
+        { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
         { label: 'Acceder Logs', icon: faScroll, action: () => navigate('/logs') },
     ] :
     [

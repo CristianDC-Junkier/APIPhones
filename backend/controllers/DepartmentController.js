@@ -1,5 +1,4 @@
-﻿const { Department } = require("../models/Relations")
-
+﻿const { Department, SubDepartment, sequelize } = require("../models/Relations");
 const LoggerController = require('./LoggerController');
 
 class DepartmentController {
@@ -13,10 +12,25 @@ class DepartmentController {
      */
     static async listAll(req, res) {
         try {
-            const departments = await Department.findAll();
+            const departments = await Department.findAll({
+                attributes: [
+                    "id",
+                    "name",
+                    [sequelize.fn("COUNT", sequelize.col("subdepartments.id")), "count"]
+                ],
+                include: [
+                    {
+                        model: SubDepartment,
+                        as: "subdepartments",
+                        attributes: []
+                    }
+                ],
+                group: ["Department.id"]
+            });
+
             res.json({ departments });
         } catch (error) {
-            LoggerController.error('Error listando departamentos: ' + error.message);
+            LoggerController.error("Error listando departamentos: " + error.message);
             res.status(500).json({ error: error.message });
         }
     }

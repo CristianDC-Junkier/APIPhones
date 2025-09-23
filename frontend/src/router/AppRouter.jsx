@@ -17,7 +17,7 @@ import AccessDenied from '../pages/AccessDenied';
 
 import DashBoardUser from '../pages/users/DashboardUser';
 import DashboardSystem from '../pages/system/DashboardSystem';
-import ExternalWeb from '../pages/ExternalWeb';
+import DashboardDepartment from '../pages/department/DashboardDepartment';
 import UserProfile from '../pages/users/UserProfile';
 
 /**
@@ -40,13 +40,13 @@ const AppRouter = () => {
 
                 {/* Rutas privadas por rol */}
                 <Route path="/users" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashBoardUser /></RoleRoute>} />
+                <Route path="/departments" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardDepartment /></RoleRoute>} />
                 <Route path="/logs" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardSystem /></RoleRoute>} />
                 <Route path="/profile" element={<RoleRoute allowedRoles={['WORKER','DEPARTMENT']}><UserProfile /></RoleRoute>} />
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
             <Route element={<ExternalLayout />}>
-                <Route path="/app" element={<PrivateRoute><ExternalWeb /></PrivateRoute>} />
             </Route>
 
         </Routes>

@@ -28,7 +28,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 
     const step1Html = `
 <div>
-  <div style="${rowStyleStep1}">
+  <div style="${rowStyleStep1} margin-top: 5vh"">
     <label style="${labelStyle}">Usuario <span style="color:red">*</span></label>
     <input id="swal-username" style="${inputStyleStep1}" placeholder="Usuario" value="${userItem?.username || ""}">
   </div>
@@ -53,7 +53,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 
     const step2Html = `
 <div>
-  <div style="${rowStyleStep2}">
+  <div style="${rowStyleStep2}" margin-top: 5vh">
     <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
     <input id="swal-name" style="${inputStyleStep2}" placeholder="Nombre completo" value="${userItem?.name || ""}">
   </div>
@@ -93,6 +93,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         focusConfirm: false,
         width: '600px',
         showCancelButton: true,
+        cancelButtonText: "Cancelar",
         confirmButtonText: "Siguiente",
         preConfirm: () => {
             const username = document.getElementById("swal-username").value.trim();
@@ -116,6 +117,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         focusConfirm: false,
         width: '600px',
         showCancelButton: true,
+        cancelButtonText: "Cancelar",
         confirmButtonText: action === "create" ? "Crear" : "Aceptar",
         preConfirm: () => {
             const name = document.getElementById("swal-name").value.trim();

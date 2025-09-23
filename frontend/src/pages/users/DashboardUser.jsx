@@ -32,7 +32,7 @@ const UserList = () => {
         const updateRows = () => {
             const vh = window.innerHeight;
             const headerHeight = 220; // altura estimada de header + estadísticas
-            const rowHeight = 50; // altura estimada por fila
+            const rowHeight = 70; // altura estimada por fila
             const footerHeight = 80; // altura del pagination
             const availableHeight = vh - headerHeight - footerHeight;
             const rows = Math.max(3, Math.floor(availableHeight / rowHeight));
@@ -269,9 +269,11 @@ const UserList = () => {
             </Table>
 
 
-            <div className="mt-auto">
-                {totalPages > 1 && (
+            <div className="mt-auto" style={{ minHeight: '40px' }}>
+                {totalPages > 1 ? (
                     <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                ) : (
+                    <div style={{ height: '40px' }}></div>
                 )}
             </div>
         </div>

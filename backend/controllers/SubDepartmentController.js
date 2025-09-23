@@ -1,4 +1,4 @@
-﻿const { SubDepartment } = require("../models/Relations")
+﻿const { Department, SubDepartment } = require("../models/Relations")
 const LoggerController = require('./LoggerController');
 
 class SubDepartmentController {
@@ -12,8 +12,26 @@ class SubDepartmentController {
      */
     static async listAll(req, res) {
         try {
-            const subdepartments = await SubDepartment.findAll();
-            res.json({ subdepartments });
+            const subdepartments = await SubDepartment.findAll({
+                include: [
+                    {
+                        model: Department,
+                        as: "department",
+                        attributes: ['id', 'name']
+                    }
+                ],
+                attributes: ['id', 'name', 'departmentId']
+            });
+
+            // Formateamos para devolver el nombre del departamento directamente en cada subdepartamento
+            const result = subdepartments.map(sd => ({
+                id: sd.id,
+                name: sd.name,
+                departmentId: sd.department.id,
+                departmentName: sd.department.name ?? null,
+            }));
+
+            res.json({ subdepartments: result });
         } catch (error) {
             LoggerController.error('Error listando subdepartamentos: ' + error.message);
             res.status(500).json({ error: error.message });

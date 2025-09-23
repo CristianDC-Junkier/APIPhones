@@ -47,7 +47,7 @@ export default function DashboardSystem() {
             setLoading(true);
             try {
                 const res = await getLogs(token);
-                if (res.success) setLogs(res.data);
+                if (res.success) setLogs(res.data.logs);
             } catch (err) {
                 console.error(err);
             } finally {

@@ -138,6 +138,7 @@ class UserDataController {
      */
     static async getProfile(req, res) {
         try {
+            
             const user = await UserAccount.findByPk(req.user.id, {
                 include: [
                     {
@@ -154,7 +155,7 @@ class UserDataController {
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             res.json({
-                user: {
+                
                     id: user.id,
                     username: user.username,
                     usertype: user.usertype,
@@ -170,7 +171,7 @@ class UserDataController {
                         subdepartmentId: user.userData.subdepartmentId,
                         subdepartmentName: user.userData.subdepartment?.name || null
                     } : null
-                }
+                
             });
 
         } catch (error) {
@@ -263,6 +264,43 @@ class UserDataController {
     static async updateMyPassword(req, res) {
         try {
             const userId = req.user.id;
+            const { newPassword, oldPassword } = req.body;
+
+            if (!newPassword || !oldPassword) {
+                return res.status(400).json({ error: "Contraseñas requeridas" });
+            }
+
+            if (newPassword === oldPassword) {
+                return res.status(400).json({ error: "La contraseña nueva tiene que ser diferente a la actual" });
+            }
+
+            const user = await UserAccount.findByPk(userId);
+            if (user.password != oldPassword) {
+                return res.status(400).json({ error: "La contraseña actual no es correcta" });
+            }
+
+            // Actualizar contraseña
+            user.password = newPassword;
+            user.forcePwdChange = false;
+            await user.save();
+
+            res.json({ id:userId });
+            LoggerController.info(`Usuario ${userId} cambió su contraseña`);
+        } catch (error) {
+            LoggerController.error(`Error actualizando contraseña: ${error.message}`);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+    * Permite al usuario autenticado cambiar su contraseña tras ser marcado.
+    * 
+    * @param {Object} req - req.user contiene el usuario autenticado.
+    * @param {Object} res
+    */
+    static async forcedPasswordChange(req, res) {
+        try {
+            const userId = req.user.id;
             const { newPassword } = req.body;
 
             if (!newPassword) {
@@ -276,7 +314,7 @@ class UserDataController {
             user.forcePwdChange = false;
             await user.save();
 
-            res.json({ id:userId });
+            res.json({ id: userId });
             LoggerController.info(`Usuario ${userId} cambió su contraseña`);
         } catch (error) {
             LoggerController.error(`Error actualizando contraseña: ${error.message}`);

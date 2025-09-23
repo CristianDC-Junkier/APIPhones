@@ -122,9 +122,85 @@ export const markPWDCUser = async (userId, password, token) => {
     }
 }
 
-export const changePassword = async (newPassword, token) => {
+//      MÉTODOS DEL PERFIL
+
+/**
+ * Solicitud de cambio de contraseña para un usuario que ha sido marcado para cambio de contraseña
+ * @param {String} newPassword - Nueva contraseña para el usuario marcado para el cambio de contraseña
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const changePasswordPWD = async (newPassword, token) => {
     try {
-        const res = await api.put(`/user/profile-pass`, newPassword, {
+        const res = await api.put(`/user/profile-pass-PWD`, newPassword, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+}
+
+/**
+ * Solicitud de cambio de contraseña del perfil conectado
+ * @param {String} newPassword - Nueva contraseña para el usuario marcado para el cambio de contraseña
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const changePassword = async (passwords, token) => {
+    try {
+        const res = await api.put(`/user/profile-pass`, passwords, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+}
+
+/**
+ * Solicitud para obtener la información del usuario conectado
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const userGetProfile = async (token) => {
+    try {
+        const res = await api.get('/user/profile', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+}
+
+/**
+ * Solicitud de cambio de nombre de ususario
+ * @param {String} username - Nuevo nombre de ususario
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const changeUsername = async (username, token) => {
+    try {
+        console.log(username);
+        const res = await api.put('/user/profile-username', username, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+}
+
+/**
+ * Solicitud de modificar perfil
+ * @param {String} profile - Nueva información del perfil
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const modifyProfile = async (profile, token) => {
+    try {
+        const res = await api.put('/user/profile-data', profile, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };

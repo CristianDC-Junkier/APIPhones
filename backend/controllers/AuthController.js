@@ -23,7 +23,7 @@ class AuthController {
      */
     static async login(req, res) {
         try {
-            const { username, password } = req.body;
+            const { username, password, remember } = req.body;
 
             if (!username || !password) {
                 return res.status(400).json({ error: "Usuario y contraseña requeridos" });
@@ -48,7 +48,7 @@ class AuthController {
                 return res.status(401).json({ error: "Credenciales incorrectas" });
             }
 
-            const token = generateToken({ id: user.id, username: user.username, usertype: user.usertype });
+            const token = await generateToken({ id: user.id, username: user.username, usertype: user.usertype }, remember);
 
             res.json({
                 token,

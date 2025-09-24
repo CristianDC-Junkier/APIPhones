@@ -15,7 +15,7 @@ const { UserAccount, UserData } = require("../models/Relations");
  * @param {Object} res - Objeto de respuesta de Express.
  * @param {Function} next - Función para pasar al siguiente middleware.
  */
-function adminOnly(req, res, next) {
+async function adminOnly(req, res, next) {
     try {
         const authHeader = req.headers["authorization"];
         if (!authHeader) return res.status(401).json({ success: false, message: "Token requerido" });
@@ -25,7 +25,7 @@ function adminOnly(req, res, next) {
             return res.status(401).json({ success: false, message: "Token requerido" });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || !payload.usertype) {
             return res.status(401).json({ success: false, message: "Token inválido" });
         }
@@ -56,7 +56,7 @@ function adminOnly(req, res, next) {
  * @param {Object} res - Objeto de respuesta de Express.
  * @param {Function} next - Función para pasar al siguiente middleware.
  */
-function notWorker(req, res, next) {
+async function notWorker(req, res, next) {
     try {
         const authHeader = req.headers["authorization"];
         if (!authHeader) {
@@ -68,7 +68,7 @@ function notWorker(req, res, next) {
             return res.status(401).json({ success: false, message: "Token requerido" });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || !payload.usertype) {
             return res.status(401).json({ success: false, message: "Token inválido" });
         }
@@ -97,7 +97,7 @@ function notWorker(req, res, next) {
  * @param {Object} res - Objeto de respuesta de Express.
  * @param {Function} next - Función para pasar al siguiente middleware.
  */
-function isAuthenticated(req, res, next) {
+async function isAuthenticated(req, res, next) {
     try {
         const authHeader = req.headers["authorization"];
         if (!authHeader) return res.status(401).json({ success: false, message: "Token requerido" });
@@ -105,7 +105,7 @@ function isAuthenticated(req, res, next) {
         const token = authHeader.split(" ")[1];
         if (!token) return res.status(401).json({ success: false, message: "Token requerido" });
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || !payload.id) {
             return res.status(401).json({ success: false, message: "Token inválido" });
         }

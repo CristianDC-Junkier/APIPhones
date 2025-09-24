@@ -2,7 +2,7 @@
 const router = express.Router();
 
 const AuthController = require("../controllers/AuthController");
-const { adminOnly, notWorker, canModifyUser } = require("../middlewares/Auth");
+const { notWorker, canModifyUser } = require("../middlewares/Auth");
 
 /**
  * Rutas para gestión de usuarios.

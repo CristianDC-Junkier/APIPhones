@@ -140,7 +140,6 @@ class LoggerController {
         this._writeToFile(formatted);
     }
 
-
     /**
      * Registra un mensaje de error crítico.
      * 

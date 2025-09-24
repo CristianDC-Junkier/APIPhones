@@ -25,7 +25,7 @@ import '../styles/auth/Login.css';
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
+    const [remember, setRemember] = useState(false);
 
     const navigate = useNavigate();
     const { login } = useAuth();
@@ -76,7 +76,7 @@ const Login = () => {
             //await showCaptcha();                                                                          //SOLO DURANTE DESARROLLO
 
             // Hacer login
-            const response = await login({ username, password, rememberMe });
+            const response = await login({ username, password, remember });
 
             if (response.success) {
                 //const user = response.data.user;
@@ -126,11 +126,11 @@ const Login = () => {
                                     <FormGroup check className="mb-0">
                                         <Input
                                             type="checkbox"
-                                            id="rememberMe"
-                                            checked={rememberMe}
-                                            onChange={(e) => setRememberMe(e.target.checked)}
+                                            id="remember"
+                                            checked={remember}
+                                            onChange={(e) => setRemember(e.target.checked)}
                                         />
-                                        <Label for="rememberMe" check className="fw-semibold ms-2">
+                                        <Label for="remember" check className="fw-semibold ms-2">
                                             Recuerdame
                                         </Label>
                                     </FormGroup>

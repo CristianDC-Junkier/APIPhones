@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
     /** 
      * Loguear usuario
      * 
-     * @param {Object} credentials - { username, password, rememberMe }
+     * @param {Object} credentials - { username, password, remember }
      * @return {Object} Resultado del login { success: boolean, data/message }
      */
     const contextLogin = async (credentials) => {
@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }) => {
                 forcePwdChange: result.data.user.forcePwdChange || false,
             };
             setUser(userLog);
-            saveUserWithExpiry(result.data.token, userLog, credentials.rememberMe);
+            saveUserWithExpiry(result.data.token, userLog, credentials.remember);
         }
         else {
             setUser(null);

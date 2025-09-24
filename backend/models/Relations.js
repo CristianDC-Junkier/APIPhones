@@ -5,6 +5,7 @@ const UserAccount = require("./AuthModel");
 const UserData = require("./UserDataModel");
 const Department = require("./DepartmentModel");
 const SubDepartment = require("./SubDepartmentModel");
+const RefreshToken = require("./RefreshTokenModel");
 
 // Relaciones Department ↔ UserData
 Department.hasMany(UserData, {
@@ -56,11 +57,24 @@ UserData.belongsTo(UserAccount, {
     onUpdate: "CASCADE"
 });
 
+// Relación 1:N con UserAccount
+UserAccount.hasMany(RefreshToken, {
+    foreignKey: "userId",
+    as: "refreshTokens"
+});
+RefreshToken.belongsTo(UserAccount, {
+    foreignKey: "userId",
+    as: "user",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE"
+});
+
 // Exportar
 module.exports = {
     sequelize,
     UserAccount,
     UserData,
     Department,
-    SubDepartment
+    SubDepartment,
+    RefreshToken
 };

@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getDepartmentsList, getSubDepartmentsList, createDepartment, createSubDepartment } from "../../services/DepartmentService";
+import { getDepartmentsList, getDepartmentById, getSubDepartmentsList, createDepartment, createSubDepartment } from "../../services/DepartmentService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from "../../components/utils/SpinnerComponent";
@@ -27,6 +27,7 @@ const DashboardDepartment = () => {
     const [subdepartments, setSubdepartments] = useState([]);
     const [currentView, setCurrentView] = useState("departments"); // "departments" | "subdepartments"
     const [search, setSearch] = useState("");
+    const [selectedDepartment, setSelectedDepartment] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
 
@@ -46,50 +47,83 @@ const DashboardDepartment = () => {
         return () => window.removeEventListener("resize", updateRows);
     }, []);
 
-    /** Si el usuario es DEPARTMENT, siempre mostrar subdepartamentos */
-    useEffect(() => {
-        if (currentUser?.usertype === "DEPARTMENT") {
-            setCurrentView("subdepartments");
-        }
-    }, [currentUser]);
-
     /** Carga inicial de datos */
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!token) return;
-            setLoading(true);
-            try {
-                const [deptResp, subResp] = await Promise.all([getDepartmentsList(token), getSubDepartmentsList(token)]);
-                if (deptResp.success) setDepartments(deptResp.data.departments ?? []);
+    const fetchDepartments = async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+            let deptResp, subResp;
+
+            if (currentUser.usertype === "DEPARTMENT") {
+                // solo su departamento y sus subdepartamentos
+                deptResp = await getDepartmentById(token, currentUser.department);
+                subResp = await getSubDepartmentsList(token, currentUser.department);
+
+                if (deptResp.success) {
+                    setDepartments([deptResp.data?.department].filter(Boolean));
+                }
                 if (subResp.success) {
-                    // Filtrar solo subdepartamentos del departamento del usuario si es DEPARTMENT
-                    if (currentUser?.usertype === "DEPARTMENT") {
-                        setSubdepartments(subResp.data?.subdepartments.filter(sd => sd.departmentId === currentUser.departmentId) ?? []);
-                    } else {
-                        setSubdepartments(subResp.data.subdepartments ?? []);
+                    const subs = subResp.data.subdepartments ?? [];
+                    setSubdepartments(subs);
+
+                    // ajustar paginación
+                    const totalPages = Math.ceil(subs.length / rowsPerPage);
+                    if (currentPage > totalPages && totalPages > 0) {
+                        setCurrentPage(totalPages);
                     }
                 }
-            } catch (error) {
-                Swal.fire("Error", "No se pudo obtener los datos", error);
+
+                // forzar vista en subdepartamentos
+                setCurrentView("subdepartments");
+            } else {
+                // admin / superadmin
+                [deptResp, subResp] = await Promise.all([
+                    getDepartmentsList(token),
+                    getSubDepartmentsList(token)
+                ]);
+
+                if (deptResp.success) {
+                    const depts = deptResp.data.departments ?? [];
+                    setDepartments(depts);
+
+                    const totalPages = Math.ceil(depts.length / rowsPerPage);
+                    if (currentPage > totalPages && totalPages > 0) {
+                        setCurrentPage(totalPages);
+                    }
+                }
+
+                if (subResp.success) {
+                    const subs = subResp.data.subdepartments ?? [];
+                    setSubdepartments(subs);
+
+                    const totalPages = Math.ceil(subs.length / rowsPerPage);
+                    if (currentPage > totalPages && totalPages > 0) {
+                        setCurrentPage(totalPages);
+                    }
+                }
             }
-            setLoading(false);
-        };
-        fetchData();
-    }, [token, currentUser, currentView]);
+        } catch (err) {
+            Swal.fire("Error", "No se pudo obtener la lista de departamentos", err);
+        }
+        setLoading(false);
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => {fetchDepartments();}, [token, currentUser, rowsPerPage]);
+
 
 
     /** Crear departamento */
     const handleCreateDepartment = async () => {
         await AddModifyDepartmentComponent({
+            token,
+            currentUser,
             action: "create",
             onConfirm: async (formValues) => {
                 const result = await createDepartment(formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Departamento creado correctamente", "success");
-                    const resp = await getDepartmentsList(token);
-                    if (resp.success) {
-                        setDepartments(resp.data.departments ?? []);
-                    }
+                    await fetchDepartments();
                 } else {
                     Swal.fire("Error", result.error || "No se pudo crear el departamento", "error");
                 }
@@ -100,30 +134,27 @@ const DashboardDepartment = () => {
     /** Crear subdepartamento */
     const handleCreateSubdepartment = async () => {
         await AddModifySubdepartmentComponent({
+            token,
+            currentUser,
             action: "create",
-            departments: currentUser?.usertype === "DEPARTMENT"
-                ? departments.filter(d => d.id === currentUser.departmentId)
-                : departments,
+            departments,
             onConfirm: async (formValues) => {
-                if (currentUser?.usertype === "DEPARTMENT") formValues.departmentId = currentUser.departmentId;
+                if (currentUser.usertype === "DEPARTMENT") {
+                    formValues.departmentId = currentUser.department;
+                }
 
                 const result = await createSubDepartment(formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Subdepartamento creado correctamente", "success");
-                    const resp = await getSubDepartmentsList(token);
-                    if (resp.success) {
-                        if (currentUser?.usertype === "DEPARTMENT") {
-                            setSubdepartments(resp.data?.subdepartments.filter(sd => sd.departmentId === currentUser.departmentId) ?? []);
-                        } else {
-                            setSubdepartments(resp.data.subdepartments ?? []);
-                        }
-                    }
+
+                    await fetchDepartments();
                 } else {
                     Swal.fire("Error", result.error || "No se pudo crear el subdepartamento", "error");
                 }
             }
         });
     };
+
 
     if (loading) return <Spinner />;
 
@@ -152,8 +183,8 @@ const DashboardDepartment = () => {
             </div>   
 
             {/* Tarjetas para cambiar de vista solo para ADMIN/SUPERADMIN */}
-            {currentUser?.usertype !== "DEPARTMENT" && (
-                <Row className="mb-3 mt-1 justify-content-center g-3">
+            <Row className="mb-3 mt-1 justify-content-center g-3">
+                {currentUser?.usertype !== "DEPARTMENT" && (
                     <Col xs={6} sm={4} md={3}>
                         <Card
                             className={`shadow-lg mb-2 border-2 ${currentView === "departments" ? "border-primary" : ""}`}
@@ -166,6 +197,7 @@ const DashboardDepartment = () => {
                             </CardBody>
                         </Card>
                     </Col>
+                    )}
                     <Col xs={6} sm={4} md={3}>
                         <Card
                             className={`shadow-lg mb-2 border-2 ${currentView === "subdepartments" ? "border-primary" : ""}`}
@@ -179,18 +211,38 @@ const DashboardDepartment = () => {
                         </Card>
                     </Col>
                 </Row>
-            )}
+            
 
-            {/* Input de búsqueda alineado a la derecha */}
-            <div className="d-flex justify-content-end mb-3">
+            <div className="d-flex justify-content-end mb-3 gap-2">
+                {/* Select de filtrado por departamento solo si es subdepartamentos y no DEPARTMENT */}
+                {currentView === "subdepartments" && currentUser?.usertype !== "DEPARTMENT" && (
+                    <Input
+                        type="select"
+                        value={selectedDepartment || ""}
+                        onChange={e => setSelectedDepartment(Number(e.target.value))}
+                        style={{ width: "240px" }}
+                    >
+                        <option value="">Todos los departamentos</option>
+                        {departments.map(d => (
+                            <option key={d.id} value={d.id}>
+                                {d.name}
+                            </option>
+                        ))}
+                    </Input>
+                )}
+                {/* Input de búsqueda siempre visible */}
                 <Input
                     type="text"
-                    placeholder={`Buscar por nombre...`}
+                    placeholder="Buscar por nombre..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     style={{ width: "250px" }}
                 />
+
+               
             </div>
+
+
 
             {/* Tabla de departamentos */}
             {currentUser?.usertype !== "DEPARTMENT" && currentView === "departments" && (
@@ -202,16 +254,7 @@ const DashboardDepartment = () => {
                     rowsPerPage={rowsPerPage}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
-                    refreshData={async () => {
-                        const resp = await getDepartmentsList(token);
-                        if (resp.success) {
-                            setDepartments(resp.data.departments ?? []);
-                            const totalPages = Math.ceil(resp.data.departments?.length / rowsPerPage);
-                            if (currentPage > totalPages && totalPages > 0) {
-                                setCurrentPage(totalPages);
-                            }
-                        }
-                    }}
+                    refreshData={fetchDepartments}
                 />
             )}
 
@@ -221,24 +264,12 @@ const DashboardDepartment = () => {
                     token={token}
                     departments={departments ?? []}
                     subdepartments={subdepartments ?? []}
+                    selectedDepartment={selectedDepartment}
                     search={search}
                     rowsPerPage={rowsPerPage}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
-                    refreshData={async () => {
-                        const resp = await getSubDepartmentsList(token);
-                        if (resp.success) {
-                            if (currentUser?.usertype === "DEPARTMENT") {
-                                setSubdepartments(resp.data?.subdepartments.filter(sd => sd.departmentId === currentUser.departmentId) ?? []);
-                            } else {
-                                setSubdepartments(resp.data.subdepartments ?? []);
-                            }
-                            const totalPages = Math.ceil(resp.data.subdepartments?.length / rowsPerPage);
-                            if (currentPage > totalPages && totalPages > 0) {
-                                setCurrentPage(totalPages);
-                            }
-                        }
-                    }}
+                    refreshData={fetchDepartments}
                 />
             )}
         </Container>

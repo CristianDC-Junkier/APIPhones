@@ -4,12 +4,12 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getUserDataList, getUserDataByDepartmentList, createUser } from "../../services/UserService";
+import { getUserDataList, createUser } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
 import TableUserComponent from "../../components/user/TableUserComponent";
-import AddModifyUserComponent from "../../components/user/AddModifyUserComponent";
+import AddModifyUserCo from "../../components/user/AddModifyUserComponent";
 
 const DashboardUser = () => {
     const { user: currentUser, token, logout } = useAuth();
@@ -42,7 +42,8 @@ const DashboardUser = () => {
         try {
             let response;
             if (currentUser.usertype === "DEPARTMENT") {
-                response = await getUserDataByDepartmentList(token);
+                response = await getUserDataList(token, currentUser.department);
+                setSelectedType("Trabajadores");
             } else {
                 response = await getUserDataList(token);
             }
@@ -68,10 +69,11 @@ const DashboardUser = () => {
         setLoading(false);
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { fetchUsers(); }, [token, currentUser, logout, navigate]);
 
     const handleCreateUser = async () => {
-        await AddModifyUserComponent({
+        await AddModifyUserCo({
             token,
             currentUser,
             action: "create",
@@ -129,18 +131,20 @@ const DashboardUser = () => {
                     { label: "Administradores", value: stats.admin, type: "Administradores" },
                     { label: "Trabajadores", value: stats.worker, type: "Trabajadores" }
                 ].map((metric, idx) => (
-                    <Col key={idx} xs={6} sm={4} md={3}>
-                        <Card
-                            className={`shadow-lg mb-2 border-2 ${selectedType === metric.type ? "border-primary" : ""}`}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => { setSelectedType(metric.type); setCurrentPage(1); }}
-                        >
-                            <CardBody className="text-center pt-3">
-                                <CardTitle tag="h6">{metric.label}</CardTitle>
-                                <CardText className="fs-4 fw-bold">{metric.value}</CardText>
-                            </CardBody>
-                        </Card>
-                    </Col>
+                    (currentUser?.usertype !== "DEPARTMENT" || metric.label === "Trabajadores") && (
+                        <Col key={idx} xs={6} sm={4} md={3}>
+                            <Card
+                                className={`shadow-lg mb-2 border-2 ${selectedType === metric.type ? "border-primary" : ""}`}
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => { setSelectedType(metric.type); setCurrentPage(1); }}
+                            >
+                                <CardBody className="text-center pt-3">
+                                    <CardTitle tag="h6">{metric.label}</CardTitle>
+                                    <CardText className="fs-4 fw-bold">{metric.value}</CardText>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    )
                 ))}
             </Row>
 

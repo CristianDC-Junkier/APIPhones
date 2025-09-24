@@ -7,6 +7,8 @@
  * Proporciona métodos para:
  *  - Listar todos los departamentos
  *  - Listar todos los subdepartamentos
+ *  - Recoger todos los subdepartamentos de un departamento
+ *  - Recoger un departamento por ID
  *  - Crear un departamento
  *  - Crear un subdepartamento
  *  - Modificar un departamento
@@ -32,18 +34,47 @@ export const getDepartmentsList = async (token) => {
 };
 
 /**
- * Solicitud para obtener la lista de todos los subdepartamentos existentes
+ * Solicitud para obtener la lista de subdepartamentos
  * @param {String} token - Token del usuario conectado para comprobar autorización
+ * @param {String|null} [departmentId=null] - Id del departamento padre (opcional)
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getSubDepartmentsList = async (token) => {
+export const getSubDepartmentsList = async (token, departmentId = null) => {
     try {
-        const res = await api.get('/subdepartment/', {
+        const endpoint = departmentId
+            ? `/subdepartment/father/${departmentId}`
+            : '/subdepartment/';
+
+        const res = await api.get(endpoint, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        return { success: true, data: res.data };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.response?.data?.error || error.message
+        };
+    }
+};
+
+/**
+ * Solicitud para obtener un departamento por id
+ * @param {String} token - Token del usuario conectado para comprobar autorización
+ * @param {String} id - Id del departamento a consultar
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const getDepartmentById = async (token, id) => {
+    try {
+        const res = await api.get(`/department/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return {
+            success: false,
+            error: error.response?.data?.error || error.message
+        };
     }
 };
 

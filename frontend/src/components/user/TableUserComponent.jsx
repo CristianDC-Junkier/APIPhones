@@ -1,11 +1,12 @@
-﻿import React, { useMemo } from "react";
+﻿import React, { useMemo, useState } from "react";
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
+import { modifyUser, deleteUser } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
-import AddModifyUserComponent from "./AddModifyUserComponent";
-import { modifyUser, deleteUser, markPWDCUser } from "../../services/UserService";
+import AddModifyUser from "./AddModifyUserComponent";
 import Pagination from "../../components/PaginationComponent";
+import PWDAsk from "../../components/user/PWDAskComponent";
 
 const TableUserComponent = ({
     users,
@@ -17,6 +18,9 @@ const TableUserComponent = ({
     refreshData,
     token
 }) => {
+    const [pwdModalOpen, setPwdModalOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+
     const filteredUsers = useMemo(
         () => users.filter(u => u.username.toLowerCase().includes(search.toLowerCase())),
         [users, search]
@@ -56,7 +60,7 @@ const TableUserComponent = ({
     });
 
     const handleModify = async (userItem) => {
-        await AddModifyUserComponent({
+        await AddModifyUser({
             token,
             userItem,
             currentUser,
@@ -74,20 +78,10 @@ const TableUserComponent = ({
         });
     };
 
-    const handlePWDC = async (userItem) => {
-        const { value: password } = await Swal.fire({
-            title: "Cambio de contraseña",
-            input: 'password',
-            inputLabel: `Contraseña temporal para ${userItem.username}`,
-            inputPlaceholder: 'Ingrese contraseña',
-            showCancelButton: true
-        });
-
-        if (!password) return;
-
-        const result = await markPWDCUser(userItem.id, { password }, token);
-        if (result.success) Swal.fire('Éxito', 'Usuario marcado correctamente', 'success');
-        else Swal.fire('Error', result.error || 'No se pudo marcar al usuario', 'error');
+    // Reemplazamos handlePWDC para usar PWDAsk
+    const handlePWDC = (userItem) => {
+        setSelectedUser(userItem);
+        setPwdModalOpen(true);
     };
 
     const handleDelete = async (userItem) => {
@@ -179,6 +173,17 @@ const TableUserComponent = ({
                 <div className="mt-auto" style={{ minHeight: '40px' }}>
                     <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 </div>
+            )}
+
+            {/* Modal PWDAsk */}
+            {selectedUser && (
+                <PWDAsk
+                    isOpen={pwdModalOpen}
+                    toggle={() => setPwdModalOpen(false)}
+                    userItem={selectedUser}
+                    token={token}
+                    onSuccess={refreshData} // refrescar datos tras marcar contraseña
+                />
             )}
         </>
     );

@@ -191,6 +191,9 @@ class AuthController {
             //Comprobar si se a escrito una nueva contraseña
             if (userAccount.password && userAccount.password !== "") {
                 targetUser.password = userAccount.password;
+                targetUser.forcePwdChange = true;
+            } else {
+                return res.status(400).json({ error: "Debe introducir una contraseña válida" });
             }
 
             const targetUserData = await UserData.findOne({ where: { userAccountId: targetUserId } });

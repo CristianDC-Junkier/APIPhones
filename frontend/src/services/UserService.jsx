@@ -31,32 +31,25 @@ export const getUsersList = async (token) => {
 /**
  * Solicitud para obtener la lista de todos los usuario existentes con detalles
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @param {String|null} [department=null] - Departamento por el que filtrar (opcional)
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getUserDataList = async (token) => {
+export const getUserDataList = async (token, department = null) => {
     try {
-        const res = await api.get('/user/list', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return { success: true, data: res.data };
-    } catch (error) {
-        return { success: false, error: error.response?.data?.error };
-    }
-};
+        const endpoint = department
+            ? `/user/list-department?departmentId=${department}`
+            : '/user/list';
 
-/**
- * Solicitud para obtener la lista de todos los usuario existentes por departamento
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
- * @returns {JSON} - Devuelve la información recibida de la llamada
- */
-export const getUserDataByDepartmentList = async (token) => {
-    try {
-        const res = await api.get('/user/list-department', {
+        const res = await api.get(endpoint, {
             headers: { Authorization: `Bearer ${token}` }
         });
+
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return {
+            success: false,
+            error: error.response?.data?.error || error.message
+        };
     }
 };
 

@@ -80,7 +80,6 @@ const Login = () => {
 
             if (response.success) {
                 //const user = response.data.user;
-                console.log("entro")
                 navigate('/home');
 
             } else {

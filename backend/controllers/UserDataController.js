@@ -83,7 +83,7 @@ class UserDataController {
      */
     static async listByDepartment(req, res) {
         try {
-            const { departmentId, requesterId } = req.params;
+            const { departmentId } = req.query;
 
             // Buscar usuarios por departamento, excluyendo al requester
             const usersInDepartment = await UserAccount.findAll({

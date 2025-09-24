@@ -17,11 +17,15 @@ import Pagination from "../../components/PaginationComponent";
  * @param {Function} props.setCurrentPage - Función para cambiar la página
  * @param {Function} props.refreshData - Función para recargar los datos
  */
-const TableSubDepartmentComponent = ({ token, departments, subdepartments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
-    const filteredSubdepartments = useMemo(
-        () => subdepartments.filter(d => d.name.toLowerCase().includes(search.toLowerCase())),
-        [subdepartments, search]
-    );
+const TableSubDepartmentComponent = ({ token, departments, subdepartments, selectedDepartment, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
+    const filteredSubdepartments = useMemo(() => {
+        return subdepartments.filter(sub => {
+            const matchesName = sub.name.toLowerCase().includes(search.toLowerCase());
+            const matchesDept = selectedDepartment ? sub.departmentId === selectedDepartment : true;
+            return matchesName && matchesDept;
+        });
+    }, [subdepartments, search, selectedDepartment]);
+
 
     const totalPages = Math.ceil(filteredSubdepartments.length / rowsPerPage);
     const currentSubdepartments = filteredSubdepartments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -99,19 +103,24 @@ const TableSubDepartmentComponent = ({ token, departments, subdepartments, searc
                     </tr>
                 </thead>
                 <tbody>
-                    {currentSubdepartments.map((sub, idx) => (
-                        <tr key={idx}>
-                            <td className="text-center">{sub.id}</td>
-                            <td className="text-center">{sub.name}</td>
-                            <td className="text-center">{sub.departmentName ?? "-"}</td>
-                            <td className="text-center">
-                                <div className="d-flex justify-content-center flex-wrap">
-                                    <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(sub)}>✏️</Button>
-                                    <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(sub)}>🗑️</Button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
+                    {currentSubdepartments.map((sub, idx) => {
+                        // Buscar el nombre del departamento
+                        const departmentName = departments.find(d => d.id === sub.departmentId)?.name || "-";
+
+                        return (
+                            <tr key={idx}>
+                                <td className="text-center">{sub.id}</td>
+                                <td className="text-center">{sub.name}</td>
+                                <td className="text-center">{departmentName}</td>
+                                <td className="text-center">
+                                    <div className="d-flex justify-content-center flex-wrap">
+                                        <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(sub)}>✏️</Button>
+                                        <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(sub)}>🗑️</Button>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    })}
 
                     {/* Filas vacías */}
                     {rowsPerPage - currentSubdepartments.length > 0 &&

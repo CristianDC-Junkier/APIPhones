@@ -39,6 +39,24 @@ class SubDepartmentController {
     }
 
     /**
+    * Obtener todos los subdepartamentos de un departamento
+    * 
+    * @param {Object} req - req.params.id es el ID del departamento
+    * @param {Object} res
+    * @returns {JSON} - Datos del subdepartamento o error si no existe
+    */
+    static async getByDepartment(req, res) {
+        try {
+            const subdepartments = await SubDepartment.findAll({ where: { departmentId: req.params.id } });
+            if (!subdepartments) return res.status(404).json({ error: 'Subdepartamentos no encontrado' });
+            res.json({ subdepartments });
+        } catch (error) {
+            LoggerController.error('Error obteniendo subdepartamento: ' + error.message);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
      * Obtener un subdepartamento por ID
      * 
      * @param {Object} req - req.params.id es el ID del subdepartamento
@@ -48,7 +66,7 @@ class SubDepartmentController {
     static async getById(req, res) {
         try {
             const subdepartment = await SubDepartment.findOne({ where: { id: req.params.id } });
-            if (!subdepartment) return res.status(404).json({ success: false, message: 'Subdepartamento no encontrado' });
+            if (!subdepartment) return res.status(404).json({ error: 'Subdepartamento no encontrado' });
             res.json({ subdepartment });
         } catch (error) {
             LoggerController.error('Error obteniendo subdepartamento: ' + error.message);

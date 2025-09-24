@@ -96,14 +96,15 @@ export const AuthProvider = ({ children }) => {
     const contextLogin = async (credentials) => {
         const result = await login(credentials);
         if (result.success) {
-            setUser(result.data.user);
             setToken(result.data.token);
             const userLog = {
                 id: result.data.user.id,
                 username: result.data.user.username,
                 usertype: result.data.user.usertype,
+                department: result.data.user.userData.departmentId || null, 
                 forcePwdChange: result.data.user.forcePwdChange || false,
             };
+            setUser(userLog);
             saveUserWithExpiry(result.data.token, userLog, credentials.rememberMe);
         }
         else {

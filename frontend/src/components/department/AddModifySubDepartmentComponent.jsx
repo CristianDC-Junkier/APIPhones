@@ -11,10 +11,15 @@
 const AddModifySubdepartmentComponent = async ({ departments, subdepartment, action = "create", onConfirm }) => {
 
     const departmentOptions = departments
-        .map(d => `<option value="${d.id}" ${subdepartment?.departmentId === d.id ? "selected" : ""}>${d.name}</option>`)
+        .map(d => {
+            const selected = departments.length === 1 || subdepartment?.departmentId === d.id ? "selected" : "";
+            return `<option value="${d.id}" ${selected}>${d.name}</option>`;
+        })
         .join("");
 
-    // Estilos consistentes con inputs grandes y labels a la izquierda
+    // Determinar si el select debe estar deshabilitado
+    const isDisabled = departments.length === 1;
+
     const rowStyle = 'display:flex; flex-direction:row; align-items:center; margin-bottom:1rem; font-size:1rem; width:100%;';
     const labelStyle = 'width:150px; font-weight:bold; text-align:left; margin-right:1rem;';
     const inputStyle = 'flex:1; padding:0.5rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
@@ -27,7 +32,9 @@ const AddModifySubdepartmentComponent = async ({ departments, subdepartment, act
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Departamento <span style="color:red">*</span></label>
-    <select id="swal-department" style="${inputStyle}">${departmentOptions}</select>
+    <select id="swal-department" style="${inputStyle}" ${isDisabled ? "disabled" : ""}>
+      ${departmentOptions}
+    </select>
   </div>
   <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
 </div>
@@ -37,19 +44,22 @@ const AddModifySubdepartmentComponent = async ({ departments, subdepartment, act
         title: action === "create" ? "Crear Subdepartamento" : "Modificar Subdepartamento",
         html,
         focusConfirm: false,
-        width: '600px', 
+        width: '600px',
         innerHeight: '400px',
         showCancelButton: true,
         cancelButtonText: "Cancelar",
         confirmButtonText: action === "create" ? "Crear" : "Aceptar",
         customClass: {
-            popup: 'swal-wide' // opcional si quieres más control vía CSS
+            popup: 'swal-wide' 
         },
         preConfirm: () => {
             const name = document.getElementById("swal-name").value.trim();
+            // Si hay solo un departamento, tomar el primero directamente
             const departmentId = document.getElementById("swal-department").value;
+
             if (!name) { Swal.showValidationMessage("El nombre es obligatorio"); return false; }
             if (!departmentId) { Swal.showValidationMessage("Debe seleccionar un departamento"); return false; }
+
             return { name, departmentId };
         }
     });

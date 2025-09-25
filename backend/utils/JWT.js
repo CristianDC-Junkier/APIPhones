@@ -40,7 +40,7 @@ async function verifyToken(token) {
             // Comprobar si el refresh token está caducado
             const now = new Date();
             if (refresh.expireDate && refresh.expireDate < now) {
-                await RefreshToken.destroy({ where: { id: refresh.id } }); 
+                await RefreshToken.destroy({ where: { id: refresh.id } });
                 throw new Error("Refresh token caducado");
             } else {
                 token = jwt.sign(jwt.decode(token), JWT_SECRET, { expiresIn: '1h' });
@@ -55,4 +55,20 @@ async function verifyToken(token) {
     }
 }
 
-module.exports = { generateToken, verifyToken };
+/**
+ * Retorna el contenido de un token JWT.
+ * 
+ * @param {string} token - Token JWT a decodificar.
+ * @returns {Object} Payload del token.
+ * @throws {Error} Si el token es inválido.
+ */
+async function decodeToken(token) {
+    try {
+        return jwt.decode(token, JWT_SECRET);
+    } catch (err) {
+        throw err;
+    }
+
+}
+
+module.exports = { generateToken, verifyToken, decodeToken };

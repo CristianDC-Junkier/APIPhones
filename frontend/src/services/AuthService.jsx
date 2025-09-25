@@ -17,3 +17,20 @@ export const login = async (credentials) => {
         return { success: false, error: error.response?.data?.error };
     }
 };
+
+
+/**
+ * Solicitud de cierre de sesión
+ * @param {String} token - Token del usuario conectado para comprobar autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const logout = async (token) => {
+    try {
+        const response = await api.get('/logout', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: response.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};

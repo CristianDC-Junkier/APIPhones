@@ -77,7 +77,7 @@ class LoggerController {
     }
 
     /**
-     * Escribe un mensaje de log en el archivo correspondiente al día actual, de forma síncrona.
+     * Escribe un mensaje de log en el archivo correspondiente al día actual.
      * 
      * @param {string} message - Mensaje ya formateado
      * @private

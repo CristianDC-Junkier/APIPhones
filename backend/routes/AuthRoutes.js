@@ -9,6 +9,7 @@ const { notWorker, canModifyUser } = require("../middlewares/Auth");
  *
  * Endpoints:
  * - POST   /login                  → Iniciar sesión y obtener token JWT.
+ * - GET    /logout                 → Cierra sesión y elimina el RefreshToken Asociado.
  * - POST   /                       → Crear un nuevo usuario (solo departamento o superior).
  * - PUT    /:id                    → Actualizar datos de un usuario por ID (solo departamento o superior).
  * - DELETE /:id                    → Eliminar un usuario por ID (solo departamento o superior).
@@ -22,6 +23,7 @@ const { notWorker, canModifyUser } = require("../middlewares/Auth");
  */
 
 router.post("/login", AuthController.login);
+router.get("/logout", AuthController.logout);
 
 router.post("/", notWorker, AuthController.create);
 router.put("/:id", notWorker, canModifyUser, AuthController.update);

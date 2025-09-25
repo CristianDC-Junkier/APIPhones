@@ -1,6 +1,6 @@
 ﻿/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from 'react';
-import { login } from '../services/AuthService';
+import { login, logout } from '../services/AuthService';
 import CryptoJS from 'crypto-js';
 
 export const AuthContext = createContext();
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }) => {
                 id: result.data.user.id,
                 username: result.data.user.username,
                 usertype: result.data.user.usertype,
-                department: result.data.user.userData.departmentId || null, 
+                department: result.data.user.userData.departmentId || null,
                 forcePwdChange: result.data.user.forcePwdChange || false,
             };
             setUser(userLog);
@@ -150,6 +150,7 @@ export const AuthProvider = ({ children }) => {
      * Cerrar sesión
      */
     const contextLogout = async () => {
+        await logout(token);
         setUser(null);
         setToken(null);
         sessionStorage.removeItem("user");

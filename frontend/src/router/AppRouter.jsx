@@ -8,21 +8,21 @@ import PublicRoute from '../components/redirect/PublicRoute';
 import PrivateRoute from '../components/redirect/PrivateRoute';
 import RoleRoute from '../components/redirect/RoleRoute';
 
-
 import LoginPage from '../pages/Login';
 import HomePage from '../pages/Home';
+import WorkerList from '../pages/lists/WorkerList';
 
 import NotFoundPage from '../pages/NotFound';
-import AccessDenied from '../pages/AccessDenied';
+import AccessDeniedPage from '../pages/AccessDenied';
 
-import DashBoardUser from '../pages/users/DashboardUser';
-import DashboardSystem from '../pages/system/DashboardSystem';
-import DashboardDepartment from '../pages/department/DashboardDepartment';
-import UserProfile from '../pages/users/UserProfile';
+import DashBoardUserPage from '../pages/users/DashboardUser';
+import DashboardSystemPage from '../pages/system/DashboardSystem';
+import DashboardDepartmentPage from '../pages/department/DashboardDepartment';
+import UserProfilePage from '../pages/users/UserProfile';
 
-import Privacity from '../pages/politics/Privacity';
-import Cookies from '../pages/politics/Cookies';
-import Compromise from '../pages/politics/Compromise';
+import PrivacityPage from '../pages/politics/Privacity';
+import CookiesPage from '../pages/politics/Cookies';
+import CompromisePage from '../pages/politics/Compromise';
 
 /**
  * Encargado de definir las rutas de acceso a las distintas páginas y
@@ -34,11 +34,12 @@ const AppRouter = () => {
         <Routes>
             <Route element={<MainLayout />}>
                 <Route path="/" element={<Navigate to="/login" replace />} />
-                <Route path="/accessdenied" element={<AccessDenied />} />
+                <Route path="/accessdenied" element={<AccessDeniedPage />} />
 
-                <Route path="/privacity-politic" element={<Privacity />} />
-                <Route path="/cookies-politic" element={<Cookies />} />
-                <Route path="/data-compromise" element={<Compromise />} />
+                <Route path="/privacity-politic" element={<PrivacityPage />} />
+                <Route path="/cookies-politic" element={<CookiesPage />} />
+                <Route path="/data-compromise" element={<CompromisePage />} />
+
                 {/* Rutas publicas */}
                 <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
 
@@ -46,14 +47,15 @@ const AppRouter = () => {
                 <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
 
                 {/* Rutas privadas por rol */}
-                <Route path="/users" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN', 'DEPARTMENT']}><DashBoardUser /></RoleRoute>} />
-                <Route path="/departments" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN','DEPARTMENT']}><DashboardDepartment /></RoleRoute>} />
-                <Route path="/logs" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardSystem /></RoleRoute>} />
-                <Route path="/profile" element={<RoleRoute allowedRoles={['WORKER','DEPARTMENT']}><UserProfile /></RoleRoute>} />
+                <Route path="/users" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN', 'DEPARTMENT']}><DashBoardUserPage /></RoleRoute>} />
+                <Route path="/departments" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN', 'DEPARTMENT']}><DashboardDepartmentPage /></RoleRoute>} />
+                <Route path="/logs" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardSystemPage /></RoleRoute>} />
+                <Route path="/profile" element={<RoleRoute allowedRoles={['WORKER', 'DEPARTMENT']}><UserProfilePage /></RoleRoute>} />
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
             <Route element={<ExternalLayout />}>
+                <Route path="/wl" element={<WorkerList />} />
             </Route>
 
         </Routes>

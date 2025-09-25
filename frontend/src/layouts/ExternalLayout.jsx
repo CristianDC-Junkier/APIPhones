@@ -1,5 +1,7 @@
 ﻿import React from 'react';
 import { Outlet } from 'react-router-dom';
+import Footer from '../components/FooterComponent';
+import BannerCookies from '../components/utils/BannerCookiesComponent';
 import background from '../../src/assets/background.jpg';
 
 /**
@@ -29,6 +31,10 @@ const ExternalLayout = () => (
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
             <Outlet /> {/* Aquí se renderizan las rutas hijas */}
         </div>
+        {/* Footer de la página */}
+        <Footer />
+        {/* Banner de cookies */}
+        <BannerCookies />
     </div>
 );
 

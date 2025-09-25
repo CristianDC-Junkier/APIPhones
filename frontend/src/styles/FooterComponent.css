@@ -1,0 +1,23 @@
+﻿/* Hover del logo: se ilumina */
+.footer-logo img:hover {
+    filter: brightness(1.5);
+    transition: filter 0.3s ease;
+}
+
+/* Hover de los enlaces: se ilumina dorado */
+.footer-links a {
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #ffc107; /* dorado */
+    text-shadow: 0 0 5px #ffc107; /* efecto glow suave */
+    text-decoration: none;
+}
+
+    /* Enlace activo: destacado */
+.footer-links a.active-link {
+    color: #ffeb3b; /* amarillo */
+    font-weight: 600;
+    text-shadow: 0 0 5px #ffeb3b;
+}

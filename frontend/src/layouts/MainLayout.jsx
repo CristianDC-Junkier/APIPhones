@@ -2,6 +2,7 @@
 import { Container } from 'reactstrap';
 import { Outlet } from 'react-router-dom';
 import Footer from '../components/FooterComponent';
+import BannerCookies from '../components/utils/BannerCookiesComponent';
 import background from '../../src/assets/background.jpg';
 
 /**
@@ -39,6 +40,8 @@ const MainLayout = () => (
 
         {/* Footer de la página */}
         <Footer />
+        {/* Banner de cookies */}
+        <BannerCookies />
     </div>
 );
 

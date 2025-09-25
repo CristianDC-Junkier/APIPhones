@@ -20,6 +20,10 @@ import DashboardSystem from '../pages/system/DashboardSystem';
 import DashboardDepartment from '../pages/department/DashboardDepartment';
 import UserProfile from '../pages/users/UserProfile';
 
+import Privacity from '../pages/politics/Privacity';
+import Cookies from '../pages/politics/Cookies';
+import Compromise from '../pages/politics/Compromise';
+
 /**
  * Encargado de definir las rutas de acceso a las distintas páginas y
  * limitar su acceso dependiendo de los permisos del usuario
@@ -31,7 +35,10 @@ const AppRouter = () => {
             <Route element={<MainLayout />}>
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/accessdenied" element={<AccessDenied />} />
-                
+
+                <Route path="/privacity-politic" element={<Privacity />} />
+                <Route path="/cookies-politic" element={<Cookies />} />
+                <Route path="/data-compromise" element={<Compromise />} />
                 {/* Rutas publicas */}
                 <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
 

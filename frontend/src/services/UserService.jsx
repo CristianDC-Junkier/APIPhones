@@ -104,6 +104,8 @@ export const deleteUser = async (userId, token) => {
     }
 };
 
+
+
 /**
  * Solicitud para marcar a un usuario para forzar un cambio de contraseña
  * @param {Object} userId - el ID del usuario que se quiere va a marcar
@@ -208,4 +210,21 @@ export const modifyProfile = async (profile, token) => {
         return { success: false, error: error.response?.data?.error };
     }
 }
+
+/**
+ * Solicitud de eliminación de un usuario
+ * @param {Object} userId - el ID del usuario que se quiere eliminar
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const deleteSelf = async (token) => {
+    try {
+        const res = await api.delete(`/user/profile-del`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};
 

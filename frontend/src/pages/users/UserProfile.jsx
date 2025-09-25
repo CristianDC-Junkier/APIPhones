@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button } from "reactstrap";
 import Spinner from '../../components/utils/SpinnerComponent';
 import { useAuth } from "../../hooks/useAuth";
-import { deleteUser, userGetProfile, changeUsername, modifyProfile, changePassword } from "../../services/UserService";
+import { deleteSelf, userGetProfile, changeUsername, modifyProfile, changePassword } from "../../services/UserService";
 import BackButton from "../../components/utils/BackButtonComponent";
 import ModifyProfileComponent from '../../components/user/ModifyProfileComponent';
 
@@ -128,8 +128,8 @@ const UserProfile = () => {
         }
     }
 
-    const handleDelete = () => {
-        Swal.fire({
+    const handleDelete = async () => {
+        const swal = await Swal.fire({
             title: "Eliminar Ususario",
             html: "¿Está seguro de que quiere eliminar su usuario?<br>Esta acción no se podrá deshacer",
             icon: 'warning',
@@ -138,17 +138,19 @@ const UserProfile = () => {
             showCancelButton: 'true',
             confirmButtonText: "Aceptar",
             cancelButtonText: "Cancelar"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                let response = deleteUser(profile.id, token);
-                if (response.succes) {
-                    logout();
-                    navigate('/');
-                } else {
-                    Swal.fire("Error", result.error || "No se eliminar el usuario", "error");
-                }
-            }
         });
+
+        if (swal.isConfirmed) {
+            let response = await deleteSelf(token);
+            if (response.success) {
+                Swal.fire("Éxito", "Cuenta eliminada correctamente. Cerrando Sesión", "success");
+                logout();
+                navigate('/');
+            } else {
+                Swal.fire("Error", response.error || "No se eliminar el usuario", "error");
+            }
+        } else return;
+       
     };
 
     if (loading) return <Spinner />;
@@ -222,7 +224,7 @@ const UserProfile = () => {
                                 <p><strong>{"Nombre: "}</strong>{profile.userData.name}</p>
                             </Col>
                             <Col md="6">
-                                <p><strong>{"Email: "}</strong>{profile.userData.email + "aaaaaaaaaaa"}</p>
+                                <p><strong>{"Email: "}</strong>{profile.userData.email}</p>
                             </Col>
                         </Row>
 

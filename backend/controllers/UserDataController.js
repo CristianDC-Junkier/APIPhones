@@ -322,6 +322,28 @@ class UserDataController {
         }
     }
 
+    /**
+      Permite al usuario autenticado cambiar su contraseña tras ser marcado.
+    * 
+    * @param {Object} req - req.user contiene el usuario autenticado.
+    * @param {Object} res.
+     */
+    static async deleteSelf(req, res) {
+        try {
+            const userid = req.user.id;
+
+            const user = await UserAccount.findByPk(userid);
+            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+            await user.destroy();
+
+            LoggerController.info(`Usuario ${req.user.username} se elimino a si mismo`);
+            res.json({ id: userid });
+        } catch (error) {
+            LoggerController.error('Error en la eliminación de usuario: ' + error.message);
+            res.status(500).json({ error: error.message });
+        }
+    }
 
     /**
     * Recupera los datos completos de un usuario por su ID.

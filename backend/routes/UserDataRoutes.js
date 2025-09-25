@@ -34,8 +34,10 @@ router.get("/profile", isAuthenticated, UserDataController.getProfile);
 router.put("/profile-data", isAuthenticated, UserDataController.updateMyProfileData);
 router.put("/profile-username", isAuthenticated, UserDataController.updateMyUsername);
 router.put("/profile-pass", isAuthenticated, UserDataController.updateMyPassword);
+router.put("/profile-pass-PWD", isAuthenticated, UserDataController.forcedPasswordChange);
+router.delete("/profile-del", isAuthenticated, UserDataController.deleteSelf);
 
 router.get("/:id", notWorker, UserDataController.getOne);//NO SE SI SE USARÁ
-router.put("/:id", notWorker, canModifyUser, UserDataController.update);//NO SE SI SE USARÁ
+router.put("/:id", isAuthenticated, UserDataController.update);//NO SE SI SE USARÁ
 
 module.exports = router;

@@ -1,6 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Input, InputGroup, InputGroupText } from 'reactstrap';
-import { changePassword } from '../../services/UserService';
+import { changePasswordPWD } from '../../services/UserService';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,7 +38,7 @@ const PWDChangeModal = () => {
         }
 
         setLoading(true);
-        const result = await changePassword({ newPassword: password }, token);
+        const result = await changePasswordPWD({ newPassword: password }, token);
         setLoading(false);
 
         if (result.success) {

@@ -1,4 +1,4 @@
-﻿const { UserAccount, UserData, Department, SubDepartment, RefreshToken } = require("../models/Relations");
+﻿const { UserAccount, UserData, Department, SubDepartment, RefreshToken, UpdateModel } = require("../models/Relations");
 
 const LoggerController = require("../controllers/LoggerController");
 const { generateToken, decodeToken } = require("../utils/JWT");
@@ -125,7 +125,23 @@ class AuthController {
         }
     }
 
+    /**
+    * Recoge la fecha y versión del listado de usuarios.
+    * 
+    * @param {Object} req - Objeto de petición de Express.
+    * @param {Object} res - Objeto de respuesta de Express.
+    */
+    static async date(req, res) {
+        try {
+            let updateRow = await UpdateModel.findByPk(1);
 
+            return res.json({ date: updateRow.date });
+
+        } catch (error) {
+            LoggerController.error("Error recuperando la fecha del listin: " + error.message);
+            res.status(500).json({ error: "Error recuperando la fecha del listin" });
+        }
+    }
 
     /**
     * Crea un nuevo usuario junto con su UserData asociado.

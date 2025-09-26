@@ -28,6 +28,7 @@ const estimateHeight = (dep) =>
 const WorkerList = () => {
     const listRef = useRef();
     const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
     const lastUpdate = "25/09/2025";
     let idCounter = 1;
 
@@ -51,106 +52,122 @@ const WorkerList = () => {
         })),
     }));
 
-    // Distribución vertical-first, exceso a la izquierda, lista invertida
+    // Distribución vertical-first
     const colCount = 3;
     const columns = Array.from({ length: colCount }, () => []);
     const heights = Array(colCount).fill(0);
-
     const totalHeight = departamentos.reduce((sum, d) => sum + estimateHeight(d), 0);
     const targetHeight = totalHeight / colCount;
 
-    // Iterar desde el final de la lista
     [...departamentos].reverse().forEach((dep) => {
         const h = estimateHeight(dep);
-
-        // Encuentra la última columna posible de derecha a izquierda
         let colIdx = colCount - 1;
-        while (colIdx > 0 && heights[colIdx] + h > targetHeight) {
-            colIdx--;
-        }
-
+        while (colIdx > 0 && heights[colIdx] + h > targetHeight) colIdx--;
         columns[colIdx].push(dep);
         heights[colIdx] += h;
     });
 
-    // Para volver a tener los departamentos en orden original dentro de cada columna
     columns.forEach((col, idx) => columns[idx] = col.reverse());
 
-    // Función para generar PDF
-    const exportPDF = async () => {
+    // Filtrar columnas según búsqueda
+    const filteredColumns = columns.map(col =>
+        col.filter(dep => dep.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
+    const exportPDF = async (showEmails = false) => {
         setLoading(true);
         try {
             const pdf = new jsPDF("p", "mm", "a4");
             const pageWidth = pdf.internal.pageSize.getWidth();
             const pageHeight = pdf.internal.pageSize.getHeight();
-            const padding = 10;
+            const padding = 10; 
             const columnGap = 2;
-            const columnWidth = (pageWidth - padding * 2 - columnGap * (colCount - 1)) / colCount;
+            const columnWidth =
+                (pageWidth - padding * 2 - columnGap * (colCount - 1)) / colCount;
 
-            // Contenedor temporal invisible
+            const titleMargin = 8; // margen extra entre título y primeros departamentos
+            // Contenedor temporal
             const tempDiv = document.createElement("div");
             tempDiv.style.position = "absolute";
             tempDiv.style.left = "-9999px";
             tempDiv.style.width = listRef.current.offsetWidth + "px";
             document.body.appendChild(tempDiv);
 
-            // Clonar contenido original
             const clone = listRef.current.cloneNode(true);
-            clone.querySelectorAll(".pdf-hide").forEach(el => el.remove());
-            clone.querySelectorAll(".collapse").forEach(c => {
-                c.classList.add("show");
-                c.style.height = "auto";
-            });
+            if (!showEmails) clone.querySelectorAll(".email").forEach(el => el.remove());
             tempDiv.appendChild(clone);
 
             const columnElements = clone.querySelectorAll(".row > .col-md-4");
-            const colHeights = Array(colCount).fill(padding);
 
-            // Solo título en la primera página
-            pdf.setFontSize(14);
-            pdf.setFont("helvetica", "bold");
-            pdf.text(
-                `Ayuntamiento de Almonte - Listín Telefónico - Última Actualización: ${lastUpdate}`,
-                pageWidth / 2,
-                padding,
-                { align: "center" }
-            );
-            const titleOffset = 10;
-            colHeights.fill(padding + titleOffset);
+            // Dibujar título solo en primera página
+            let isFirstPage = true;
+            const drawTitle = () => {
+                pdf.setFont("trebuchet", "normal");
+                pdf.setFontSize(14);
+                pdf.text(
+                    `Ayuntamiento de Almonte - Listín Telefónico - Última Actualización: ${lastUpdate}`,
+                    pageWidth / 2,
+                    padding,
+                    { align: "center" }
+                );
+                if (isFirstPage) isFirstPage = false;
+            };
+            drawTitle();
 
-            // Número máximo de filas entre columnas
-            const maxRows = Math.max(...Array.from(columnElements).map(col => col.children.length));
+            // Inicializar offsets por columna, solo con margen entre título y primeros departamentos
+            const yOffsets = Array(colCount).fill(padding + titleMargin);
 
-            for (let rowIdx = 0; rowIdx < maxRows; rowIdx++) {
-                for (let colIdx = 0; colIdx < colCount; colIdx++) {
-                    const col = columnElements[colIdx];
-                    const dep = col.children[rowIdx];
-                    if (!dep) continue;
-
-                    // html2canvas con escala más realista
+            // Convertir cada departamento a imagen primero
+            const columnsImages = [];
+            for (let colIdx = 0; colIdx < colCount; colIdx++) {
+                const col = columnElements[colIdx];
+                const depImgs = [];
+                for (let dep of col.children) {
                     const canvas = await html2canvas(dep, {
                         scale: window.devicePixelRatio,
                         backgroundColor: "#ffffff",
                         useCORS: true,
                         width: dep.scrollWidth,
-                        height: dep.scrollHeight,
+                        height: dep.scrollHeight + 10,
                     });
-
-
                     const imgData = canvas.toDataURL("image/png");
                     const imgHeight = (canvas.height * columnWidth) / canvas.width;
+                    depImgs.push({ imgData, imgHeight });
+                }
+                columnsImages.push(depImgs);
+            }
 
-                    // Saltar página si se supera altura disponible
-                    if (colHeights[colIdx] + imgHeight > pageHeight - padding) {
-                        pdf.addPage();
-                        colHeights.fill(padding); // nueva página sin título extra
-                    }
+            // Dibujar departamentos
+            let hasContent = true;
+            while (hasContent) {
+                hasContent = false;
+
+                const rowImages = columnsImages.map(colImgs => colImgs.shift() || null);
+                if (rowImages.some(img => img)) hasContent = true;
+                if (!hasContent) break;
+
+                // Calcular altura máxima de esta fila 
+                const rowHeight = Math.max(...rowImages.map(img => (img ? img.imgHeight : 0)));
+
+                // Comprobar si cabe en la página
+                if (Math.max(...yOffsets) + rowHeight > pageHeight + padding) {
+                    pdf.addPage();
+                    for (let i = 0; i < colCount; i++) yOffsets[i] = padding ; 
+                }
+
+                // Dibujar la fila
+                for (let colIdx = 0; colIdx < colCount; colIdx++) {
+                    const img = rowImages[colIdx];
+                    if (!img) continue;
 
                     const x = padding + colIdx * (columnWidth + columnGap);
-                    const y = colHeights[colIdx];
-                    pdf.addImage(imgData, "PNG", x, y, columnWidth, imgHeight);
+                    const y = yOffsets[colIdx];
 
-                    colHeights[colIdx] += imgHeight + 5;
+                    // Dibujar imagen con padding interno
+                    pdf.addImage(img.imgData, "PNG", x , y , columnWidth, img.imgHeight);
+
+                    // Avanzar offset por la altura real ocupada
+                    yOffsets[colIdx] += img.imgHeight;
                 }
             }
 
@@ -160,7 +177,7 @@ const WorkerList = () => {
             Swal.fire({
                 icon: "success",
                 title: "PDF generado",
-                text: "Se ha exportado la sección de departamentos con columnas equilibradas y título solo en la primera página.",
+                text: `La lista teléfonica se ha exportado correctamente a descargas.`,
                 confirmButtonText: "Aceptar",
             });
         } catch (error) {
@@ -177,6 +194,7 @@ const WorkerList = () => {
     };
 
 
+
     return (
         <div className="container-fluid my-4">
             <div style={{ position: "absolute", top: "10px", left: "10px" }}>
@@ -189,22 +207,47 @@ const WorkerList = () => {
                 </h2>
             </div>
 
-            <div className="d-flex justify-content-end mb-2" style={{ marginRight: "40px" }}>
-                <input>
-                </input>
+            {/* Buscador y botón exportar */}
+            <div className="d-flex justify-content-between mb-2">
+                {/* Input a la izquierda */}
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Buscar departamento..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ width: "200px", marginLeft: "26px", }}
+                />
+
+                {/* Botón a la derecha */}
                 <Button
                     color="secondary"
-                    onClick={exportPDF}
                     disabled={loading}
-                    style={{ fontWeight: 500, fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "5px" }}
+                    style={{ fontWeight: 500, fontSize: "0.9rem", display: "flex", alignItems: "center", marginRight: "28px", gap: "5px" }}
+                    onClick={async (e) => {
+                        e.preventDefault();
+
+                        setSearchTerm("");
+
+                        const { isConfirmed } = await Swal.fire({
+                            title: 'Exportar correos?',
+                            text: '¿Deseas incluir los correos en el PDF?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Sí, incluir correos',
+                            cancelButtonText: 'No, excluir correos'
+                        });
+                        exportPDF(isConfirmed);
+                    }}
                 >
                     {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
                     {loading ? " Generando..." : " Exportar a PDF"}
                 </Button>
             </div>
 
+
             <div ref={listRef} className="row mx-3">
-                {columns.map((col, colIdx) => (
+                {filteredColumns.map((col, colIdx) => (
                     <Col key={colIdx} xs="12" md="4" className={colIdx < colCount - 1 ? "pe-1" : ""}>
                         {col.map((dep, depIdx) => (
                             <PhoneDepartmentComponent

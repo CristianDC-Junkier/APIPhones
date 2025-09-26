@@ -6,6 +6,7 @@ const UserData = require("./UserDataModel");
 const Department = require("./DepartmentModel");
 const SubDepartment = require("./SubDepartmentModel");
 const RefreshToken = require("./RefreshTokenModel");
+const UpdateModel = require("./UpdateModel");
 
 // Relaciones Department ↔ UserData
 Department.hasMany(UserData, {
@@ -76,5 +77,6 @@ module.exports = {
     UserData,
     Department,
     SubDepartment,
-    RefreshToken
+    RefreshToken,
+    UpdateModel
 };

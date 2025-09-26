@@ -34,3 +34,17 @@ export const logout = async (token) => {
         return { success: false, error: error.response?.data?.error };
     }
 };
+
+
+/**
+ * Solicitud de la fecha del listin
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const date = async () => {
+    try {
+        const response = await api.get('/date');
+        return { success: true, data: response.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};

@@ -82,7 +82,7 @@ const DepartamentoComponent = ({
                                             onClick={() => toggleSubDep(idx)}
                                         >
                                             <FontAwesomeIcon
-                                                icon={openDep ? faChevronDown : faChevronRight}
+                                                icon={openSubDeps[idx] ? faChevronDown : faChevronRight} // ← corregido
                                                 className="pdf-hide arrow-icon"
                                                 style={{ fontSize: "0.8rem", marginRight: "6px" }}
                                             />

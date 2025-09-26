@@ -1,5 +1,5 @@
 ﻿import React, { useRef, useState } from "react";
-import { Row, Col, Button, Spinner } from "reactstrap";
+import { Col, Button, Spinner } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
@@ -9,119 +9,158 @@ import html2canvas from "html2canvas";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+// Funciones auxiliares
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+const randomName = () => {
+    const firstNames = ["Juan", "María", "Pedro", "Lucía", "Carlos", "Sofía", "Miguel", "Ana", "Luis", "Isabel"];
+    const lastNames = ["García", "Rodríguez", "López", "Martínez", "Hernández", "Pérez", "Sánchez", "Ramírez"];
+    return `${firstNames[randomInt(0, firstNames.length - 1)]} ${lastNames[randomInt(0, lastNames.length - 1)]}`;
+};
+const randomDeptName = (idCounter) => {
+    const types = ["Administración", "Finanzas", "Servicios", "Recursos Humanos", "Tecnología", "Operaciones"];
+    return `${types[randomInt(0, types.length - 1)]} ${idCounter}`;
+};
+
+// Función para estimar "altura" de un departamento
+const estimateHeight = (dep) =>
+    dep.trabajadores.length + dep.subdepartamentos.reduce((acc, sd) => acc + sd.trabajadores.length + 1, 1);
+
 const WorkerList = () => {
     const listRef = useRef();
     const [loading, setLoading] = useState(false);
     const lastUpdate = "25/09/2025";
+    let idCounter = 1;
 
-    const generateNumber = () =>
-        Math.floor(100000000 + Math.random() * 900000000).toString();
-    const generateExtension = () =>
-        Math.floor(10000 + Math.random() * 90000).toString();
-
-    const departamentos = Array.from({ length: 20 }, (_, i) => ({
-        nombre: `DEPARTAMENTO ${i + 1}`,
-        trabajadores: Array.from({ length: 3 }, () => ({
-            numero: generateNumber(),
-            extension: generateExtension(),
-            nombre: "USUARIO PRUEBA",
-            email: "usuario@ejemplo.com",
+    // Generar departamentos aleatorios
+    const departamentos = Array.from({ length: randomInt(15, 25) }, () => ({
+        nombre: randomDeptName(idCounter++),
+        trabajadores: Array.from({ length: randomInt(1, 5) }, () => ({
+            numero: (Math.floor(100000000 + Math.random() * 900000000)).toString(),
+            extension: (Math.floor(10000 + Math.random() * 90000)).toString(),
+            nombre: randomName(),
+            email: `${Math.random().toString(36).substring(2, 8)}@ejemplo.com`,
         })),
-        subdepartamentos: [
-            {
-                nombre: `SUBDEP ${i + 1}-A`,
-                trabajadores: Array.from({ length: 2 }, () => ({
-                    numero: generateNumber(),
-                    extension: generateExtension(),
-                    nombre: "USUARIO PRUEBA",
-                    email: "usuario@ejemplo.com",
-                })),
-            },
-            {
-                nombre: `SUBDEP ${i + 1}-B`,
-                trabajadores: Array.from({ length: 2 }, () => ({
-                    numero: generateNumber(),
-                    extension: generateExtension(),
-                    nombre: "USUARIO PRUEBA",
-                    email: "usuario@ejemplo.com",
-                })),
-            },
-        ],
+        subdepartamentos: Array.from({ length: randomInt(1, 4) }, (_, idx) => ({
+            nombre: `Subdep ${idx + 1}`,
+            trabajadores: Array.from({ length: randomInt(1, 3) }, () => ({
+                numero: (Math.floor(100000000 + Math.random() * 900000000)).toString(),
+                extension: (Math.floor(10000 + Math.random() * 90000)).toString(),
+                nombre: randomName(),
+                email: `${Math.random().toString(36).substring(2, 8)}@ejemplo.com`,
+            })),
+        })),
     }));
 
+    // Distribución vertical-first, exceso a la izquierda, lista invertida
+    const colCount = 3;
+    const columns = Array.from({ length: colCount }, () => []);
+    const heights = Array(colCount).fill(0);
+
+    const totalHeight = departamentos.reduce((sum, d) => sum + estimateHeight(d), 0);
+    const targetHeight = totalHeight / colCount;
+
+    // Iterar desde el final de la lista
+    [...departamentos].reverse().forEach((dep) => {
+        const h = estimateHeight(dep);
+
+        // Encuentra la última columna posible de derecha a izquierda
+        let colIdx = colCount - 1;
+        while (colIdx > 0 && heights[colIdx] + h > targetHeight) {
+            colIdx--;
+        }
+
+        columns[colIdx].push(dep);
+        heights[colIdx] += h;
+    });
+
+    // Para volver a tener los departamentos en orden original dentro de cada columna
+    columns.forEach((col, idx) => columns[idx] = col.reverse());
+
+    // Función para generar PDF
     const exportPDF = async () => {
         setLoading(true);
         try {
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const padding = 10;
+            const columnGap = 2;
+            const columnWidth = (pageWidth - padding * 2 - columnGap * (colCount - 1)) / colCount;
+
             // Contenedor temporal invisible
             const tempDiv = document.createElement("div");
             tempDiv.style.position = "absolute";
             tempDiv.style.left = "-9999px";
+            tempDiv.style.width = listRef.current.offsetWidth + "px";
             document.body.appendChild(tempDiv);
 
-            // Clonar contenido
+            // Clonar contenido original
             const clone = listRef.current.cloneNode(true);
-
-            // Reorganizar columnas a 2 en lugar de 3
-            const allDeps = [];
-            clone.querySelectorAll(".col-md-4").forEach(col => {
-                Array.from(col.children).forEach(dep => allDeps.push(dep));
+            clone.querySelectorAll(".pdf-hide").forEach(el => el.remove());
+            clone.querySelectorAll(".collapse").forEach(c => {
+                c.classList.add("show");
+                c.style.height = "auto";
             });
-            clone.innerHTML = ""; // vaciar
-            const newRow = document.createElement("div");
-            newRow.className = "row";
-            clone.appendChild(newRow);
-
-            const col1 = document.createElement("div");
-            col1.className = "col-6";
-            const col2 = document.createElement("div");
-            col2.className = "col-6";
-
-            allDeps.forEach((dep, idx) => {
-                if (idx % 2 === 0) col1.appendChild(dep);
-                else col2.appendChild(dep);
-            });
-
-            newRow.appendChild(col1);
-            newRow.appendChild(col2);
-
             tempDiv.appendChild(clone);
 
-            // Quitar flechas
-            clone.querySelectorAll(".pdf-hide").forEach(el => el.remove());
+            const columnElements = clone.querySelectorAll(".row > .col-md-4");
+            const colHeights = Array(colCount).fill(padding);
 
-            // Encabezado
-            const header = document.createElement("div");
-            header.style.textAlign = "center";
-            header.style.marginBottom = "10px";
-            header.style.fontWeight = "bold";
-            header.style.fontSize = "1.5rem";
-            header.innerText = `Ayuntamiento de Almonte - Listín Telefónico - Fecha de actualización: ${lastUpdate}`;
-            clone.insertBefore(header, clone.firstChild);
+            // Solo título en la primera página
+            pdf.setFontSize(14);
+            pdf.setFont("helvetica", "bold");
+            pdf.text(
+                `Ayuntamiento de Almonte - Listín Telefónico - Última Actualización: ${lastUpdate}`,
+                pageWidth / 2,
+                padding,
+                { align: "center" }
+            );
+            const titleOffset = 10;
+            colHeights.fill(padding + titleOffset);
 
-            // Canvas
-            const canvas = await html2canvas(clone, { scale: 4, backgroundColor: "#ffffff" });
-            const imgData = canvas.toDataURL("image/png");
+            // Número máximo de filas entre columnas
+            const maxRows = Math.max(...Array.from(columnElements).map(col => col.children.length));
 
-            const pdf = new jsPDF("p", "mm", "a4");
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            for (let rowIdx = 0; rowIdx < maxRows; rowIdx++) {
+                for (let colIdx = 0; colIdx < colCount; colIdx++) {
+                    const col = columnElements[colIdx];
+                    const dep = col.children[rowIdx];
+                    if (!dep) continue;
 
-            let position = 0;
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            while (position < pdfHeight) {
-                const h = position + pageHeight > pdfHeight ? pdfHeight - position : pageHeight;
-                pdf.addImage(imgData, "PNG", 0, -position, pdfWidth, pdfHeight);
-                position += pageHeight;
-                if (position < pdfHeight) pdf.addPage();
+                    // html2canvas con escala más realista
+                    const canvas = await html2canvas(dep, {
+                        scale: window.devicePixelRatio,
+                        backgroundColor: "#ffffff",
+                        useCORS: true,
+                        width: dep.scrollWidth,
+                        height: dep.scrollHeight,
+                    });
+
+
+                    const imgData = canvas.toDataURL("image/png");
+                    const imgHeight = (canvas.height * columnWidth) / canvas.width;
+
+                    // Saltar página si se supera altura disponible
+                    if (colHeights[colIdx] + imgHeight > pageHeight - padding) {
+                        pdf.addPage();
+                        colHeights.fill(padding); // nueva página sin título extra
+                    }
+
+                    const x = padding + colIdx * (columnWidth + columnGap);
+                    const y = colHeights[colIdx];
+                    pdf.addImage(imgData, "PNG", x, y, columnWidth, imgHeight);
+
+                    colHeights[colIdx] += imgHeight + 5;
+                }
             }
 
-            pdf.save("listin-telefonico.pdf");
+            pdf.save("departamentos.pdf");
             tempDiv.remove();
 
             Swal.fire({
                 icon: "success",
                 title: "PDF generado",
-                text: "El listín telefónico se ha exportado correctamente.",
+                text: "Se ha exportado la sección de departamentos con columnas equilibradas y título solo en la primera página.",
                 confirmButtonText: "Aceptar",
             });
         } catch (error) {
@@ -137,25 +176,22 @@ const WorkerList = () => {
         }
     };
 
-    const columns = [[], [], []];
-    departamentos.forEach((dep, idx) => columns[idx % 3].push(dep));
 
     return (
         <div className="container-fluid my-4">
-            {/* Botón atrás */}
             <div style={{ position: "absolute", top: "10px", left: "10px" }}>
                 <BackButtonComponent back="/home" />
             </div>
 
-            {/* Fecha */}
-            <div className="text-center" style={{ marginTop: "20px", marginBottom: "20px" }}>
+            <div className="text-center my-4">
                 <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
-                    Última actualización: {lastUpdate}
+                    Ayuntamiento de Almonte - Listín Telefónico - Última Actualización: {lastUpdate}
                 </h2>
             </div>
 
-            {/* Botón PDF con spinner e icono FontAwesome */}
-            <div className="d-flex justify-content-end" style={{ marginRight: "40px", marginBottom: "10px" }}>
+            <div className="d-flex justify-content-end mb-2" style={{ marginRight: "40px" }}>
+                <input>
+                </input>
                 <Button
                     color="secondary"
                     onClick={exportPDF}
@@ -167,17 +203,16 @@ const WorkerList = () => {
                 </Button>
             </div>
 
-            {/* Contenedor principal */}
-            <div ref={listRef} className="row" style={{ marginLeft: "30px", marginRight: "30px" }}>
+            <div ref={listRef} className="row mx-3">
                 {columns.map((col, colIdx) => (
-                    <Col key={colIdx} xs="12" md="4" className={colIdx < 2 ? "pe-1" : ""}>
+                    <Col key={colIdx} xs="12" md="4" className={colIdx < colCount - 1 ? "pe-1" : ""}>
                         {col.map((dep, depIdx) => (
                             <PhoneDepartmentComponent
                                 key={depIdx}
                                 nombreDepartamento={dep.nombre}
                                 trabajadoresDepartamento={dep.trabajadores}
-                                nombresSubdepartamentos={dep.subdepartamentos.map((sd) => sd.nombre)}
-                                trabajadoresSubdepartamentos={dep.subdepartamentos.map((sd) => sd.trabajadores)}
+                                nombresSubdepartamentos={dep.subdepartamentos.map(sd => sd.nombre)}
+                                trabajadoresSubdepartamentos={dep.subdepartamentos.map(sd => sd.trabajadores)}
                             />
                         ))}
                     </Col>

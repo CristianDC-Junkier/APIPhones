@@ -58,31 +58,6 @@ const UserData = sequelize.define("UserData", {
     }
 });
 
-// Relaciones
-
-
-// Hook para incrementar la version del UserAccount al actualizar UserData
-UserData.afterUpdate(async (userdata, options) => {
-    const userAccount = await userdata.getUserAccount();
-    if (userAccount.version < 100) {
-        userAccount.version += 1;
-        await userAccount.save({ hooks: false });
-    }
-});
-
-// Hook para validar campos antes de guardar
-UserData.beforeValidate((userData) => {
-    if (userData.extension && !/^\d+$/.test(userData.extension)) {
-        throw new Error("Extension debe ser numérica");
-    }
-    if (userData.number && !/^[0-9+\-\s()]*$/.test(userData.number)) {
-        throw new Error("Number no válido");
-    }
-    if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
-        throw new Error("Email no válido");
-    }
-});
-
 
 
 module.exports = UserData;

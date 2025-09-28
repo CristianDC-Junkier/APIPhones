@@ -1,6 +1,5 @@
 ﻿const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const { UserAccount } = require("../models/Relations")
 const { encrypt, decrypt } = require("../utils/crypto");
 
 const RefreshToken = sequelize.define("RefreshToken", {
@@ -28,16 +27,10 @@ const RefreshToken = sequelize.define("RefreshToken", {
     userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: { model: UserAccount, key: "id" },
+        references: { model: "UserAccounts", key: "id" },
         onDelete: "CASCADE",
     },
 });
 
-// Hook para incrementar tiempo de expiración en cada actualización directa
-RefreshToken.beforeUpdate((token, options) => {
-    if (!token.expireDate) {
-        token.expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 días
-    }
-});
 
 module.exports = RefreshToken;

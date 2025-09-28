@@ -1,6 +1,5 @@
 ﻿const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const { UserDataModel } = require("../models/Relations");
 
 /**
  * Modelo Sequelize para el control de actualizaciones globales del sistema.
@@ -32,32 +31,4 @@ const UpdateModel = sequelize.define("UpdateModel", {
     },
 });
 
-// Función para actualizar el único registro 
-async function bumpUpdate() {
-    try {
-        let updateRow = await UpdateModel.findByPk(1);
-        if (updateRow) {
-            updateRow.date = new Date();
-            updateRow.version = updateRow.version + 1;
-            await updateRow.save();
-        } else {
-            await UpdateModel.create({
-                id: 1,
-                date: new Date(),
-                version: 1,
-            });
-        }
-    } catch (err) {
-        console.error("Error al actualizar UpdateModel:", err);
-    }
-}
-
-// Hooks para versionado
-UserDataModel.afterUpdate(async () => {
-    await bumpUpdate();
-});
-UserDataModel.afterCreate(async () => {
-    await bumpUpdate();
-});
-
-module.exports = UpdateModel;
+module.exports = { UpdateModel };

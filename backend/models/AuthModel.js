@@ -53,9 +53,6 @@ const UserAccount = sequelize.define("UserAccount", {
     },
 });
 
-// Hook para incrementar version en cada actualización directa
-UserAccount.beforeUpdate((user, options) => {
-    if (user.version < 100) user.version += 1;
-});
+
 
 module.exports = UserAccount;

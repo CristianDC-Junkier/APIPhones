@@ -2,7 +2,6 @@
 import { Col, Button, Spinner } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
@@ -10,6 +9,7 @@ import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
 import { getUserDataList } from "../../services/UserService";
 
+import { generateMockUsers } from "./generate";
 
 
 const WorkerList = () => {
@@ -35,11 +35,13 @@ const WorkerList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
-            if (!token) return;
-            const result = await getUserDataList(token);
-            if (result.success) {
-                setUsers(result.data.users);
-            }
+            const mockData = generateMockUsers(100); // genera 200 empleados
+            setUsers(mockData);
+            //if (!token) return;
+            //const result = await getUserDataList(token);
+            //if (result.success) {
+            //    setUsers(result.data.users);
+            //}
             setLoading(false);
         };
         fetchUsers();

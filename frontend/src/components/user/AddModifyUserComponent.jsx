@@ -66,12 +66,12 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 
     // HTML para selects y opciones
     const optionsHtml = types.map(t => `<option value="${t.value}" ${userItem?.usertype === t.value ? "selected" : ""}>${t.label}</option>`).join("");
-    const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");
+    const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.userData.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");
 
     const initialSubDeps = userItem?.departmentId
         ? subdepartments.filter(sd => sd.departmentId === userItem.departmentId)
         : subdepartments;
-    const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
+    const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.userData.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
 
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
@@ -102,19 +102,19 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 <div>
   <div style="${rowStyle} margin-top: 5vh">
     <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
-    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.name || ""}">
+    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData.name || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Extensión</label>
-    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.extension || ""}">
+    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData.extension || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Teléfono</label>
-    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.number || ""}">
+    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData.number || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Email</label>
-    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.email || ""}">
+    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData.email || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Departamento</label>

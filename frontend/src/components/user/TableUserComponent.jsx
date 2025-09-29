@@ -70,7 +70,7 @@ const TableUserComponent = ({
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
                     await refreshData();
-                    if (userItem.id === currentUser.id) window.location.href = "/login";
+                    if (userItem.id === currentUser.id) window.location.href = "/listin-telefonico/login";
                 } else {
                     Swal.fire("Error", result.error || "No se pudo modificar el usuario", "error");
                 }
@@ -92,7 +92,7 @@ const TableUserComponent = ({
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
             await refreshData();
-            if (userItem.id === currentUser.id) window.location.href = "/login";
+            if (userItem.id === currentUser.id) window.location.href = "/listin-telefonico/login";
         } else {
             Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
         }

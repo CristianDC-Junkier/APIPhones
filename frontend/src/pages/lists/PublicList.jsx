@@ -2,6 +2,7 @@
 import { Col, Button, Spinner } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
@@ -9,10 +10,9 @@ import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
 import { getUserDataList } from "../../services/UserService";
 
-import { generateMockUsers } from "./generate";
 
 
-const WorkerList = () => {
+const PublicList = () => {
     const listRef = useRef();
     const [loading, setLoading] = useState(false);
     const [searchUser, setSearchUser] = useState("");
@@ -35,13 +35,11 @@ const WorkerList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
-            const mockData = generateMockUsers(100); // genera 200 empleados
-            setUsers(mockData);
-            //if (!token) return;
-            //const result = await getUserDataList(token);
-            //if (result.success) {
-            //    setUsers(result.data.users);
-            //}
+            if (!token) return;
+            const result = await getUserDataList(token);
+            if (result.success) {
+                setUsers(result.data.users);
+            }
             setLoading(false);
         };
         fetchUsers();
@@ -120,18 +118,18 @@ const WorkerList = () => {
                     t.name.toLowerCase().includes(searchUser.toLowerCase())
                 )
                 : true;
-        } else {
+        }/* else {
             for (var i = 0; i < dep.subdepartamentos.length; i++) {
                 matchMain = searchUser
                     ? dep.subdepartamentos[i].trabajadores.some(t =>
                         t.name.toLowerCase().includes(searchUser.toLowerCase())
                     )
                     : true;
-                if (matchMain) break;
+                if (matchMain) break;*/
             }
         }
         // Un departamento entra si cumple ambos filtros activos
-        return matchDept && matchMain;
+return matchDept;// && matchMain;
     });
 
 
@@ -235,4 +233,4 @@ const WorkerList = () => {
     );
 };
 
-export default WorkerList;
+export default PublicList;

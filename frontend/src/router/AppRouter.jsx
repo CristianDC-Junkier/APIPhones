@@ -11,6 +11,7 @@ import RoleRoute from '../components/redirect/RoleRoute';
 import LoginPage from '../pages/Login';
 import HomePage from '../pages/Home';
 import WorkerList from '../pages/lists/WorkerList';
+import PublicList from '../pages/lists/PublicList';
 
 import NotFoundPage from '../pages/NotFound';
 import AccessDeniedPage from '../pages/AccessDenied';
@@ -56,6 +57,7 @@ const AppRouter = () => {
             </Route>
             <Route element={<ExternalLayout />}>
                 <Route path="/workers" element={<WorkerList />} />
+                <Route path="/public" element={<PublicList /> } />
             </Route>
 
         </Routes>

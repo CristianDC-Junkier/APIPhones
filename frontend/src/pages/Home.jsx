@@ -27,17 +27,26 @@ const Home = () => {
     const { user, logout } = useAuth();
 
     //Acciones disponibles según el tipo de usuario
-    const actions = user.usertype !== 'WORKER'
-        ? [
-            { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
-            { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
-            { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
-            { label: 'Acceder Logs', icon: faScroll, action: () => navigate('/logs') },
-        ]
-        : [
-            { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/app') },
-            { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
-        ];
+    const actions = (() => {
+        switch (user.usertype) {
+            case 'WORKER': return [
+                { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
+                { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
+            ];
+            case 'DEPARTMENT': return [
+                { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
+                { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
+                { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
+                { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
+            ];
+            default: return [
+                { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
+                { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
+                { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
+                { label: 'Acceder Logs', icon: faScroll, action: () => navigate('/logs') },
+            ]
+        }
+    })();
 
     //Función que gestiona el cierre de sesión
     const handleLogout = async () => {

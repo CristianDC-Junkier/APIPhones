@@ -18,7 +18,7 @@ const DepartamentoComponent = ({
             >
                 <h6
                     className="m-0 text-uppercase fw-bold flex-grow-1 text-center"
-                    style={{ fontSize: "1.0rem", color: "#000" }}
+                    style={{ fontSize: "1.05rem", color: "#000" }}
                 >
                     {nombreDepartamento}
                 </h6>
@@ -29,7 +29,7 @@ const DepartamentoComponent = ({
                 responsive
                 size="sm"
                 className="mb-0 text-center border-dark border-2 table-striped table-hover"
-                style={{ fontSize: "1rem" }}
+                style={{ fontSize: "1.05rem" }}
             >
                 <tbody>
                     {/* Trabajadores del departamento */}

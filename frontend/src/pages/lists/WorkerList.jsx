@@ -46,85 +46,93 @@ const WorkerList = () => {
     }, [token]);
 
     // Construir departamentos a partir de users
-    const realDepartamentos = users
-        .filter(u => u.userData && u.userData.departmentId)
-        .reduce((acc, u) => {
-            const depId = u.userData.departmentId;
-            const subdepId = u.userData.subdepartmentId;
+    const departamentosArray = Object.values(
+        users
+            .filter(u => u.userData && u.userData.departmentId)
+            .reduce((acc, u) => {
+                const depId = u.userData.departmentId;
+                const subdepId = u.userData.subdepartmentId;
 
-            if (!acc[depId]) {
-                acc[depId] = {
-                    id: depId,
-                    nombre: u.userData.departmentName || "Sin nombre",
-                    trabajadores: [],
-                    subdepartamentos: {}
-                };
-            }
-
-            if (subdepId) {
-                if (!acc[depId].subdepartamentos[subdepId]) {
-                    acc[depId].subdepartamentos[subdepId] = {
-                        id: subdepId,
-                        nombre: u.userData.subdepartmentName || "Subdep",
-                        trabajadores: []
+                if (!acc[depId]) {
+                    acc[depId] = {
+                        id: depId,
+                        nombre: u.userData.departmentName || "Sin nombre",
+                        trabajadores: [],
+                        subdepartamentos: {}
                     };
                 }
-                acc[depId].subdepartamentos[subdepId].trabajadores.push(u.userData);
-            } else {
-                acc[depId].trabajadores.push(u.userData);
-            }
 
-            return acc;
-        }, {});
+                if (subdepId) {
+                    if (!acc[depId].subdepartamentos[subdepId]) {
+                        acc[depId].subdepartamentos[subdepId] = {
+                            id: subdepId,
+                            nombre: u.userData.subdepartmentName || "Subdep",
+                            trabajadores: []
+                        };
+                    }
+                    acc[depId].subdepartamentos[subdepId].trabajadores.push(u.userData);
+                } else {
+                    acc[depId].trabajadores.push(u.userData);
+                }
 
-    // Convertir a array y generar subdepartamentos
-    const departamentosArray = Object.values(realDepartamentos).map(dep => ({
-        ...dep,
-        subdepartamentos: Object.values(dep.subdepartamentos)
-    }));
+                return acc;
+            }, {})
+    )
+        .map(dep => {
+            // Ordenar trabajadores del departamento principal
+            const sortedTrabajadores = dep.trabajadores.sort((a, b) =>
+                a.name.localeCompare(b.name)
+            );
 
-    // Función para estimar altura
-    const estimateHeight = (dep) =>
-        dep.trabajadores.length +
-        dep.subdepartamentos.reduce((acc, sd) => acc + sd.trabajadores.length + 1, 1);
+            // Convertir subdepartamentos a array y ordenar
+            const sortedSubdeps = Object.values(dep.subdepartamentos)
+                .map(sub => ({
+                    ...sub,
+                    trabajadores: sub.trabajadores.sort((a, b) =>
+                        a.name.localeCompare(b.name)
+                    )
+                }))
+                .sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-    // Distribución vertical-first
-    const colCount = 3;
-    const columns = Array.from({ length: colCount }, () => []);
-    const heights = Array(colCount).fill(0);
-    const totalHeight = departamentosArray.reduce((sum, d) => sum + estimateHeight(d), 0);
-    const targetHeight = totalHeight / colCount;
+            return {
+                ...dep,
+                trabajadores: sortedTrabajadores,
+                subdepartamentos: sortedSubdeps
+            };
+        })
+        // Finalmente ordenar departamentos
+        .sort((a, b) => a.nombre.localeCompare(b.nombre));
 
-    [...departamentosArray].reverse().forEach((dep) => {
-        const h = estimateHeight(dep);
-        let colIdx = colCount - 1;
-        while (colIdx > 0 && heights[colIdx] + h > targetHeight) colIdx--;
-        columns[colIdx].push(dep);
-        heights[colIdx] += h;
+    // Filtrar departamentos según búsqueda
+    const filteredDepartamentos = departamentosArray.filter(dep => {
+        // Si searchDepartment tiene texto, comprobar coincidencia
+        const matchDept = searchDepartment
+            ? dep.nombre.toLowerCase().includes(searchDepartment.toLowerCase())
+            : true;
+
+        // Si searchUser tiene texto, comprobar coincidencia
+        const matchMain = searchUser
+            ? dep.trabajadores.some(t =>
+                t.name.toLowerCase().includes(searchUser.toLowerCase())
+            )
+            : true;
+
+        // Un departamento entra si cumple ambos filtros activos
+        return matchDept && matchMain;
     });
 
-    columns.forEach((col, idx) => columns[idx] = col.reverse());
 
-    // Filtrar columnas según búsqueda
-    const filteredColumns = columns.map(col =>
-        col.filter(dep => {
-            // Coincidencia en nombre del departamento
-            const matchDept = dep.nombre.toLowerCase().includes(searchDepartment.toLowerCase());
+    // Distribución vertical-first sobre los filtrados
+    const colCount = 3;
+    const columns = Array.from({ length: colCount }, () => []);
+    const perColumn = Math.ceil(filteredDepartamentos.length / colCount);
 
-            // Coincidencia en trabajadores del departamento principal
-            const matchMain = dep.trabajadores.some(t =>
-                t.name.toLowerCase().includes(searchUser.toLowerCase())
-            );
+    for (let i = 0; i < colCount; i++) {
+        const start = i * perColumn;
+        const end = start + perColumn;
+        columns[i] = filteredDepartamentos.slice(start, end);
+    }
 
-            // Coincidencia en trabajadores de subdepartamentos
-            const matchSub = dep.subdepartamentos.some(sd =>
-                sd.trabajadores.some(t => t.name.toLowerCase().includes(searchUser.toLowerCase()))
-            );
-
-            // Retorna true si coincide en el departamento o en cualquier trabajador
-            return matchDept || matchMain || matchSub;
-        })
-    );
 
 
     return (
@@ -190,8 +198,13 @@ const WorkerList = () => {
 
 
             <div ref={listRef} className="row mx-3">
-                {filteredColumns.map((col, colIdx) => (
-                    <Col key={colIdx} xs="12" md="4" className={colIdx < colCount - 1 ? "pe-1" : ""}>
+                {columns.map((col, colIdx) => (
+                    <Col
+                        key={colIdx}
+                        xs="12"
+                        md="4"
+                        className={colIdx < colCount - 1 ? "pe-1" : ""}
+                    >
                         {col.map((dep, depIdx) => (
                             <PhoneDepartmentComponent
                                 key={depIdx}

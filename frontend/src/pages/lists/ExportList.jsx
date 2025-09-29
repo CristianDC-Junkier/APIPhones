@@ -34,6 +34,7 @@ export const exportPDF = async ({ colCount, listRef, lastUpdate, setLoading }) =
         tempDiv.style.left = "-9999px";
         tempDiv.style.top = "-9999px";
         tempDiv.style.width = listRef.current.offsetWidth + "px";
+        tempDiv.style.height = "100vh";
         tempDiv.style.boxSizing = "border-box";
         document.body.appendChild(tempDiv);
 

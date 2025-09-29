@@ -1,64 +1,101 @@
-import React, { useRef, useState } from "react";
+﻿import React, { useRef, useState, useEffect } from "react";
 import { Col, Button, Spinner } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
-import BackButtonComponent from "../../components/utils/BackButtonComponent";
-import { exportPDF } from "./ExportList"; 
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
+import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
+import BackButtonComponent from "../../components/utils/BackButtonComponent";
+import { exportPDF } from "./ExportList";
+import { useAuth } from '../../hooks/UseAuth';
+import { getUserDataList } from "../../services/UserService";
 
-// Funciones auxiliares
-const randomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-const randomName = () => {
-    const firstNames = ["Juan", "María", "Pedro", "Lucía", "Carlos", "Sofía", "Miguel", "Ana", "Luis", "Isabel"];
-    const lastNames = ["García", "Rodríguez", "López", "Martínez", "Hernández", "Pérez", "Sánchez", "Ramírez"];
-    return `${firstNames[randomInt(0, firstNames.length - 1)]} ${lastNames[randomInt(0, lastNames.length - 1)]}`;
-};
-const randomDeptName = (idCounter) => {
-    const types = ["Administración", "Finanzas", "Servicios", "Recursos Humanos", "Tecnología", "Operaciones"];
-    return `${types[randomInt(0, types.length - 1)]} ${idCounter}`;
-};
 
-// Función para estimar "altura" de un departamento
-const estimateHeight = (dep) =>
-    dep.trabajadores.length + dep.subdepartamentos.reduce((acc, sd) => acc + sd.trabajadores.length + 1, 1);
 
 const WorkerList = () => {
     const listRef = useRef();
     const [loading, setLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const lastUpdate = "25/09/2025";
-    let idCounter = 1;
+    const [searchUser, setSearchUser] = useState("");
+    const [searchDepartment, setSearchDepartment] = useState("");
+    const [users, setUsers] = useState([]);
+    const [lastUpdate, setLastUpdate] = useState(null);
+    const [showPhones, setShowPhones] = useState(true);
+    const { token } = useAuth();
+    const { date } = useAuth();
 
-    // Generar departamentos aleatorios
-    const departamentos = Array.from({ length: randomInt(15, 25) }, () => ({
-        nombre: randomDeptName(idCounter++),
-        trabajadores: Array.from({ length: randomInt(1, 5) }, () => ({
-            numero: (Math.floor(100000000 + Math.random() * 900000000)).toString(),
-            extension: (Math.floor(10000 + Math.random() * 90000)).toString(),
-            nombre: randomName(),
-            email: `${Math.random().toString(36).substring(2, 8)}@ejemplo.com`,
-        })),
-        subdepartamentos: Array.from({ length: randomInt(1, 4) }, (_, idx) => ({
-            nombre: `Subdep ${idx + 1}`,
-            trabajadores: Array.from({ length: randomInt(1, 3) }, () => ({
-                numero: (Math.floor(100000000 + Math.random() * 900000000)).toString(),
-                extension: (Math.floor(10000 + Math.random() * 90000)).toString(),
-                nombre: randomName(),
-                email: `${Math.random().toString(36).substring(2, 8)}@ejemplo.com`,
-            })),
-        })),
+    useEffect(() => {
+        const fetchDate = async () => {
+            const result = await date();
+            setLastUpdate(result);
+        };
+
+        fetchDate();
+    }, [date]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoading(true);
+            if (!token) return;
+            const result = await getUserDataList(token);
+            if (result.success) {
+                setUsers(result.data.users);
+            }
+            setLoading(false);
+        };
+        fetchUsers();
+    }, [token]);
+
+    // Construir departamentos a partir de users
+    const realDepartamentos = users
+        .filter(u => u.userData && u.userData.departmentId)
+        .reduce((acc, u) => {
+            const depId = u.userData.departmentId;
+            const subdepId = u.userData.subdepartmentId;
+
+            if (!acc[depId]) {
+                acc[depId] = {
+                    id: depId,
+                    nombre: u.userData.departmentName || "Sin nombre",
+                    trabajadores: [],
+                    subdepartamentos: {}
+                };
+            }
+
+            if (subdepId) {
+                if (!acc[depId].subdepartamentos[subdepId]) {
+                    acc[depId].subdepartamentos[subdepId] = {
+                        id: subdepId,
+                        nombre: u.userData.subdepartmentName || "Subdep",
+                        trabajadores: []
+                    };
+                }
+                acc[depId].subdepartamentos[subdepId].trabajadores.push(u.userData);
+            } else {
+                acc[depId].trabajadores.push(u.userData);
+            }
+
+            return acc;
+        }, {});
+
+    // Convertir a array y generar subdepartamentos
+    const departamentosArray = Object.values(realDepartamentos).map(dep => ({
+        ...dep,
+        subdepartamentos: Object.values(dep.subdepartamentos)
     }));
+
+    // Función para estimar altura
+    const estimateHeight = (dep) =>
+        dep.trabajadores.length +
+        dep.subdepartamentos.reduce((acc, sd) => acc + sd.trabajadores.length + 1, 1);
 
     // Distribución vertical-first
     const colCount = 3;
     const columns = Array.from({ length: colCount }, () => []);
     const heights = Array(colCount).fill(0);
-    const totalHeight = departamentos.reduce((sum, d) => sum + estimateHeight(d), 0);
+    const totalHeight = departamentosArray.reduce((sum, d) => sum + estimateHeight(d), 0);
     const targetHeight = totalHeight / colCount;
 
-    [...departamentos].reverse().forEach((dep) => {
+    [...departamentosArray].reverse().forEach((dep) => {
         const h = estimateHeight(dep);
         let colIdx = colCount - 1;
         while (colIdx > 0 && heights[colIdx] + h > targetHeight) colIdx--;
@@ -70,8 +107,25 @@ const WorkerList = () => {
 
     // Filtrar columnas según búsqueda
     const filteredColumns = columns.map(col =>
-        col.filter(dep => dep.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+        col.filter(dep => {
+            // Coincidencia en nombre del departamento
+            const matchDept = dep.nombre.toLowerCase().includes(searchDepartment.toLowerCase());
+
+            // Coincidencia en trabajadores del departamento principal
+            const matchMain = dep.trabajadores.some(t =>
+                t.name.toLowerCase().includes(searchUser.toLowerCase())
+            );
+
+            // Coincidencia en trabajadores de subdepartamentos
+            const matchSub = dep.subdepartamentos.some(sd =>
+                sd.trabajadores.some(t => t.name.toLowerCase().includes(searchUser.toLowerCase()))
+            );
+
+            // Retorna true si coincide en el departamento o en cualquier trabajador
+            return matchDept || matchMain || matchSub;
+        })
     );
+
 
     return (
         <div className="container-fluid my-4">
@@ -87,46 +141,51 @@ const WorkerList = () => {
 
             {/* Buscador y botón exportar */}
             <div className="d-flex justify-content-between mb-2">
-                {/* Input a la izquierda */}
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Buscar departamento..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ width: "200px", marginLeft: "26px", }}
-                />
+                <div className="d-flex gap-2" style={{ marginLeft: "26px" }}>
+                    {/* Departamento */}
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Buscar departamento..."
+                        value={searchDepartment}
+                        onChange={(e) => setSearchDepartment(e.target.value)}
+                    />
+                    {/* Usuario */}
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Buscar usuario..."
+                        value={searchUser}
+                        onChange={(e) => setSearchUser(e.target.value)}
+                    />
+                </div>
+                <div className="d-flex gap-2" style={{ marginRight: "28px" }}>
+                    <Button
+                        color={showPhones ? "primary" : "secondary"}
+                        onClick={() => setShowPhones(true)}
+                        style={{ fontWeight: 500 }}
+                    >
+                        Teléfonos
+                    </Button>
 
-                {/* Botón a la derecha */}
-                <Button
-                    color="secondary"
-                    disabled={loading}
-                    style={{ fontWeight: 500, fontSize: "0.9rem", display: "flex", alignItems: "center", marginRight: "28px", gap: "5px" }}
-                    onClick={async (e) => {
-                        e.preventDefault();
+                    <Button
+                        color={!showPhones ? "primary" : "secondary"}
+                        onClick={() => setShowPhones(false)}
+                        style={{ fontWeight: 500 }}
+                    >
+                        Correos
+                    </Button>
 
-                        setSearchTerm("");
-
-                        const { isConfirmed } = await Swal.fire({
-                            title: 'Exportar correos?',
-                            text: '¿Deseas incluir los correos en el PDF?',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Sí, incluir correos',
-                            cancelButtonText: 'No, excluir correos'
-                        });
-                        exportPDF({
-                            showEmails: isConfirmed,
-                            colCount,
-                            listRef,
-                            lastUpdate,
-                            setLoading
-                        });
-                    }}
-                >
-                    {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
-                    {loading ? " Generando..." : " Exportar a PDF"}
-                </Button>
+                    <Button
+                        color="secondary"
+                        disabled={loading}
+                        style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
+                        onClick={() => exportPDF({ showEmails: !showPhones, colCount, listRef, lastUpdate, setLoading })}
+                    >
+                        {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
+                        {loading ? " Generando..." : " Exportar PDF"}
+                    </Button>
+                </div>
             </div>
 
 
@@ -140,6 +199,7 @@ const WorkerList = () => {
                                 trabajadoresDepartamento={dep.trabajadores}
                                 nombresSubdepartamentos={dep.subdepartamentos.map(sd => sd.nombre)}
                                 trabajadoresSubdepartamentos={dep.subdepartamentos.map(sd => sd.trabajadores)}
+                                showPhones={showPhones}
                             />
                         ))}
                     </Col>

@@ -8,6 +8,9 @@ const SubDepartment = require("./SubDepartmentModel");
 const RefreshToken = require("./RefreshTokenModel");
 const UpdateModel = require("./UpdateModel");
 
+// ----------- DEFINIR RELACIONES -----------
+
+
 // Relaciones Department ↔ UserData
 Department.hasMany(UserData, {
     foreignKey: "departmentId",
@@ -70,7 +73,7 @@ RefreshToken.belongsTo(UserAccount, {
     onUpdate: "CASCADE"
 });
 
-// Exportar
+// ----------- EXPORTAR MODELOS -----------
 module.exports = {
     sequelize,
     UserAccount,
@@ -80,3 +83,7 @@ module.exports = {
     RefreshToken,
     UpdateModel
 };
+
+// ----------- REGISTRAR HOOKS -----------
+require("./Hooks");
+

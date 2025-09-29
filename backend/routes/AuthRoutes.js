@@ -26,7 +26,7 @@ const { notWorker, canModifyUser } = require("../middlewares/Auth");
 router.post("/login", AuthController.login);
 router.get("/logout", AuthController.logout);
 
-router.post("/date", AuthController.date);
+router.get("/date", AuthController.date);
 
 router.post("/", notWorker, AuthController.create);
 router.put("/:id", notWorker, canModifyUser, AuthController.update);

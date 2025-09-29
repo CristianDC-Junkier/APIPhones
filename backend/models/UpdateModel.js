@@ -31,4 +31,4 @@ const UpdateModel = sequelize.define("UpdateModel", {
     },
 });
 
-module.exports = { UpdateModel };
+module.exports = UpdateModel;

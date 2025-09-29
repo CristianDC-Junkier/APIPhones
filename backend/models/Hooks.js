@@ -1,4 +1,4 @@
-const { UserAccount, UserData, UpdateModel, RefreshToken } = require("./Relations");
+ï»¿const { UserAccount, UserData, UpdateModel, RefreshToken } = require("./Relations");
 
 /**
  * Hook: antes de actualizar un UserAccount.
@@ -12,8 +12,8 @@ UserAccount.beforeUpdate((user, options) => {
 });
 
 /**
- * Función auxiliar para actualizar el registro único de UpdateModel.
- * - Si existe, incrementa su versión y actualiza la fecha.
+ * Funciï¿½n auxiliar para actualizar el registro ï¿½nico de UpdateModel.
+ * - Si existe, incrementa su versiï¿½n y actualiza la fecha.
  * - Si no existe, crea un registro con id=1.
  */
 async function bumpUpdate() {
@@ -36,7 +36,7 @@ async function bumpUpdate() {
 }
 
 /**
- * Hook: después de actualizar un UserData.
+ * Hook: despuï¿½s de actualizar un UserData.
  * 
  * - Actualiza el registro global de UpdateModel.
  */
@@ -45,7 +45,7 @@ UserData.afterUpdate(async () => {
 });
 
 /**
- * Hook: después de crear un UserData.
+ * Hook: despuï¿½s de crear un UserData.
  * 
  * - Actualiza el registro global de UpdateModel.
  */
@@ -54,9 +54,9 @@ UserData.afterCreate(async () => {
 });
 
 /**
- * Hook: después de actualizar un UserData.
+ * Hook: despuï¿½s de actualizar un UserData.
  * 
- * - También actualiza la `version` del UserAccount relacionado,
+ * - Tambiï¿½n actualiza la `version` del UserAccount relacionado,
  *   siempre que sea menor a 100.
  */
 UserData.afterUpdate(async (userdata, options) => {
@@ -70,21 +70,21 @@ UserData.afterUpdate(async (userdata, options) => {
 /**
  * Hook: antes de validar un UserData.
  * 
- * - Valida que `extension` contenga solo dígitos.
- * - Valida que `number` tenga un formato de teléfono válido.
- * - Valida que `email` tenga un formato de correo válido.
+ * - Valida que `extension` contenga solo dï¿½gitos.
+ * - Valida que `number` tenga un formato de telï¿½fono vï¿½lido.
+ * - Valida que `email` tenga un formato de correo vï¿½lido.
  * 
- * @throws Error si alguna validación falla.
+ * @throws Error si alguna validaciï¿½n falla.
  */
 UserData.beforeValidate((userData) => {
     if (userData.extension && !/^\d+$/.test(userData.extension)) {
-        throw new Error("Extension debe ser numérica");
+        throw new Error("Extension debe ser numï¿½rica");
     }
     if (userData.number && !/^[0-9+\-\s()]*$/.test(userData.number)) {
-        throw new Error("Number no válido");
+        throw new Error("Number no vï¿½lido");
     }
     if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
-        throw new Error("Email no válido");
+        throw new Error("Email no vï¿½lido");
     }
 });
 
@@ -92,14 +92,14 @@ UserData.beforeValidate((userData) => {
  * Hook: beforeUpdate
  *
  * - Este hook se ejecuta **antes de actualizar un RefreshToken**.
- * - Si `expireDate` no está definido, se asigna automáticamente
- *   una nueva fecha de expiración con +7 días desde el momento actual.
+ * - Si `expireDate` no estï¿½ definido, se asigna automï¿½ticamente
+ *   una nueva fecha de expiraciï¿½n con +7 dï¿½as desde el momento actual.
  *
- * @param {RefreshToken} token - Instancia del token que se está actualizando.
+ * @param {RefreshToken} token - Instancia del token que se estï¿½ actualizando.
  * @param {object} options - Opciones de la query de Sequelize.
  */
 RefreshToken.beforeUpdate((token, options) => {
     if (!token.expireDate) {
-        token.expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 días
+        token.expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 dï¿½as
     }
 });

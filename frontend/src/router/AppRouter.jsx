@@ -55,7 +55,7 @@ const AppRouter = () => {
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
             <Route element={<ExternalLayout />}>
-                <Route path="/wl" element={<WorkerList />} />
+                <Route path="/workers" element={<WorkerList />} />
             </Route>
 
         </Routes>

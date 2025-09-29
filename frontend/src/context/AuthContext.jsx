@@ -1,6 +1,6 @@
 ﻿/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect } from 'react';
-import { login, logout } from '../services/AuthService';
+import { login, logout, date } from '../services/AuthService';
 import CryptoJS from 'crypto-js';
 
 export const AuthContext = createContext();
@@ -145,7 +145,6 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-
     /**
      * Cerrar sesión
      */
@@ -157,6 +156,15 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user");
     };
 
+    /**
+     * Recoger fecha del listin
+     */
+    const contextDate = async () => {
+        const result = await date(); 
+        if (result.success) return result.data.date;
+        else return "Fecha no disponible";
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -165,6 +173,7 @@ export const AuthProvider = ({ children }) => {
                 loading,
                 login: contextLogin,
                 logout: contextLogout,
+                date: contextDate,
                 updateUser,
             }}
         >

@@ -32,14 +32,10 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     let departments = [];
     let subdepartments = [];
     let isDepartmentDisabled = false;
-    console.log(currentUser);
     if (currentUser.usertype === "DEPARTMENT") {
         // Solo su departamento y sus subdepartamentos
         const deptResp = await getDepartmentById(token, currentUser.department);
         const subResp = await getSubDepartmentsList(token, currentUser.department);
-
-        console.log(currentUser);
-        console.log(deptResp, subResp);
 
         if (deptResp.success) {
             departments = [deptResp.data?.department].filter(Boolean);

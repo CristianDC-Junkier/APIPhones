@@ -29,7 +29,7 @@ const Home = () => {
     //Acciones disponibles según el tipo de usuario
     const actions = user.usertype !== 'WORKER'
         ? [
-            { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/app') },
+            { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
             { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
             { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
             { label: 'Acceder Logs', icon: faScroll, action: () => navigate('/logs') },

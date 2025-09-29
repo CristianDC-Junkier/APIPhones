@@ -133,13 +133,19 @@ class AuthController {
     */
     static async date(req, res) {
         try {
-            let updateRow = await UpdateModel.findByPk(1);
+            const updateRow = await UpdateModel.findByPk(1);
 
-            return res.json({ date: updateRow.date });
+            if (!updateRow) {
+                return res.status(404).json({ error: "No se encontró la fecha del listín" });
+            }
+
+            const date = new Date(updateRow.date).toLocaleDateString("es-ES");
+
+            return res.json({date});
 
         } catch (error) {
-            LoggerController.error("Error recuperando la fecha del listin: " + error.message);
-            res.status(500).json({ error: "Error recuperando la fecha del listin" });
+            LoggerController.error("Error recuperando la fecha del listín: " + error.message);
+            res.status(500).json({ error: "Error recuperando la fecha del listín" });
         }
     }
 

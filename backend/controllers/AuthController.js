@@ -48,7 +48,7 @@ class AuthController {
                 return res.status(401).json({ error: "Credenciales incorrectas" });
             }
 
-            const token = await generateToken({ id: user.id, username: user.username, usertype: user.usertype }, remember);
+            const token = await generateToken({ id: user.id, username: user.username, usertype: user.usertype, departmentId: user.departmentId }, remember);
 
             res.json({
                 token,
@@ -57,6 +57,7 @@ class AuthController {
                     username: user.username,
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
+                    departmentId: user.departmentId,
                     userData: user.userData ? {
                         id: user.userData.id,
                         name: user.userData.name,

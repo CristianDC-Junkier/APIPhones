@@ -91,7 +91,7 @@ export const AuthProvider = ({ children }) => {
      * Loguear usuario
      * 
      * @param {Object} credentials - { username, password, remember }
-     * @return {Object} Resultado del login { success: boolean, data/message }
+     * @return {Object} Resultado del login { success: boolean, data{ user, token } }
      */
     const contextLogin = async (credentials) => {
         const result = await login(credentials);
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }) => {
                 id: result.data.user.id,
                 username: result.data.user.username,
                 usertype: result.data.user.usertype,
-                department: result.data.user.userData.departmentId || null,
+                department: result.data.user.departmentId || null,
                 forcePwdChange: result.data.user.forcePwdChange || false,
             };
             setUser(userLog);

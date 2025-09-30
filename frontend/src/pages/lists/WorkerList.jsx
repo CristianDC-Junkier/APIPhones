@@ -226,6 +226,7 @@ const WorkerList = () => {
                                 nombresSubdepartamentos={dep.subdepartamentos.map(sd => sd.nombre)}
                                 trabajadoresSubdepartamentos={dep.subdepartamentos.map(sd => sd.trabajadores)}
                                 showPhones={showPhones}
+                                publicAccess={false}
                             />
                         ))}
                     </Col>

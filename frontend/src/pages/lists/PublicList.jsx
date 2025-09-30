@@ -15,11 +15,9 @@ import { getUserDataList } from "../../services/UserService";
 const PublicList = () => {
     const listRef = useRef();
     const [loading, setLoading] = useState(false);
-    const [searchUser, setSearchUser] = useState("");
     const [searchDepartment, setSearchDepartment] = useState("");
     const [users, setUsers] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
-    const [showPhones, setShowPhones] = useState(true);
     const { token } = useAuth();
     const { date } = useAuth();
 
@@ -109,27 +107,7 @@ const PublicList = () => {
         const matchDept = searchDepartment
             ? dep.nombre.toLowerCase().includes(searchDepartment.toLowerCase())
             : true;
-
-        // Si searchUser tiene texto, comprobar coincidencia
-        /*let matchMain;
-        if (dep.trabajadores.length > 0) {
-            matchMain = searchUser
-                ? dep.trabajadores.some(t =>
-                    t.name.toLowerCase().includes(searchUser.toLowerCase())
-                )
-                : true;
-        } else {
-            for (var i = 0; i < dep.subdepartamentos.length; i++) {
-                matchMain = searchUser
-                    ? dep.subdepartamentos[i].trabajadores.some(t =>
-                        t.name.toLowerCase().includes(searchUser.toLowerCase())
-                    )
-                    : true;
-                if (matchMain) break;
-            }
-        }*/
-        // Un departamento entra si cumple ambos filtros activos
-        return matchDept;// && matchMain;
+        return matchDept;
     });
 
 
@@ -169,37 +147,13 @@ const PublicList = () => {
                         value={searchDepartment}
                         onChange={(e) => setSearchDepartment(e.target.value)}
                     />
-                    {/* Usuario */}
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Buscar usuario..."
-                        value={searchUser}
-                        onChange={(e) => setSearchUser(e.target.value)}
-                    />
                 </div>
                 <div className="d-flex gap-2" style={{ marginRight: "28px" }}>
-                    <Button
-                        color={showPhones ? "primary" : "secondary"}
-                        onClick={() => setShowPhones(true)}
-                        style={{ fontWeight: 500 }}
-                    >
-                        Teléfonos
-                    </Button>
-
-                    <Button
-                        color={!showPhones ? "primary" : "secondary"}
-                        onClick={() => setShowPhones(false)}
-                        style={{ fontWeight: 500 }}
-                    >
-                        Correos
-                    </Button>
-
                     <Button
                         color="secondary"
                         disabled={loading}
                         style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
-                        onClick={() => exportPDF({ showEmails: !showPhones, colCount, listRef, lastUpdate, setLoading })}
+                        onClick={() => exportPDF({colCount, listRef, lastUpdate, setLoading })}
                     >
                         {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
                         {loading ? " Generando..." : " Exportar PDF"}
@@ -223,7 +177,8 @@ const PublicList = () => {
                                 trabajadoresDepartamento={dep.trabajadores}
                                 nombresSubdepartamentos={dep.subdepartamentos.map(sd => sd.nombre)}
                                 trabajadoresSubdepartamentos={dep.subdepartamentos.map(sd => sd.trabajadores)}
-                                showPhones={showPhones}
+                                showPhones={true}
+                                publicAccess={true}
                             />
                         ))}
                     </Col>

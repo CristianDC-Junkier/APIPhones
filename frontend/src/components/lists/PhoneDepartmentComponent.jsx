@@ -8,6 +8,7 @@ const DepartamentoComponent = ({
     nombresSubdepartamentos = [],
     trabajadoresSubdepartamentos = [],
     showPhones = true,
+    publicAccess = false,
 }) => {
     return (
         <div className="border-top border-2 border-dark mb-0">
@@ -39,7 +40,7 @@ const DepartamentoComponent = ({
                                 <>
                                     <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.number}</strong></td>
                                     <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
-                                    <td className="text-uppercase"> {t.name}</td>
+                                    {!publicAccess && <td className="text-uppercase"> {t.name}</td>}
                                 </>
                             ) : (
                                 <>
@@ -75,7 +76,7 @@ const DepartamentoComponent = ({
                                         <>
                                             <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.number}</strong></td>
                                             <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
-                                            <td className="text-uppercase"> {t.name}</td>
+                                            {!publicAccess && <td className="text-uppercase"> {t.name}</td>}
                                         </>
                                     ) : (
                                         <>

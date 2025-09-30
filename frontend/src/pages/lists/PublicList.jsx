@@ -111,25 +111,25 @@ const PublicList = () => {
             : true;
 
         // Si searchUser tiene texto, comprobar coincidencia
-        let matchMain;
+        /*let matchMain;
         if (dep.trabajadores.length > 0) {
             matchMain = searchUser
                 ? dep.trabajadores.some(t =>
                     t.name.toLowerCase().includes(searchUser.toLowerCase())
                 )
                 : true;
-        }/* else {
+        } else {
             for (var i = 0; i < dep.subdepartamentos.length; i++) {
                 matchMain = searchUser
                     ? dep.subdepartamentos[i].trabajadores.some(t =>
                         t.name.toLowerCase().includes(searchUser.toLowerCase())
                     )
                     : true;
-                if (matchMain) break;*/
+                if (matchMain) break;
             }
-        }
+        }*/
         // Un departamento entra si cumple ambos filtros activos
-return matchDept;// && matchMain;
+        return matchDept;// && matchMain;
     });
 
 

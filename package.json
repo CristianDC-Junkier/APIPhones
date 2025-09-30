@@ -11,10 +11,5 @@
   "description": "",
   "devDependencies": {
     "concurrently": "^9.2.1"
-  },
-  "dependencies": {
-    "html2canvas": "^1.4.1",
-    "jspdf": "^3.0.3",
-    "react-icons": "^5.5.0"
   }
 }

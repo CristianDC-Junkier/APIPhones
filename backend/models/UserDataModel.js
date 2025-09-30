@@ -33,10 +33,8 @@ const UserData = sequelize.define("UserData", {
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        set(value) { this.setDataValue("name", encrypt(value)); },
-        get() { const val = this.getDataValue("name"); return val ? decrypt(val) : null; },
+        allowNull: true,
+        unique: true
     },
     extension: {
         type: DataTypes.STRING,

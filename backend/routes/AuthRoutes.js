@@ -28,7 +28,7 @@ router.get("/logout", AuthController.logout);
 
 router.get("/date", AuthController.date);
 
-router.post("/", notWorker, AuthController.create);
+router.post("/", notWorker, AuthController.createWorker);
 router.put("/:id", notWorker, canModifyUser, AuthController.update);
 router.delete("/:id", notWorker, canModifyUser, AuthController.delete);
 router.put("/:id/forcepwd", notWorker, canModifyUser, AuthController.forcePasswordChange);

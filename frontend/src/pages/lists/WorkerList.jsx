@@ -35,13 +35,13 @@ const WorkerList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
-            const mockData = generateMockUsers(100); // genera 200 empleados
-            setUsers(mockData);
-            //if (!token) return;
-            //const result = await getUserDataList(token);
-            //if (result.success) {
-            //    setUsers(result.data.users);
-            //}
+            //const mockData = generateMockUsers(100); // genera 200 empleados
+            //setUsers(mockData);
+            if (!token) return;
+            const result = await getUserDataList(token);
+            if (result.success) {
+                setUsers(result.data.users);
+            }
             setLoading(false);
         };
         fetchUsers();

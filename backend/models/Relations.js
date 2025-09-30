@@ -11,7 +11,7 @@ const UpdateModel = require("./UpdateModel");
 // ----------- DEFINIR RELACIONES -----------
 
 
-// Relaciones Department ↔ UserData
+// Relaciones Department 1 ↔ 0..* UserData
 Department.hasMany(UserData, {
     foreignKey: "departmentId",
     as: "users"
@@ -19,14 +19,14 @@ Department.hasMany(UserData, {
 UserData.belongsTo(Department, {
     foreignKey: "departmentId",
     as: "department",
-    onDelete: "SET NULL",
+    onDelete: "CASCADE",
     onUpdate: "CASCADE"
 });
 
-// Relaciones Department ↔ SubDepartment
+// Relaciones Department 1 ↔ 0..* SubDepartment
 Department.hasMany(SubDepartment, {
     foreignKey: "departmentId",
-    as: "subdepartments"
+    as: "subdepartment"
 });
 SubDepartment.belongsTo(Department, {
     foreignKey: "departmentId",
@@ -35,7 +35,19 @@ SubDepartment.belongsTo(Department, {
     onUpdate: "CASCADE"
 });
 
-// Relaciones SubDepartment ↔ UserData
+// Relaciones Department 1 ↔ 0..* UserAccount
+Department.hasMany(UserAccount, {
+    foreignKey: "departmentId",
+    as: "account"
+});
+UserAccount.belongsTo(Department, {
+    foreignKey: "departmentId",
+    as: "department",
+    onDelete: "SET NULL",
+    onUpdate: "CASCADE"
+});
+
+// Relaciones SubDepartment 1 ↔ 0..* UserData
 SubDepartment.hasMany(UserData, {
     foreignKey: "subdepartmentId",
     as: "users"
@@ -47,21 +59,19 @@ UserData.belongsTo(SubDepartment, {
     onUpdate: "CASCADE"
 });
 
-// Relaciones UserAccount ↔ UserData
+// Relaciones UserAccount 1 ↔ 0..* (1 si es Worker) UserData
 UserAccount.hasOne(UserData, {
     foreignKey: "userAccountId",
     as: "userData",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE"
 });
 UserData.belongsTo(UserAccount, {
     foreignKey: "userAccountId",
     as: "userAccount",
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     onUpdate: "CASCADE"
 });
 
-// Relación 1:N con UserAccount
+// Relaciones UserAccount 1 ↔ 0..* RefreshToken
 UserAccount.hasMany(RefreshToken, {
     foreignKey: "userId",
     as: "refreshTokens"

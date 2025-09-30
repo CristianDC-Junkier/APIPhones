@@ -36,7 +36,7 @@ async function bumpUpdate() {
 }
 
 /**
- * Hook: despu�s de actualizar un UserData.
+ * Hook: después de actualizar un UserData.
  * 
  * - Actualiza el registro global de UpdateModel.
  */
@@ -45,7 +45,7 @@ UserData.afterUpdate(async () => {
 });
 
 /**
- * Hook: despu�s de crear un UserData.
+ * Hook: después de crear un UserData.
  * 
  * - Actualiza el registro global de UpdateModel.
  */
@@ -54,9 +54,9 @@ UserData.afterCreate(async () => {
 });
 
 /**
- * Hook: despu�s de actualizar un UserData.
+ * Hook: después de actualizar un UserData.
  * 
- * - Tambi�n actualiza la `version` del UserAccount relacionado,
+ * - También actualiza la `version` del UserAccount relacionado,
  *   siempre que sea menor a 100.
  */
 UserData.afterUpdate(async (userdata, options) => {
@@ -74,7 +74,7 @@ UserData.afterUpdate(async (userdata, options) => {
  * - Valida que `number` tenga un formato de tel�fono v�lido.
  * - Valida que `email` tenga un formato de correo v�lido.
  * 
- * @throws Error si alguna validaci�n falla.
+ * @throws Error si alguna validación falla.
  */
 UserData.beforeValidate((userData) => {
     if (userData.extension && !/^\d+$/.test(userData.extension)) {
@@ -89,17 +89,46 @@ UserData.beforeValidate((userData) => {
 });
 
 /**
- * Hook: beforeUpdate
- *
- * - Este hook se ejecuta **antes de actualizar un RefreshToken**.
- * - Si `expireDate` no est� definido, se asigna autom�ticamente
- *   una nueva fecha de expiraci�n con +7 d�as desde el momento actual.
- *
- * @param {RefreshToken} token - Instancia del token que se est� actualizando.
- * @param {object} options - Opciones de la query de Sequelize.
- */
+* Hook: beforeUpdate
+*
+* - Este hook se ejecuta **antes de actualizar un RefreshToken**.
+* - Si `expireDate` no está definido, se asigna automáticamente
+*   una nueva fecha de expiraci�n con +7 días desde el momento actual.
+*
+*/
 RefreshToken.beforeUpdate((token, options) => {
     if (!token.expireDate) {
         token.expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 d�as
     }
 });
+
+/**
+* Hook: afterUpdate
+*
+* - Este hook se ejecuta **después de actualizar un UserAccount**.
+* - Si se modificó `departmentId`, todos los `UserData` asociados al usuario
+*   que **no pertenezcan al mismo departamento** serán desasociados
+*   (su `userAccountId` se pone en `null`).
+* - Evita disparar otros hooks de `UserData` para no generar loops.
+*/
+UserAccount.afterUpdate(async (user, options) => {
+    try {
+        // Verificamos si se actualizó departmentId
+        if (user.changed('departmentId')) {
+
+            // Obtenemos todos los UserData asociados
+            const userDatas = await user.getUserData();
+
+            for (const ud of userDatas) {
+                // Si el UserData no pertenece al mismo departamento, desasociarlo
+                if (ud.departmentId !== user.departmentId) {
+                    ud.userAccountId = null;
+                    await ud.save({ hooks: false }); // evitamos disparar hooks adicionales
+                }
+            }
+        }
+    } catch (err) {
+        console.error(`Error en afterUpdate de UserAccount: ${err.message}`);
+    }
+});
+

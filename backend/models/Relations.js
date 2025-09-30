@@ -59,8 +59,8 @@ UserData.belongsTo(SubDepartment, {
     onUpdate: "CASCADE"
 });
 
-// Relaciones UserAccount 1 ↔ 0..* (1 si es Worker) UserData
-UserAccount.hasOne(UserData, {
+// Relaciones UserAccount (1 si es Worker) 0 ↔ 0..* (1 si es Worker) UserData
+UserAccount.hasMany(UserData, {
     foreignKey: "userAccountId",
     as: "userData",
 });

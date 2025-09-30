@@ -9,7 +9,7 @@ class UserDataController {
     /**
     * Listar UserData para el usuario no autenticado (solo extensión y departamento).
     */
-    static async list(req, res) {
+    static async publicList(req, res) {
         try {
             const allData = await UserData.findAll({
                 include: ["department", "subdepartment"],
@@ -32,40 +32,26 @@ class UserDataController {
     /**
     * Listar todos los UserData para el usuario autenticado, con todos los datos.
     */
-    static async listAll(req, res) {
+    static async workerList(req, res) {
         try {
-            const allData = await UserAccount.findAll({
+            const allData = await UserData.findAll({
                 include: [
-                    {
-                        model: UserData,
-                        as: "userData",
-                        include: [
-                            { model: Department, as: "department" },
-                            { model: SubDepartment, as: "subdepartment" }
-                        ]
-                    }
+                    { model: Department, as: "department" },
+                    { model: SubDepartment, as: "subdepartment" }
                 ]
             });
 
             const formatted = allData.map(user => ({
-                id: user.id,
-                username: user.username,
-                usertype: user.usertype,
-                forcePwdChange: user.forcePwdChange,
-                userData: user.userData
-                    ? {
-                        id: user.userData.id,
-                        name: user.userData.name,
-                        extension: user.userData.extension,
-                        number: user.userData.number,
-                        email: user.userData.email,
-                        departmentId: user.userData.departmentId,
-                        departmentName: user.userData.department?.name || null,
-                        subdepartmentId: user.userData.subdepartmentId,
-                        subdepartmentName: user.userData.subdepartment?.name || null
-                    }
-                    : null
-            }));
+                name: user.userData.name,
+                extension: user.userData.extension,
+                number: user.userData.number,
+                email: user.userData.email,
+                departmentId: user.userData.departmentId,
+                departmentName: user.userData.department?.name || null,
+                subdepartmentId: user.userData.subdepartmentId,
+                subdepartmentName: user.userData.subdepartment?.name || null
+            })
+            );
 
             res.json({ users: formatted });
         } catch (error) {
@@ -75,78 +61,23 @@ class UserDataController {
     }
 
     /**
-    * Listar UserData de todos los usuarios del mismo departamento que el que hace la petición.
-    * Solo devuelve usuarios que tengan departmentId asignado.
-    * 
-    * @param {Object} req - req.user viene del middleware isAuthenticated
-    * @param {Object} res
-     */
-    static async listByDepartment(req, res) {
-        try {
-            const { departmentId } = req.query;
-
-            // Buscar usuarios por departamento, excluyendo al requester
-            const usersInDepartment = await UserAccount.findAll({
-                include: [
-                    {
-                        model: UserData,
-                        as: "userData",
-                        where: {
-                            departmentId,
-                            //id: { [Op.ne]: requesterId } // Excluye al que hace la petición
-                        },
-                        include: [
-                            { model: Department, as: "department" },
-                            { model: SubDepartment, as: "subdepartment" }
-                        ]
-                    }
-                ]
-            });
-
-            const formatted = usersInDepartment.map(user => ({
-                id: user.id,
-                username: user.username,
-                usertype: user.usertype,
-                forcePwdChange: user.forcePwdChange,
-                userData: user.userData
-                    ? {
-                        id: user.userData.id,
-                        name: user.userData.name,
-                        extension: user.userData.extension,
-                        number: user.userData.number,
-                        email: user.userData.email,
-                        departmentId: user.userData.departmentId,
-                        departmentName: user.userData.department?.name || null,
-                        subdepartmentId: user.userData.subdepartmentId,
-                        subdepartmentName: user.userData.subdepartment?.name || null
-                    }
-                    : null
-            }));
-
-            res.json({ users: formatted });
-        } catch (error) {
-            LoggerController.error(`Error obteniendo la lista por departamento: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
      * Recupera los datos completos del usuario usando solo el token.
      * 
-     * @param {Object} req - Objeto de petición de Express, con `req.user` proveniente del middleware de autenticación.
-     * @param {Object} res - Objeto de respuesta de Express.
+     * @param {Object} req - Objeto de petición con {params: {id} }.
+     * @param {Object} res 
      */
     static async getProfile(req, res) {
         try {
-            
             const user = await UserAccount.findByPk(req.user.id, {
                 include: [
+                    { model: Department, as: 'department', attributes: ['id', 'name'] },
                     {
                         model: UserData,
                         as: 'userData',
+                        attributes: ['id', 'name', 'extension', 'number', 'email', 'departmentId', 'subdepartmentId'],
                         include: [
-                            { model: Department, as: 'department' },
-                            { model: SubDepartment, as: 'subdepartment' }
+                            { model: Department, as: 'department', attributes: ['id', 'name'] },
+                            { model: SubDepartment, as: 'subdepartment', attributes: ['id', 'name'] }
                         ]
                     }
                 ]
@@ -155,23 +86,23 @@ class UserDataController {
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             res.json({
-                
-                    id: user.id,
-                    username: user.username,
-                    usertype: user.usertype,
-                    forcePwdChange: user.forcePwdChange,
-                    userData: user.userData ? {
-                        id: user.userData.id,
-                        name: user.userData.name,
-                        extension: user.userData.extension,
-                        number: user.userData.number,
-                        email: user.userData.email,
-                        departmentId: user.userData.departmentId,
-                        departmentName: user.userData.department?.name || null,
-                        subdepartmentId: user.userData.subdepartmentId,
-                        subdepartmentName: user.userData.subdepartment?.name || null
-                    } : null
-                
+                id: user.id,
+                username: user.username,
+                usertype: user.usertype,
+                forcePwdChange: user.forcePwdChange,
+                departmentId: user.departmentId,
+                departmentName: user.department?.name || null,
+                userData: user.userData?.map(ud => ({
+                    id: ud.id,
+                    name: ud.name,
+                    extension: ud.extension,
+                    number: ud.number,
+                    email: ud.email,
+                    departmentId: ud.departmentId,
+                    departmentName: ud.department?.name || null,
+                    subdepartmentId: ud.subdepartmentId,
+                    subdepartmentName: ud.subdepartment?.name || null
+                })) || [] // si no tiene userData, devuelve un array vacío
             });
 
         } catch (error) {
@@ -181,29 +112,28 @@ class UserDataController {
     }
 
     /**
-     * Permite al usuario autenticado actualizar sus propios datos de UserData.
-     * 
-     * @param {Object} req - Objeto de petición de Express, con `req.user` del middleware de autenticación.
-     * @param {Object} res - Objeto de respuesta de Express.
-     * @returns {JSON} - Datos actualizados o error.
-     */
+    * Permite al usuario autenticado actualizar sus propios datos de UserData.
+    * 
+    * @param {Object} req - Objeto de petición { param: {id}, body: {id, name, extension, number, email}}
+    * @param {Object} res 
+    */
     static async updateMyProfileData(req, res) {
         try {
             const userId = req.user.id;
-            const { name, extension, number, email } = req.body;
+            const { id, name, extension, number, email } = req.body;
 
             // Recuperar UserData del usuario
-            const userdata = await UserData.findOne({ where: { userAccountId: userId } });
+            const userdata = await UserData.findOne({ where: { id: id, userAccountId: userId } });
 
             if (!userdata) {
                 return res.status(404).json({ error: "Datos de Usuario no encontrado" });
             }
 
             // Actualizar solo campos permitidos
-            if (name) userdata.name = name;
-            if (extension) userdata.extension = extension;
-            if (number) userdata.number = number;
-            if (email) userdata.email = email;
+            if (name !== undefined) userdata.name = name;
+            if (extension !== undefined) userdata.extension = extension;
+            if (number !== undefined) userdata.number = number;
+            if (email !== undefined) userdata.email = email;
 
             await userdata.save();
 
@@ -224,216 +154,150 @@ class UserDataController {
     }
 
     /**
-    * Permite al usuario autenticado cambiar su nombre de usuario.
-    * 
-    * @param {Object} req - req.user contiene el usuario autenticado.
+    * Permite crear un UserData asignado directamente al usuario autenticado.
+    *
+    * @param {Object} req - { body: { name, extension, number, email, departmentId, subdepartmentId } }
     * @param {Object} res
     */
-    static async updateMyUsername(req, res) {
+    static async create(req, res) {
         try {
-            const userId = req.user.id;
-            const { username } = req.body;
+            const id = req.user.id;
+            const { name, extension, number, email, departmentId, subdepartmentId, userId } = req.body;
 
-            if (!username) {
-                return res.status(400).json({ error: "El nuevo nombre de usuario es requerido" });
+            const user = await UserAccount.findByPk(id);
+            let userToAssign = userId;
+
+            // Configurar tu id, si eres DEPARTMENT
+            if (user.usertype === "DEPARTMENT" ) {
+                userToAssign = id;
             }
 
-            // Verificar que el username no exista ya
-            const exists = await UserAccount.findOne({ where: { username } });
-            if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
-
-            // Actualizar username
-            const user = await UserAccount.findByPk(userId);
-            user.username = username;
-            await user.save();
-
-            res.json({ username:user.username });
-            LoggerController.info(`Usuario ${userId} cambió su username a ${username}`);
-        } catch (error) {
-            LoggerController.error(`Error actualizando username: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-    * Permite al usuario autenticado cambiar su contraseña.
-    * 
-    * @param {Object} req - req.user contiene el usuario autenticado.
-    * @param {Object} res
-    */
-    static async updateMyPassword(req, res) {
-        try {
-            const userId = req.user.id;
-            const { newPassword, oldPassword } = req.body;
-
-            if (!newPassword || !oldPassword) {
-                return res.status(400).json({ error: "Contraseñas requeridas" });
+            // Validar si el departamento es el tuyo si eres DEPARTMENT
+            if (user.usertype === "DEPARTMENT" && departmentId !== user.departmentId) {
+                return res.status(403).json({ error: "No puedes asignar UserData a un departamento distinto al tuyo" });
             }
 
-            if (newPassword === oldPassword) {
-                return res.status(400).json({ error: "La contraseña nueva tiene que ser diferente a la actual" });
+            // Validar el subdepartamento
+            let subdepartment = null;
+            if (subdepartmentId) {
+                subdepartment = await SubDepartment.findByPk(subdepartmentId);
+                if (!subdepartment) return res.status(400).json({ error: "Subdepartmento no válido" });
+                if (departmentId && subdepartment.departmentId != departmentId) {
+                    return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
+                }
             }
 
-            const user = await UserAccount.findByPk(userId);
-            if (user.password != oldPassword) {
-                return res.status(400).json({ error: "La contraseña actual no es correcta" });
-            }
-
-            // Actualizar contraseña
-            user.password = newPassword;
-            user.forcePwdChange = false;
-            await user.save();
-
-            res.json({ id:userId });
-            LoggerController.info(`Usuario ${userId} cambió su contraseña`);
-        } catch (error) {
-            LoggerController.error(`Error actualizando contraseña: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-    * Permite al usuario autenticado cambiar su contraseña tras ser marcado.
-    * 
-    * @param {Object} req - req.user contiene el usuario autenticado.
-    * @param {Object} res
-    */
-    static async forcedPasswordChange(req, res) {
-        try {
-            const userId = req.user.id;
-            const { newPassword } = req.body;
-
-            if (!newPassword) {
-                return res.status(400).json({ error: "Nueva contraseña requerida" });
-            }
-
-            const user = await UserAccount.findByPk(userId);
-
-            // Actualizar contraseña
-            user.password = newPassword;
-            user.forcePwdChange = false;
-            await user.save();
-
-            res.json({ id: userId });
-            LoggerController.info(`Usuario ${userId} cambió su contraseña`);
-        } catch (error) {
-            LoggerController.error(`Error actualizando contraseña: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-      Permite al usuario autenticado cambiar su contraseña tras ser marcado.
-    * 
-    * @param {Object} req - req.user contiene el usuario autenticado.
-    * @param {Object} res.
-     */
-    static async deleteSelf(req, res) {
-        try {
-            const userid = req.user.id;
-
-            const user = await UserAccount.findByPk(userid);
-            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-
-            await user.destroy();
-
-            LoggerController.info(`Usuario ${req.user.username} se elimino a si mismo`);
-            res.json({ id: userid });
-        } catch (error) {
-            LoggerController.error('Error en la eliminación de usuario: ' + error.message);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-    * Recupera los datos completos de un usuario por su ID.
-    * 
-    * @param {Object} req - req.params.id es el ID del usuario a consultar
-    * @param {Object} res
-    */
-    static async getOne(req, res) {
-        try {
-            const { id } = req.params;
-
-            const user = await UserAccount.findByPk(id, {
-                include: [
-                    {
-                        model: UserData,
-                        as: 'userData',
-                        include: [
-                            { model: Department, as: 'department' },
-                            { model: Subdepartment, as: 'subdepartment' }
-                        ]
-                    }
-                ]
+            const userdata = await UserData.create({
+                name,
+                extension,
+                number,
+                email,
+                userAccountId: userToAssign,
+                departmentId: departmentId || req.user.departmentId,
+                subdepartmentId: subdepartmentId || null
             });
 
-            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+            res.status(201).json({ user: userdata });
+            LoggerController.info(`UserData creado para el usuario ${userId} con id ${userdata.id}`);
+
+        } catch (error) {
+            LoggerController.error(`Error creando UserData para el usuario: ${error.message}`);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+    * Permite actualizar un UserData según permisos del usuario autenticado.
+    * 
+    * Reglas:
+    * - Usuarios que no son WORKER pueden actualizar cualquier UserData.
+    * - Usuarios DEPARTMENT solo pueden actualizar UserData de su mismo departamento.
+    * 
+    * @param {Object} req - Objeto de petición { body: {id, name, extension, number, email} }
+    * @param {Object} res 
+    */
+    static async update(req, res) {
+        try {
+            const userId = req.user.id;
+            const { id, name, extension, number, email, userId, departmentId, subdepartmentId } = req.body;
+
+            // Recuperar UserData a modificar
+            const userdata = await UserData.findByPk(id);
+            if (!userdata) {
+                return res.status(404).json({ error: "Datos de Usuario no encontrado" });
+            }
+
+            // Verificar que el departamento del usuario coincida con el del UserData si es DEPARTMENT
+            if (req.user.usertype === "DEPARTMENT") {
+                if (req.user.departmentId !== userdata.departmentId) {
+                    return res.status(403).json({ error: "No tienes permiso para modificar datos fuera de tu departamento" });
+                }
+            }
+
+            // Validar que el departamento y subdepartamento existen si se proporcionan
+            if (userData.departmentId) {
+                const department = await Department.findByPk(userData.departmentId);
+                if (!department) {
+                    return res.status(400).json({ error: "Departmento no válido" });
+                }
+            }
+
+            // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
+            if (!userData.departmentId && userData.subdepartmentId) {
+                return res.status(400).json({ error: "Departmento no válido" });
+            }
+
+            // Validar que el subdepartamento pertenece al departamento indicado y que existe
+            if (userData.subdepartmentId) {
+                const subdepartment = await SubDepartment.findByPk(userData.subdepartmentId);
+                if (!subdepartment) {
+                    return res.status(400).json({ error: "Subdepartmento no válido" });
+                }
+                if (userData.departmentId && subdepartment.departmentId != userData.departmentId) {
+                    return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
+                }
+            }
+
+            // Validar que el userAccountId (userId) pertenece al mismo departamento
+            if (userId !== undefined) {
+                const userAccount = await UserAccount.findByPk(userId);
+                if (!userAccount) {
+                    return res.status(400).json({ error: "Usuario no válido" });
+                }
+                if (userdata.departmentId && userAccount.departmentId !== userdata.departmentId) {
+                    return res.status(400).json({ error: "El usuario asignado no pertenece al mismo departamento que el UserData" });
+                }
+            }
+
+            // Actualizar solo campos permitidos
+            if (name !== undefined) userdata.name = name;
+            if (extension !== undefined) userdata.extension = extension;
+            if (number !== undefined) userdata.number = number;
+            if (email !== undefined) userdata.email = email;
+            if (userId !== undefined) userdata.userId = userId;
+
+            await userdata.save();
 
             res.json({
                 user: {
-                    id: user.id,
-                    username: user.username,
-                    usertype: user.usertype,
-                    forcePwdChange: user.forcePwdChange,
-                    userData: user.userData ? {
-                        id: user.userData.id,
-                        name: user.userData.name,
-                        extension: user.userData.extension,
-                        number: user.userData.number,
-                        email: user.userData.email,
-                        departmentId: user.userData.departmentId,
-                        departmentName: user.userData.department?.name || null,
-                        subdepartmentId: user.userData.subdepartmentId,
-                        subdepartmentName: user.userData.subdepartment?.name || null
-                    } : null
+                    id: userdata.id,
+                    name: userdata.name,
+                    extension: userdata.extension,
+                    number: userdata.number,
+                    email: userdata.email,
+                    departmentId: userdata.departmentId,
+                    subdepartmentId: userdata.subdepartmentId,
+                    userId: userdata.userAccountId
                 }
             });
-        } catch (error) {
-            LoggerController.error(`Error obteniendo usuario: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
 
-    /**
-     * Modifica todos los valores de UserData que se le pasen.
-     * 
-     * @param {Object} req - req.params.id es el ID del usuario cuyo UserData se va a modificar
-     * @param {Object} req.body - Objeto con los campos a actualizar en UserData
-     * @param {Object} res
-     */
-    static async update(req, res) {
-        try {
-            const { id } = req.params;
-            const { name, extension, number, email, departmentId, subdepartmentId } = req.body;
+            LoggerController.info(`Usuario ${userId} actualizó UserData ${userdata.id}`);
 
-            const userData = await UserData.findOne({ where: { userAccountId: id } });
-            if (!userData) return res.status(404).json({ error: "UserData no encontrado" });
-
-            const requester = req.user; // viene del middleware de autenticación
-
-            // Campos que se pueden actualizar según el tipo de usuario
-            let updateFields = { name, extension, number, email };
-
-            if (["ADMIN", "SUPERADMIN"].includes(requester.usertype)) {
-                // ADMIN/SUPERADMIN pueden actualizar departamento y subdepartamento
-                if (departmentId !== undefined) updateFields.departmentId = departmentId;
-                if (subdepartmentId !== undefined) updateFields.subdepartmentId = subdepartmentId;
-            } else {
-                // Usuarios normales solo pueden actualizar subdepartamento, no departamento
-                if (subdepartmentId !== undefined) updateFields.subdepartmentId = subdepartmentId;
-            }
-
-            await userData.update(updateFields);
-
-            res.json({ id });
-            LoggerController.info(`UserData de usuarioId ${id} actualizado por ${requester.username}`);
         } catch (error) {
             LoggerController.error(`Error actualizando UserData: ${error.message}`);
             res.status(500).json({ error: error.message });
         }
     }
-
 
 
 }

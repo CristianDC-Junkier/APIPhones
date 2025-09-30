@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button } from "reactstrap";
 import Spinner from '../../components/utils/SpinnerComponent';
 import { useAuth } from "../../hooks/useAuth";
-import { deleteSelf, userGetProfile, changeUsername, modifyProfile, changePassword } from "../../services/UserService";
+import { deleteSelf, userGetProfile, modifyProfile, updateProfileAcc } from "../../services/UserService";
 import BackButton from "../../components/utils/BackButtonComponent";
 import ModifyProfileComponent from '../../components/user/ModifyProfileComponent';
 
@@ -37,7 +37,7 @@ const UserProfile = () => {
         fetchData();
     }, [token, logout, navigate]);
 
-    const handleChangeUsername = async () => {
+    /*const handleChangeUsername = async () => {
         const { value: username } = await Swal.fire({
             title: "Cambio de contraseña",
             input: 'text',
@@ -57,7 +57,7 @@ const UserProfile = () => {
             }
         }
         else Swal.fire('Error', result.error || 'No se pudo modificar el nombre de usuario', 'error');
-    }
+    }*/
 
     const handleModify = async () => {
         await ModifyProfileComponent({
@@ -78,21 +78,25 @@ const UserProfile = () => {
         });
     };
 
-    const handleChangePassword = async () => {
+    const handleModifyAcc = async () => {
         const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
         const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
         const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
         const html = `
 <div>
+    <div style="${rowStyle} margin-top: 5vh">
+        <label style="${labelStyle}">Usuario <span style="color:red">*</span></label>
+        <input id="swal-username" style="${inputStyle}" placeholder="Usuario" value="${profile.username || ""}">
+    </div>
   <div style="${rowStyle}">
-    <label style="${labelStyle}">Contraseña actual <span style="color:red">*</span></label>
-    <input id="swal-passwordOld" type="password" style="${inputStyle}" placeholder="Contraseña">
+        <label style="${labelStyle}">Contraseña actual <span style="color:red">*</span></label>
+        <input id="swal-passwordOld" type="password" style="${inputStyle}" placeholder="Contraseña">
   </div>
 
   <div style="${rowStyle}">
-    <label style="${labelStyle}">Nueva contraseña <span style="color:red">*</span></label>
-    <input id="swal-passwordNew" type="password" style="${inputStyle}" placeholder="Contraseña">
+        <label style="${labelStyle}">Nueva contraseña <span style="color:red">*</span></label>
+        <input id="swal-passwordNew" type="password" style="${inputStyle}" placeholder="Contraseña">
   </div>
   <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
 </div>
@@ -106,25 +110,27 @@ const UserProfile = () => {
             cancelButtonText: "Cancelar",
             confirmButtonText: "Aceptar",
             preConfirm: () => {
+                const username = document.getElementById("swal-username").value.trim();
                 const oldPassword = document.getElementById("swal-passwordOld").value.trim();
                 const newPassword = document.getElementById("swal-passwordNew").value.trim();
 
+                if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
                 if (!oldPassword) { Swal.showValidationMessage("La contraseña actual no puede estar vacía"); return false; }
                 if (!newPassword) { Swal.showValidationMessage("La contraseña nueva no puede estar vacía"); return false; }
 
-                return { newPassword, oldPassword };
+                return { username, newPassword, oldPassword };
             }
         });
 
         if (!swal.value) return;
 
-        const result = await changePassword(swal.value, token);
+        const result = await updateProfileAcc(swal.value, token);
         if (result.success) {
-            Swal.fire("Éxito", "Contraseña modificada correctamente", "success");
+            Swal.fire("Éxito", "Información de inicio de sesión cambiada correctamente. Cerrando sesión...", "success");
             logout();
             navigate('/');
         } else {
-            Swal.fire("Error", result.error || "No se pudo modificar la contraseña", "error");
+            Swal.fire("Error", result.error || "No se pudo modificar la cuenta", "error");
         }
     }
 
@@ -175,13 +181,8 @@ const UserProfile = () => {
                         <Row className="mb-3 justify-content-center">
                             <h3 className="mb-4">Acciones sobre la cuenta</h3>
                             <Col md="5">
-                                <Button color="primary" outline onClick={() => handleChangeUsername()}>
-                                    {"Cambiar nombre de usuario"}
-                                </Button>
-                            </Col>
-                            <Col md="5">
-                                <Button color="primary" outline onClick={() => handleChangePassword()}>
-                                    {"Cambiar contraseña"}
+                                <Button color="primary" outline onClick={() => handleModifyAcc()}>
+                                    {"Cambiar Información de Inicio de Sesión"}
                                 </Button>
                             </Col>
                         </Row>

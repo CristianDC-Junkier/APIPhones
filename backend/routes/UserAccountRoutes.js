@@ -32,17 +32,19 @@ router.get("/list", isAuthenticated, UserAccountController.listUsers);
 router.get("/list-department", isAuthenticated, notWorker, UserAccountController.listUsersByDepartment);
 router.get("/:id", notWorker, UserAccountController.getOne);
 
-router.post("/", notWorker, UserAccountController.create);
-router.put("/:id", notWorker, canModifyUser, UserAccountController.update);
-router.put("/:id/forcepwd", notWorker, canModifyUser, UserAccountController.forcePasswordChange);
-router.delete("/:id", notWorker, canModifyUser, UserAccountController.delete);
-
 router.post("/worker/", notWorker, UserAccountController.createWorker);
 router.delete("/worker/:id", notWorker, canModifyUser, UserAccountController.deleteWorker);
 
 router.put("/profile-update", isAuthenticated, UserAccountController.updateMyProfileAccount);
 router.delete("/profile-del", isAuthenticated, UserAccountController.deleteSelf);
 router.put("/profile-PWD", isAuthenticated, UserAccountController.forcedPasswordChange);
+
+router.post("/", notWorker, UserAccountController.create);
+router.put("/:id", notWorker, canModifyUser, UserAccountController.update);
+router.put("/:id/forcepwd", notWorker, canModifyUser, UserAccountController.forcePasswordChange);
+router.delete("/:id", notWorker, canModifyUser, UserAccountController.delete);
+
+
 
 
 module.exports = router;

@@ -95,6 +95,10 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     <label style="${labelStyle}">Tipo de Usuario <span style="color:red">*</span></label>
     <select id="swal-type" style="${inputStyle}">${optionsHtml}</select>
   </div>
+  <div style="${rowStyle}">
+    <label style="${labelStyle}">Departamento</label>
+    <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
+  </div>
   <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
 </div>`;
 
@@ -117,10 +121,6 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData.email || ""}">
   </div>
   <div style="${rowStyle}">
-    <label style="${labelStyle}">Departamento</label>
-    <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
-  </div>
-  <div style="${rowStyle}">
     <label style="${labelStyle}">Subdepartamento</label>
     <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
   </div>
@@ -140,57 +140,60 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             const username = document.getElementById("swal-username").value.trim();
             const password = document.getElementById("swal-password").value.trim();
             const usertype = document.getElementById("swal-type").value;
+            const departmentIdRaw = document.getElementById("swal-department").value;
+            const departmentId = departmentIdRaw === "null" ? null : parseInt(departmentIdRaw, 10);
 
             if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
             if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
 
-            return { username, password, usertype };
+            return { username, password, usertype, departmentId };
         }
     });
 
     if (!swalStep1.value) return;
     const step1Values = swalStep1.value;
+    let swalStep2;
+    if (step1Values.usertype === "WORKER") {
+        // Paso 2
+        swalStep2 = await Swal.fire({
+            title: "Datos Extendidos",
+            html: step2Html,
+            focusConfirm: false,
+            width: '600px',
+            showCancelButton: true,
+            cancelButtonText: "Cancelar",
+            confirmButtonText: action === "create" ? "Crear" : "Aceptar",
+            didOpen: () => {
+                const departmentSelect = step1Values.departmentId;
+                const subdepartmentSelect = document.getElementById("swal-subdepartment");
 
-    // Paso 2
-    const swalStep2 = await Swal.fire({
-        title: "Datos Extendidos",
-        html: step2Html,
-        focusConfirm: false,
-        width: '600px',
-        showCancelButton: true,
-        cancelButtonText: "Cancelar",
-        confirmButtonText: action === "create" ? "Crear" : "Aceptar",
-        didOpen: () => {
-            const departmentSelect = document.getElementById("swal-department");
-            const subdepartmentSelect = document.getElementById("swal-subdepartment");
+                departmentSelect.addEventListener("change", (e) => {
+                    const selectedDep = parseInt(e.target.value, 10);
+                    const filteredSubDeps = subdepartments.filter(sd => sd.departmentId === selectedDep);
+                    const options = [{ id: null, name: "-- Seleccionar --" }, ...filteredSubDeps];
+                    subdepartmentSelect.innerHTML = options.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+                });
+            },
+            preConfirm: () => {
+                const name = document.getElementById("swal-name").value.trim();
+                const extension = document.getElementById("swal-extension").value.trim();
+                const number = document.getElementById("swal-number").value.trim();
+                const email = document.getElementById("swal-email").value.trim();
+                //const departmentIdRaw = document.getElementById("swal-department").value;
+                //const departmentId = departmentIdRaw === "null" ? null : parseInt(departmentIdRaw, 10);
+                const subdepartmentIdRaw = document.getElementById("swal-subdepartment").value;
+                const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
 
-            departmentSelect.addEventListener("change", (e) => {
-                const selectedDep = parseInt(e.target.value, 10);
-                const filteredSubDeps = subdepartments.filter(sd => sd.departmentId === selectedDep);
-                const options = [{ id: null, name: "-- Seleccionar --" }, ...filteredSubDeps];
-                subdepartmentSelect.innerHTML = options.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
-            });
-        },
-        preConfirm: () => {
-            const name = document.getElementById("swal-name").value.trim();
-            const extension = document.getElementById("swal-extension").value.trim();
-            const number = document.getElementById("swal-number").value.trim();
-            const email = document.getElementById("swal-email").value.trim();
-            const departmentIdRaw = document.getElementById("swal-department").value;
-            const departmentId = departmentIdRaw === "null" ? null : parseInt(departmentIdRaw, 10);
-            const subdepartmentIdRaw = document.getElementById("swal-subdepartment").value;
-            const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
+                if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
+                if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
+                if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
+                if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-            if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
-            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
-            if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
-            if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
-
-            return { name, extension, number, email, departmentId, subdepartmentId };
-        }
-    });
-
-    if (!swalStep2.value) return;
+                return { name, extension, number, email, /*departmentId,*/ subdepartmentId };
+            }
+        });
+        if (!swalStep2.value) return;
+    }
 
     if (action === "modify" && !step1Values.password) {
         onConfirm({ userAccount: step1Values, userData: swalStep2.value, userAccountId: userItem?.userAccountId || null });

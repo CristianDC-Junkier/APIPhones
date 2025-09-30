@@ -11,6 +11,7 @@ import Spinner from '../../components/utils/SpinnerComponent';
 import TableUserAccountComponent from "../../components/user/TableUserAccountComponent";
 import TableUserDataComponent from "../../components/user/TableUserDataComponent";
 import AddModifyUserCo from "../../components/user/AddModifyUserComponent";
+import { createWorker } from "../../../../backend/controllers/UserAccountController";
 
 const DashboardUser = () => {
     const { user: currentUser, token, logout } = useAuth();
@@ -52,8 +53,8 @@ const DashboardUser = () => {
             }
 
             if (responseUserData.success && responseUserAccounts.success) {
-                setUserData(responseUserData);
-                setUserAccounts(responseUserAccounts);
+                setUserData(responseUserData.data.users);
+                setUserAccounts(responseUserAccounts.data.users);
                 if (statsType === "Accounts") {
                     // Ajustar currentPage si la página actual quedó vacía
                     const totalPages = Math.ceil(userAccounts.length / rowsPerPage);
@@ -84,12 +85,22 @@ const DashboardUser = () => {
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
-                const result = await createUser(formValues, token);
-                if (result.success) {
-                    Swal.fire("Éxito", "Usuario creado correctamente", "success");
-                    await fetchUsers();
+                if (formValues.userData) {
+                    const result = await createWorker(formValues, token);
+                    if (result.success) {
+                        Swal.fire("Éxito", "Usuario creado correctamente", "success");
+                        await fetchUsers();
+                    } else {
+                        Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
+                    }
                 } else {
-                    Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
+                    const result = await createUser(formValues, token);
+                    if (result.success) {
+                        Swal.fire("Éxito", "Usuario creado correctamente", "success");
+                        await fetchUsers();
+                    } else {
+                        Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
+                    }
                 }
             }
         });

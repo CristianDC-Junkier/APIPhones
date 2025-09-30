@@ -1,7 +1,8 @@
 ﻿const { UserAccount, UserData, Department, SubDepartment, RefreshToken, UpdateModel } = require("../models/Relations");
 
 const LoggerController = require("./LoggerController");
-const { generateToken, decodeToken } = require("../utils/JWT");
+const { Op } = require("sequelize");
+
 
 /**
  * Controlador de autenticación y gestión de usuarios.
@@ -12,7 +13,7 @@ const { generateToken, decodeToken } = require("../utils/JWT");
  *  - Modificar un usuario
  *  - Eliminar un usuario
  */
-class AuthController {
+class UserAccountController {
 
     /**
     * Listar todos los usuarios con su UserData y relaciones.
@@ -575,4 +576,4 @@ class AuthController {
 
 }
 
-module.exports = AuthController;
+module.exports = UserAccountController;

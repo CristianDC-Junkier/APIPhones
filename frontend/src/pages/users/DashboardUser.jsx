@@ -4,14 +4,13 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getUserDataList, createUser } from "../../services/UserService";
+import { getUserDataList, createUser, createWorker } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
 import TableUserAccountComponent from "../../components/user/TableUserAccountComponent";
 import TableUserDataComponent from "../../components/user/TableUserDataComponent";
 import AddModifyUserCo from "../../components/user/AddModifyUserComponent";
-import { createWorker } from "../../../../backend/controllers/UserAccountController";
 
 const DashboardUser = () => {
     const { user: currentUser, token, logout } = useAuth();

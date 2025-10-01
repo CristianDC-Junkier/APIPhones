@@ -57,6 +57,24 @@ export const createUser = async (user, token) => {
 };
 
 /**
+ * Solicitud de creación de un nuevo usuario tipo Worker
+ * @param {Object} user - la información del usuario que se quiere crear
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const createWorker = async (user, token) => {
+    try {
+        const res = await api.post('/acc/worker/', user, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};
+
+
+/**
  * Solicitud de modificación de un usuario existente
  * @param {Object} user - la información del usuario que se quiere modificar
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización

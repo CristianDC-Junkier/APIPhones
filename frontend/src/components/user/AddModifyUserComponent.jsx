@@ -154,6 +154,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     const step1Values = swalStep1.value;
     let swalStep2;
     if (step1Values.usertype === "WORKER") {
+
         // Paso 2
         swalStep2 = await Swal.fire({
             title: "Datos Extendidos",
@@ -164,23 +165,16 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             cancelButtonText: "Cancelar",
             confirmButtonText: action === "create" ? "Crear" : "Aceptar",
             didOpen: () => {
-                const departmentSelect = step1Values.departmentId;
                 const subdepartmentSelect = document.getElementById("swal-subdepartment");
-
-                departmentSelect.addEventListener("change", (e) => {
-                    const selectedDep = parseInt(e.target.value, 10);
-                    const filteredSubDeps = subdepartments.filter(sd => sd.departmentId === selectedDep);
-                    const options = [{ id: null, name: "-- Seleccionar --" }, ...filteredSubDeps];
-                    subdepartmentSelect.innerHTML = options.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
-                });
+                const filteredSubDeps = subdepartments.filter(sd => sd.departmentId === step1Values.departmentId);
+                const options = [{ id: null, name: "-- Seleccionar --" }, ...filteredSubDeps];
+                subdepartmentSelect.innerHTML = options.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
             },
             preConfirm: () => {
                 const name = document.getElementById("swal-name").value.trim();
                 const extension = document.getElementById("swal-extension").value.trim();
                 const number = document.getElementById("swal-number").value.trim();
                 const email = document.getElementById("swal-email").value.trim();
-                //const departmentIdRaw = document.getElementById("swal-department").value;
-                //const departmentId = departmentIdRaw === "null" ? null : parseInt(departmentIdRaw, 10);
                 const subdepartmentIdRaw = document.getElementById("swal-subdepartment").value;
                 const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
 
@@ -189,7 +183,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
                 if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
                 if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-                return { name, extension, number, email, /*departmentId,*/ subdepartmentId };
+                return { name, extension, number, email, departmentId: step1Values.departmentId,  subdepartmentId };
             }
         });
         if (!swalStep2.value) return;

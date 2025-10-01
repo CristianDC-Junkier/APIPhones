@@ -35,9 +35,9 @@ async function bumpUpdate() {
         let updateRow = await UpdateModel.findByPk(1);
         if (updateRow) {
             if (updateRow.version < 100000) {
-                userdata.version += 1;
+                updateRow.version += 1;
             } else {
-                userdata.version = 0;
+                updateRow.version = 0;
             }
             updateRow.date = new Date();
             await updateRow.save();

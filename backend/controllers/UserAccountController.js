@@ -1,6 +1,7 @@
-﻿const { UserAccount, UserData, Department, SubDepartment, RefreshToken, UpdateModel } = require("../models/Relations");
+﻿const { UserAccount, UserData, Department, SubDepartment, } = require("../models/Relations");
 
 const LoggerController = require("./LoggerController");
+const { generateToken } = require("../utils/JWT");
 const { Op } = require("sequelize");
 
 
@@ -45,6 +46,7 @@ class UserAccountController {
                 forcePwdChange: user.forcePwdChange,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
+                version: user.version,
                 userData: user.userData?.map(ud => ({
                     id: ud.id,
                     name: ud.name,
@@ -54,7 +56,8 @@ class UserAccountController {
                     departmentId: ud.departmentId,
                     departmentName: ud.department?.name || null,
                     subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null
+                    subdepartmentName: ud.subdepartment?.name || null,
+                    version: user.version
                 })) || []
             }));
 
@@ -110,6 +113,7 @@ class UserAccountController {
                 forcePwdChange: user.forcePwdChange,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
+                version: user.version,
                 userData: user.userData?.map(ud => ({
                     id: ud.id,
                     name: ud.name,
@@ -119,7 +123,8 @@ class UserAccountController {
                     departmentId: ud.departmentId,
                     departmentName: ud.department?.name || null,
                     subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null
+                    subdepartmentName: ud.subdepartment?.name || null,
+                    version: user.version
                 })) || [] // si no tiene userData, devuelve un array vacío
             }));
 
@@ -165,6 +170,7 @@ class UserAccountController {
                 forcePwdChange: user.forcePwdChange,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
+                version: user.version,
                 userData: user.userData?.map(ud => ({
                     id: ud.id,
                     name: ud.name,
@@ -174,7 +180,8 @@ class UserAccountController {
                     departmentId: ud.departmentId,
                     departmentName: ud.department?.name || null,
                     subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null
+                    subdepartmentName: ud.subdepartment?.name || null,
+                    version: user.version
                 })) || [] // si no tiene userData, devuelve un array vacío
             });
 
@@ -343,6 +350,8 @@ class UserAccountController {
             const targetUser = await UserAccount.findByPk(targetUserId);
             if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
+            if (targetUser.version != userAccount.version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
+
 
             // Validar que el nuevo username sea único
             if (userAccount.username && userAccount.username !== targetUser.username) {
@@ -378,16 +387,18 @@ class UserAccountController {
     /**
     * Marca un usuario para que deba cambiar la contraseña en su próximo login.
      * 
-    * @param {Object} req - Objeto de petición con { params: { id } }.
+    * @param {Object} req - Objeto de petición con { params: { id }, body: { password, version } }.
     * @param {Object} res 
     */
     static async forcePasswordChange(req, res) {
         try {
             const { id } = req.params;
-            const { password } = req.body;
+            const { password, version } = req.body;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+            if (user.version != version) return res.status(409).json({ error: "Su usuario ha sido modificado anteriormente" });
 
             user.forcePwdChange = true;
             user.password = password;
@@ -402,18 +413,21 @@ class UserAccountController {
     }
 
     /**
-     * Elimina un usuario (No Worker) existente.
-     * 
-     * @param {Object} req - Objeto de petición con { params: { id } }.
-     * @param {Object} res 
-     */
+    * Elimina un usuario (No Worker) existente.
+    * 
+    * @param {Object} req - Objeto de petición con { params: { id }, body: { version } }.
+    * @param {Object} res 
+    */
     static async delete(req, res) {
         try {
             const { id } = req.params;
+            const { version } = req.body;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
             if (user.usertype === "WORKER") return res.status(400).json({ error: "El usuario es un trabajador" });
+
+            if (user.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
 
             await user.destroy();
 
@@ -426,18 +440,21 @@ class UserAccountController {
     }
 
     /**
-     * Elimina un usuario (Worker) existente.
-     * 
-     * @param {Object} req - Objeto de petición con { params: { id } }.
-     * @param {Object} res 
-     */
+    * Elimina un usuario (Worker) existente.
+    * 
+    * @param {Object} req - Objeto de petición con { params: { id }, body: { version } }.
+    * @param {Object} res 
+    */
     static async deleteWorker(req, res) {
         try {
             const { id } = req.params;
+            const { version } = req.body;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
             if (user.usertype !== "WORKER") return res.status(400).json({ error: "El usuario no es un trabajador" });
+
+            if (user.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
 
             const userData = await UserData.findOne({ where: { userAccountId: id } });
 
@@ -453,57 +470,85 @@ class UserAccountController {
     }
 
     /**
-   * Permite al usuario autenticado actualizar su username y/o contraseña.
-   * 
-   * @param {Object} req - req.user contiene el usuario autenticado.
-   * @param {Object} res
-   */
+    * Permite al usuario autenticado modificar su propia cuenta.
+    * 
+    * @param {Object} req - Objeto de petición con { params: { user }, body: { username, usertype, department, oldPassword, newPassword, version } }.
+    * @param {Object} res.
+    */
     static async updateMyProfileAccount(req, res) {
         try {
-            const userId = req.user.id;
-            const { username, oldPassword, newPassword } = req.body;
+            const currentUser = req.user; // Usuario autenticado
+            const { username, usertype, department, oldPassword, newPassword, version } = req.body;
 
-            const user = await UserAccount.findByPk(userId);
+            const user = await UserAccount.findByPk(currentUser.id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+            if (user.version != version) return res.status(409).json({ error: "Su usuario ha sido modificado anteriormente" });
 
             const updates = {};
 
-            // Actualizar username
-            if (username) {
-                // Verificar que no exista otro usuario con el mismo username
-                const exists = await UserAccount.findOne({
-                    where: { username, id: { [Sequelize.Op.ne]: userId } }
-                });
-                if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
-
-                updates.username = username;
+            // --- Contraseña ---
+            if (!oldPassword || !newPassword) {
+                return res.status(400).json({ error: "Ambas contraseñas son requeridas para actualizarla" });
+            }
+            if (oldPassword === newPassword) {
+                return res.status(400).json({ error: "La contraseña nueva debe ser diferente a la actual" });
+            }
+            if (user.password !== oldPassword) {
+                return res.status(400).json({ error: "La contraseña actual no es correcta" });
             }
 
-            // Actualizar contraseña
-            if (oldPassword || newPassword) {
-                if (!oldPassword || !newPassword) {
-                    return res.status(400).json({ error: "Ambas contraseñas son requeridas para actualizarla" });
-                }
-                if (oldPassword === newPassword) {
-                    return res.status(400).json({ error: "La contraseña nueva debe ser diferente a la actual" });
-                }
-                if (user.password !== oldPassword) {
-                    return res.status(400).json({ error: "La contraseña actual no es correcta" });
-                }
+            updates.password = newPassword;
+            updates.forcePwdChange = false;
 
-                updates.password = newPassword;
-                updates.forcePwdChange = false;
+
+            // --- Username ---
+            if (!username) return res.status(400).json({ error: "El nombre de usuario es obligatorio" });
+
+            const exists = await UserAccount.findOne({
+                where: { username, id: { [Sequelize.Op.ne]: currentUser.id } }
+            });
+            if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
+
+            updates.username = username;
+
+            // --- Department (solo ADMIN/SUPERADMIN) ---
+            if (["ADMIN", "SUPERADMIN"].includes(currentUser.usertype)) {
+                if (!department) return res.status(400).json({ error: "El departamento es obligatorio" });
+                updates.department = department;
+            }
+
+            // --- Usertype ---
+            if (currentUser.usertype === "SUPERADMIN") {
+                if (!usertype) return res.status(400).json({ error: "El tipo de usuario es obligatorio" });
+                updates.usertype = usertype;
+            } else if (currentUser.usertype === "ADMIN" && usertype && usertype !== "SUPERADMIN") {
+                updates.usertype = usertype;
             }
 
             // Aplicar cambios
             await user.update(updates);
 
-            res.json({
+            const token = await generateToken({
                 id: user.id,
-                username: user.username
+                username: user.username,
+                usertype: user.usertype,
+                departmentId: user.departmentId,
+                remember: currentUser.remember || false
             });
 
-            LoggerController.info(`Usuario ${userId} actualizó su perfil (username/contraseña)`);
+            res.json({
+                token,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    usertype: user.usertype,
+                    forcePwdChange: user.forcePwdChange,
+                    departmentId: user.departmentId,
+                    userversion: user.version,
+                }
+            });
+
+            LoggerController.info(`Usuario ${currentUser.id} actualizó su perfil`);
 
         } catch (error) {
             LoggerController.error(`Error actualizando perfil: ${error.message}`);
@@ -514,15 +559,18 @@ class UserAccountController {
     /**
     * Permite al usuario autenticado eliminar su propia cuenta.
     * 
-    * @param {Object} req - req.user contiene el usuario autenticado.
+    * @param {Object} req - Objeto de petición con { params: { id }, body: { version } }.
     * @param {Object} res.
-     */
+    */
     static async deleteSelf(req, res) {
         try {
-            const userid = req.user.id;
+            const { id } = req.user.id;
+            const { version } = req.body;
 
-            const user = await UserAccount.findByPk(userid);
+
+            const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+            if (user.version != version) return res.status(409).json({ error: "Su usuario ha sido modificado anteriormente" });
 
             if (user.usertype === "SUPERADMIN") {
                 return res.status(403).json({ error: "Un SUPERADMIN no puede eliminarse" });
@@ -535,7 +583,7 @@ class UserAccountController {
             await user.destroy();
 
             LoggerController.info(`Usuario ${req.user.username} se elimino a si mismo`);
-            res.json({ id: userid });
+            res.json({ id: id });
         } catch (error) {
             LoggerController.error('Error en la eliminación de usuario: ' + error.message);
             res.status(500).json({ error: error.message });
@@ -545,7 +593,7 @@ class UserAccountController {
     /**
     * Permite al usuario autenticado cambiar su contraseña tras ser marcado.
     * 
-    * @param {Object} req - req.user contiene el usuario autenticado.
+    * @param {Object} req - Objeto de petición con { params: { id }, body: { newPassword } }.
     * @param {Object} res
     */
     static async forcedPasswordChange(req, res) {

@@ -9,9 +9,21 @@ UserAccount.beforeUpdate((user, options) => {
     if (user.version < 100000) {
         user.version += 1;
     } else {
-        userdata.version = 0;
+        user.version = 0;
     }
 });
+
+/**
+ * Hook: después de actualizar un UserAccount.
+ * 
+ * - Destruir todos los refresh tokens asociados al usuario modificado
+ */
+UserAccount.afterUpdate(async (user, options) => {
+    await RefreshToken.destroy({
+        where: { userId: user.id }
+    });
+});
+
 
 /**
  * Función auxiliar para actualizar el registro �nico de UpdateModel.
@@ -98,12 +110,12 @@ UserData.beforeValidate((userData) => {
 *
 * - Este hook se ejecuta **antes de actualizar un RefreshToken**.
 * - Si `expireDate` no está definido, se asigna automáticamente
-*   una nueva fecha de expiraci�n con +7 días desde el momento actual.
+*   una nueva fecha de expiración con +7 días desde el momento actual.
 *
 */
 RefreshToken.beforeUpdate((token, options) => {
     if (!token.expireDate) {
-        token.expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 d�as
+        token.expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 días
     }
 });
 

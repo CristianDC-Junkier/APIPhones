@@ -23,7 +23,7 @@ api.interceptors.response.use(
             Swal.fire({
                 icon: 'warning',
                 title: 'Sesión expirada',
-                text: 'Por motivos de seguridad su sesión expiró.\nPor favor, vuelve a iniciar sesión.',
+                html: 'Por motivos de seguridad su sesión expiró.<br> Por favor, vuelve a iniciar sesión.',
                 confirmButtonText: 'Aceptar',
                 allowOutsideClick: false,
                 allowEscapeKey: false

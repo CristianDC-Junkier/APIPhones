@@ -1,7 +1,7 @@
 ﻿const { UserAccount, UserData, Department, SubDepartment, RefreshToken, UpdateModel } = require("../models/Relations");
 
 const LoggerController = require("../controllers/LoggerController");
-const { generateToken, decodeToken } = require("../utils/JWT");
+const { generateToken } = require("../utils/JWT");
 
 /**
  * Controlador de autenticación y gestión de usuarios.
@@ -48,7 +48,7 @@ class AuthController {
                 return res.status(401).json({ error: "Credenciales incorrectas" });
             }
 
-            const token = await generateToken({ id: user.id, username: user.username, usertype: user.usertype, departmentId: user.departmentId }, remember);
+            const token = await generateToken({ id: user.id, username: user.username, usertype: user.usertype, departmentId: user.departmentId, remember: remember });
 
             res.json({
                 token,
@@ -58,17 +58,7 @@ class AuthController {
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
                     departmentId: user.departmentId,
-                    userData: user.userData ? {
-                        id: user.userData.id,
-                        name: user.userData.name,
-                        extension: user.userData.extension,
-                        number: user.userData.number,
-                        email: user.userData.email,
-                        departmentId: user.userData.departmentId,
-                        departmentName: user.userData.department?.name || null,
-                        subdepartmentId: user.userData.subdepartmentId,
-                        subdepartmentName: user.userData.subdepartment?.name || null
-                    } : null
+                    version: user.version,
                 }
             });
 
@@ -92,17 +82,8 @@ class AuthController {
     */
     static async logout(req, res) {
         try {
-            const authHeader = req.headers["authorization"];
-            if (!authHeader) return res.status(401).json({ error: "Token requerido" });
-
-            const token = authHeader.split(" ")[1];
-            if (!token) return res.status(401).json({ error: "Token requerido" });
-
-            // Decodificar JWT para obtener el userId
-            const payload = await decodeToken(token);
-
-            const userId = payload.id;
-            const userName = payload.username;
+            const userId = req.user.id;
+            const userName = req.user.username;
 
             // Buscar todos los refresh tokens del usuario
             const userTokens = await RefreshToken.findAll({ where: { userId } });
@@ -132,7 +113,7 @@ class AuthController {
     * @param {Object} req - Objeto de petición de Express.
     * @param {Object} res - Objeto de respuesta de Express.
     */
-    static async date(req, res) {
+    static async getDate(req, res) {
         try {
             const updateRow = await UpdateModel.findByPk(1);
 
@@ -142,10 +123,32 @@ class AuthController {
 
             const date = new Date(updateRow.date).toLocaleDateString("es-ES");
 
-            return res.json({date});
+            return res.json({ date });
 
         } catch (error) {
             LoggerController.error("Error recuperando la fecha del listín: " + error.message);
+            res.status(500).json({ error: "Error recuperando la fecha del listín" });
+        }
+    }
+
+    /**
+    * Recoge la versión del usuario.
+    * 
+    * @param {Object} req - Objeto de petición de Express.
+    * @param {Object} res - Objeto de respuesta de Express.
+    */
+    static async getVersion(req, res) {
+        try {
+            const userVersion = await UserAccount.findByPk(req.user.id, {
+                attributes: ['version']
+            });
+
+            const version = userVersion?.version;
+
+            return res.json({ version });
+
+        } catch (error) {
+            LoggerController.error("Error recuperando la versión del usuario: " + error.message);
             res.status(500).json({ error: "Error recuperando la fecha del listín" });
         }
     }

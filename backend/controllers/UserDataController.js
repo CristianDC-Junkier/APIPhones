@@ -49,7 +49,7 @@ class UserDataController {
                 departmentId: user.userData.departmentId,
                 departmentName: user.userData.department?.name || null,
                 subdepartmentId: user.userData.subdepartmentId,
-                subdepartmentName: user.userData.subdepartment?.name || null
+                subdepartmentName: user.userData.subdepartment?.name || null,
             })
             );
 
@@ -63,18 +63,18 @@ class UserDataController {
     /**
      * Recupera los datos completos del usuario usando solo el token.
      * 
-     * @param {Object} req - Objeto de petición con {params: {id} }.
+     * @param {Object} req - Objeto de petición con {params: {id} version: {version}}.
      * @param {Object} res 
      */
     static async getProfile(req, res) {
         try {
+            const { version } = req.body;
             const user = await UserAccount.findByPk(req.user.id, {
                 include: [
                     { model: Department, as: 'department', attributes: ['id', 'name'] },
                     {
                         model: UserData,
                         as: 'userData',
-                        attributes: ['id', 'name', 'extension', 'number', 'email', 'departmentId', 'subdepartmentId'],
                         include: [
                             { model: Department, as: 'department', attributes: ['id', 'name'] },
                             { model: SubDepartment, as: 'subdepartment', attributes: ['id', 'name'] }
@@ -85,6 +85,8 @@ class UserDataController {
 
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
+            if (user.version != version) return res.status(409).json({ error: "Su perfil ha sido modificado anteriormente" });
+
             res.json({
                 id: user.id,
                 username: user.username,
@@ -92,6 +94,7 @@ class UserDataController {
                 forcePwdChange: user.forcePwdChange,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
+                version: user.version,
                 userData: user.userData?.map(ud => ({
                     id: ud.id,
                     name: ud.name,
@@ -101,7 +104,8 @@ class UserDataController {
                     departmentId: ud.departmentId,
                     departmentName: ud.department?.name || null,
                     subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null
+                    subdepartmentName: ud.subdepartment?.name || null,
+                    version: user.version
                 })) || [] // si no tiene userData, devuelve un array vacío
             });
 
@@ -114,13 +118,13 @@ class UserDataController {
     /**
     * Permite al usuario autenticado actualizar sus propios datos de UserData.
     * 
-    * @param {Object} req - Objeto de petición { param: {id}, body: {id, name, extension, number, email}}
+    * @param {Object} req - Objeto de petición { param: { id }, body: {id, name, extension, number, email, version}}
     * @param {Object} res 
     */
     static async updateMyProfileData(req, res) {
         try {
             const userId = req.user.id;
-            const { id, name, extension, number, email } = req.body;
+            const { id, name, extension, number, email, version } = req.body;
 
             // Recuperar UserData del usuario
             const userdata = await UserData.findOne({ where: { id: id, userAccountId: userId } });
@@ -128,6 +132,8 @@ class UserDataController {
             if (!userdata) {
                 return res.status(404).json({ error: "Datos de Usuario no encontrado" });
             }
+
+            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificados anteriormente" });
 
             // Actualizar solo campos permitidos
             if (name !== undefined) userdata.name = name;
@@ -213,19 +219,21 @@ class UserDataController {
     * - Usuarios que no son WORKER pueden actualizar cualquier UserData.
     * - Usuarios DEPARTMENT solo pueden actualizar UserData de su mismo departamento.
     * 
-    * @param {Object} req - Objeto de petición { body: {id, name, extension, number, email, userId, departmentId, subdepartmentId} }
+    * @param {Object} req - Objeto de petición { params: { id }, body: {id, name, extension, number, email, userId, departmentId, subdepartmentId, version} }
     * @param {Object} res 
     */
     static async update(req, res) {
         try {
             const currentUserId = req.user.id;
-            const { id, name, extension, number, email, userId, departmentId, subdepartmentId } = req.body;
+            const { id, name, extension, number, email, userId, departmentId, subdepartmentId, version } = req.body;
 
             // Recuperar UserData a modificar
             const userdata = await UserData.findByPk(id);
             if (!userdata) {
                 return res.status(404).json({ error: "Datos de Usuario no encontrado" });
             }
+
+            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificado por otro proceso" });
 
             // Verificar que el usuario es DEPARTMENT
             if (req.user.usertype !== "DEPARTMENT") {

@@ -40,9 +40,25 @@ export const logout = async (token) => {
  * Solicitud de la fecha del listin
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const date = async () => {
+export const getDate = async () => {
     try {
         const response = await api.get('/date');
+        return { success: true, data: response.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};
+
+
+/**
+ * Solicitud de la versión del usuario
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const getVersion = async (token) => {
+    try {
+        const response = await api.get('/version', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         return { success: true, data: response.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

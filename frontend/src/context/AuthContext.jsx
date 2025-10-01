@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
 
     /** Restaurar usuario al cargar la app */
     useEffect(() => {
+
         const restoreAndCheckVersion = async () => {
             const storedValues = getUserWithExpiry();
             if (!storedValues) {
@@ -75,7 +76,7 @@ export const AuthProvider = ({ children }) => {
 
 
             try {
-                const result = await getVersion(storedValues.token); 
+                const result = await getVersion(storedValues.token);
                 if (result.success) {
 
                     if (result.data.version !== storedValues.version) {
@@ -175,7 +176,7 @@ export const AuthProvider = ({ children }) => {
 
     /** Obtener fecha del listín */
     const contextDate = async () => {
-        const result = await getDate();
+        const result = await getDate(token);
         if (result.success) return result.data.date;
         return "Fecha no disponible";
     };

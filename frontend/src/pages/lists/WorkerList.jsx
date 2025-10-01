@@ -20,27 +20,28 @@ const WorkerList = () => {
     const [users, setUsers] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
     const [showPhones, setShowPhones] = useState(true);
-    const { token } = useAuth();
-    const { date } = useAuth();
+    const { date, token } = useAuth();
 
     useEffect(() => {
         const fetchDate = async () => {
+            if (loading || !token) return;
             const result = await date();
             setLastUpdate(result);
         };
 
         fetchDate();
-    }, [date]);
+    }, [date, loading, token]);
 
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
-            //const mockData = generateMockUsers(100); // genera 200 empleados
+            //const mockData = generateMockUsers(100); // genera 100 empleados
             //setUsers(mockData);
             if (!token) return;
             const result = await getUserDataList(token);
             if (result.success) {
-                setUsers(result.data.users);
+                console.log(result.data.users);
+              setUsers(result.data.users);
             }
             setLoading(false);
         };

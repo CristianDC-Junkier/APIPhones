@@ -16,6 +16,30 @@ import Swal from "sweetalert2";
  * @param {Function} params.setLoading - callback para setear loading
  */
 export const exportPDF = async ({ colCount, listRef, lastUpdate, setLoading }) => {
+    // Evitar crash si no hay ref
+    if (!listRef?.current) {
+        Swal.fire({
+            icon: "warning",
+            title: "Sin datos",
+            text: "No hay información disponible para exportar.",
+            confirmButtonText: "Aceptar",
+        });
+        return;
+    }
+
+    // Buscar todos los departamentos renderizados
+    const departmentNodes = listRef.current.querySelectorAll(".row > .col-md-4 > *");
+
+    // Si no hay departamentos (aunque existan columnas vacías)
+    if (departmentNodes.length === 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Sin datos",
+            text: "No hay departamentos para exportar.",
+            confirmButtonText: "Aceptar",
+        });
+        return;
+    }
     setLoading(true);
     try {
         const pdf = new jsPDF("p", "mm", "a4");

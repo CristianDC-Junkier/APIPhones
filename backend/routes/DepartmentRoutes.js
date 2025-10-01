@@ -15,7 +15,7 @@ const { isAuthenticated } = require("../middlewares/Auth");
  *  * Middleware:
  * - `isAuthenticated` → Permite acceso a usuarios logeados.
  */
-router.get('/', isAuthenticated, DepartmentController.listAll);
+router.get('/', isAuthenticated, DepartmentController.list);
 router.get('/:id', isAuthenticated, DepartmentController.getById);
 router.post('/', isAuthenticated, DepartmentController.create);
 router.put('/:id', isAuthenticated, DepartmentController.update);

@@ -5,10 +5,10 @@ import Swal from "sweetalert2";
 import { modifyUser, deleteUser } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
 import AddModifyUser from "./AddModifyUserComponent";
-import Pagination from "../../components/PaginationComponent";
-import PWDAsk from "../../components/user/PWDAskComponent";
+import Pagination from "../PaginationComponent";
+import PWDAsk from "./PWDAskComponent";
 
-const TableUserComponent = ({
+const TableUserAccountComponent = ({
     users,
     search,
     rowsPerPage,
@@ -118,7 +118,6 @@ const TableUserComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
-                        const isCurrentUser = userItem.id === currentUser.id;
 
                         let canModify = false;
                         let canDelete = false;
@@ -144,13 +143,13 @@ const TableUserComponent = ({
                         }
 
                         return (
-                            <tr key={idx} style={isCurrentUser ? { fontWeight: "bold" } : {}}>
-                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd" } : {}}>{userItem.id}</td>
-                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd" } : {}}>{userItem.username}</td>
-                                <td className="text-center" style={isCurrentUser ? { color: "#0d6efd" } : {}}>{tipoLabels[userItem.usertype]}</td>
+                            <tr key={idx} >
+                                <td className="text-center"> {userItem.id}</td>
+                                <td className="text-center"> {userItem.username}</td>
+                                <td className="text-center"> {tipoLabels[userItem.usertype]}</td>
                                 <td className="text-center">
                                     <div className="d-flex justify-content-center flex-wrap">
-                                        {canPWDC && !isCurrentUser && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
+                                        {canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
                                         {canModify && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
                                         {canDelete && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
                                     </div>
@@ -189,4 +188,4 @@ const TableUserComponent = ({
     );
 };
 
-export default TableUserComponent;
+export default TableUserAccountComponent;

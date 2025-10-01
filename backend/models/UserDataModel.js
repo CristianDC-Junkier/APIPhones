@@ -4,18 +4,19 @@ const { encrypt, decrypt } = require("../utils/Crypto");
 
 
 /**
- * Modelo Sequelize para almacenar información adicional de usuarios.
- * Todos los campos tipo STRING se guardan cifrados para proteger datos sensibles.
+ * Modelo Sequelize para almacenar información de datos de los usuarios.
+ * Algnos campos están cifrados para mayor seguridad.
  * 
  * Campos:
- * - id             → Identificador único autoincremental.
- * - name           → Nombre completo del usuario (cifrado).
- * - extension      → Extensión telefónica (cifrada).
- * - number         → Número de teléfono (cifrado).
- * - email          → Correo electrónico (cifrado, validado como email).
- * - departmentId   → Clave foránea a Department.
- * - subdepartmentId→ Clave foránea a Subdepartment.
- * - userAccountId  → Clave foránea a UserAccount (obligatorio).
+ * - id              → Identificador único autoincremental.
+ * - name            → Nombre completo del usuario.
+ * - extension       → Extensión telefónica (cifrada, validado como número).
+ * - number          → Número de teléfono (cifrado, validado con teléfono).
+ * - email           → Correo electrónico (cifrado, validado como email).
+ * - departmentId    → Clave foránea a Department (obligatorio).
+ * - subdepartmentId → Clave foránea a Subdepartment.
+ * - userAccountId   → Clave foránea a UserAccount.
+ * - version         → Versión del objeto (obligatorio).
  * 
  * Relaciones:
  * - belongsTo UserAccount
@@ -23,7 +24,8 @@ const { encrypt, decrypt } = require("../utils/Crypto");
  * - belongsTo Subdepartment
  * 
  * Hooks:
- * - afterCreate / afterUpdate → Incrementa la versión del UserAccount asociado.
+ * - afterCreate / afterUpdate → Incrementa la fecha del UpdateModel.
+ * - beforeUpdate              → Incrementa el campo `version` automáticamente.
  */
 const UserData = sequelize.define("UserData", {
     id: {
@@ -53,7 +55,13 @@ const UserData = sequelize.define("UserData", {
         allowNull: true,
         set(value) { this.setDataValue("email", encrypt(value)); },
         get() { const val = this.getDataValue("email"); return val ? decrypt(val) : null; },
-    }
+    },
+    version: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        validate: { min: 0, max: 100000 },
+    },
 });
 
 

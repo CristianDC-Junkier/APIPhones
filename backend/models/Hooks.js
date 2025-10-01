@@ -3,25 +3,31 @@
 /**
  * Hook: antes de actualizar un UserAccount.
  * 
- * - Incrementa el campo `version` del UserAccount siempre que sea < 100.
+ * - Incrementa el campo `version` del UserAccount siempre que sea < 100000.
  */
 UserAccount.beforeUpdate((user, options) => {
-    if (user.version < 100) {
+    if (user.version < 100000) {
         user.version += 1;
+    } else {
+        userdata.version = 0;
     }
 });
 
 /**
- * Funci�n auxiliar para actualizar el registro �nico de UpdateModel.
- * - Si existe, incrementa su versi�n y actualiza la fecha.
+ * Función auxiliar para actualizar el registro �nico de UpdateModel.
+ * - Si existe, incrementa su versión y actualiza la fecha.
  * - Si no existe, crea un registro con id=1.
  */
 async function bumpUpdate() {
     try {
         let updateRow = await UpdateModel.findByPk(1);
         if (updateRow) {
+            if (updateRow.version < 100000) {
+                userdata.version += 1;
+            } else {
+                userdata.version = 0;
+            }
             updateRow.date = new Date();
-            updateRow.version = updateRow.version + 1;
             await updateRow.save();
         } else {
             await UpdateModel.create({
@@ -54,16 +60,15 @@ UserData.afterCreate(async () => {
 });
 
 /**
- * Hook: después de actualizar un UserData.
+ * Hook: antes de actualizar un UserData.
  * 
- * - También actualiza la `version` del UserAccount relacionado,
- *   siempre que sea menor a 100.
+ * - Incrementa el campo `version` del UserAccount siempre que sea < 100000.
  */
-UserData.afterUpdate(async (userdata, options) => {
-    const userAccount = await userdata.getUserAccount();
-    if (userAccount && userAccount.version < 100) {
-        userAccount.version += 1;
-        await userAccount.save({ hooks: false }); 
+UserData.beforeUpdate((userdata, options) => {
+    if (userdata.version < 100000) {
+        userdata.version += 1;
+    } else {
+        userdata.version = 0;
     }
 });
 
@@ -78,13 +83,13 @@ UserData.afterUpdate(async (userdata, options) => {
  */
 UserData.beforeValidate((userData) => {
     if (userData.extension && !/^\d+$/.test(userData.extension)) {
-        throw new Error("Extension debe ser num�rica");
+        throw new Error("Extensión debe ser numérica");
     }
     if (userData.number && !/^[0-9+\-\s()]*$/.test(userData.number)) {
-        throw new Error("Number no v�lido");
+        throw new Error("Teléfono no válido");
     }
     if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
-        throw new Error("Email no v�lido");
+        throw new Error("Email no válido");
     }
 });
 

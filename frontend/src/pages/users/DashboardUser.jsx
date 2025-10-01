@@ -8,7 +8,8 @@ import { getUserDataList, createUser } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
-import TableUserComponent from "../../components/user/TableUserComponent";
+import TableUserAccountComponent from "../../components/user/TableUserAccountComponent";
+import TableUserDataComponent from "../../components/user/TableUserDataComponent";
 import AddModifyUserCo from "../../components/user/AddModifyUserComponent";
 
 const DashboardUser = () => {
@@ -16,9 +17,10 @@ const DashboardUser = () => {
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
-    const [users, setUsers] = useState([]);
+    const [userAccounts, setUserAccounts] = useState([]);
+    const [userData, setUserData] = useState([]);
+    const [statsType, setStatsType] = useState("Accounts");
     const [search, setSearch] = useState("");
-    const [selectedType, setSelectedType] = useState("Todos los usuarios");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
 
@@ -40,31 +42,35 @@ const DashboardUser = () => {
         if (!token) return;
         setLoading(true);
         try {
-            let response;
+            let responseUserData, responseUserAccounts;
             if (currentUser.usertype === "DEPARTMENT") {
-                response = await getUserDataList(token, currentUser.department);
-                setSelectedType("Trabajadores");
+                responseUserData = await getUserDataList(token, currentUser.department);
+                responseUserAccounts = await getUserDataList(token, currentUser.department);
             } else {
-                response = await getUserDataList(token);
+                responseUserData = await getUserDataList(token);
+                responseUserAccounts = await getUserDataList(token);
             }
 
-            if (response.success) {
-                const fetchedUsers = response.data.users ?? [];
-                setUsers(fetchedUsers);
-
-                // Ajustar currentPage si la página actual quedó vacía
-                const totalPages = Math.ceil(fetchedUsers.length / rowsPerPage);
-                if (currentPage > totalPages && totalPages > 0) {
-                    setCurrentPage(totalPages);
+            if (responseUserData.success && responseUserAccounts.success) {
+                setUserData(responseUserData);
+                setUserAccounts(responseUserAccounts);
+                if (statsType === "Accounts") {
+                    // Ajustar currentPage si la página actual quedó vacía
+                    const totalPages = Math.ceil(userAccounts.length / rowsPerPage);
+                    if (currentPage > totalPages && totalPages > 0) {
+                        setCurrentPage(totalPages);
+                    }
+                } else {
+                    // Ajustar currentPage si la página actual quedó vacía
+                    const totalPages = Math.ceil(userData.length / rowsPerPage);
+                    if (currentPage > totalPages && totalPages > 0) {
+                        setCurrentPage(totalPages);
+                    }
                 }
+
             }
-            else if (response.error === "Token inválido") {
-                Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                    .then(() => { logout(); navigate('/login'); });
-                return;
-            }
-        } catch (err) {
-            Swal.fire("Error", "No se pudo obtener la lista de usuarios", err);
+        } catch {
+            Swal.fire("Error", "No se pudo obtener la lista de usuarios", 'error');
         }
         setLoading(false);
     };
@@ -91,21 +97,6 @@ const DashboardUser = () => {
 
     if (loading) return <Spinner />;
 
-    // Filtrar usuarios según tipo seleccionado
-    const filteredByType = users.filter(u => {
-        if (selectedType === "Todos los usuarios") return true;
-        if (selectedType === "Administradores") return ["DEPARTMENT", "ADMIN", "SUPERADMIN"].includes(u.usertype);
-        if (selectedType === "Trabajadores") return u.usertype === "WORKER";
-        return true;
-    });
-
-    // Estadísticas
-    const stats = {
-        total: users.length,
-        admin: users.filter(u => ["DEPARTMENT", "ADMIN", "SUPERADMIN"].includes(u.usertype)).length,
-        worker: users.filter(u => u.usertype === "WORKER").length,
-    };
-
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
             {/* Botón Volver */}
@@ -127,16 +118,15 @@ const DashboardUser = () => {
             {/* Tarjetas de estadísticas */}
             <Row className="mb-3 mt-1 justify-content-center g-3">
                 {[
-                    { label: "Total", value: stats.total, type: "Todos los usuarios" },
-                    { label: "Administradores", value: stats.admin, type: "Administradores" },
-                    { label: "Trabajadores", value: stats.worker, type: "Trabajadores" }
+                    { label: "Cuentas de Usuario", value: userAccounts.length, type: "Accounts" },
+                    { label: "Datos de Trabajadores", value: userData.length, type: "Data" },
                 ].map((metric, idx) => (
                     (currentUser?.usertype !== "DEPARTMENT" || metric.label === "Trabajadores") && (
                         <Col key={idx} xs={6} sm={4} md={3}>
                             <Card
-                                className={`shadow-lg mb-2 border-2 ${selectedType === metric.type ? "border-primary" : ""}`}
+                                className={`shadow-lg mb-2 border-2 ${statsType === metric.type ? "border-primary" : ""}`}
                                 style={{ cursor: 'pointer' }}
-                                onClick={() => { setSelectedType(metric.type); setCurrentPage(1); }}
+                                onClick={() => { setStatsType(metric.type); setCurrentPage(1); }}
                             >
                                 <CardBody className="text-center pt-3">
                                     <CardTitle tag="h6">{metric.label}</CardTitle>
@@ -150,7 +140,7 @@ const DashboardUser = () => {
 
             {/* Fila con tipo de usuario seleccionado + búsqueda */}
             <div className="d-flex justify-content-between mb-3 align-items-center">
-                <div style={{ fontWeight: "bold", fontSize: "1rem" }}>{selectedType}</div>
+                <div style={{ fontWeight: "bold", fontSize: "1rem" }}>{statsType === "Accounts" ? "Cuentas de Usuario" : "Datos de Trabajadores"}</div>
                 <Input
                     type="text"
                     placeholder="Buscar por usuario..."
@@ -161,17 +151,29 @@ const DashboardUser = () => {
             </div>
 
             {/* Tabla de usuarios modular */}
-            <TableUserComponent
-                users={filteredByType}
-                currentUser={currentUser}
-                token={token}
-                search={search}
-                setSearch={setSearch}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                rowsPerPage={rowsPerPage}
-                refreshData={fetchUsers}
-            />
+            {statsType === "Accounts" ?
+                <TableUserAccountComponent
+                    users={userAccounts}
+                    currentUser={currentUser}
+                    token={token}
+                    search={search}
+                    setSearch={setSearch}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    rowsPerPage={rowsPerPage}
+                    refreshData={fetchUsers}
+                /> :
+                <TableUserDataComponent
+                    users={userData}
+                    currentUser={currentUser}
+                    token={token}
+                    search={search}
+                    setSearch={setSearch}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    rowsPerPage={rowsPerPage}
+                    refreshData={fetchUsers}
+                />}
         </Container>
     );
 };

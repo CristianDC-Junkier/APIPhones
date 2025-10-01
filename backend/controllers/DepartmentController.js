@@ -10,18 +10,18 @@ class DepartmentController {
      * @param {Object} res - Objeto de respuesta de Express
      * @returns {JSON} - Lista de departamentos
      */
-    static async listAll(req, res) {
+    static async list(req, res) {
         try {
             const departments = await Department.findAll({
                 attributes: [
                     "id",
                     "name",
-                    [sequelize.fn("COUNT", sequelize.col("subdepartments.id")), "count"]
+                    [sequelize.fn("COUNT", sequelize.col("subdepartment.id")), "count"]
                 ],
                 include: [
                     {
                         model: SubDepartment,
-                        as: "subdepartments",
+                        as: "subdepartment",
                         attributes: []
                     }
                 ],

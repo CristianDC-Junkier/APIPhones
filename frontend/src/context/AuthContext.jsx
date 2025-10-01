@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
                 sessionStorage.removeItem("user");
                 localStorage.removeItem("user");
                 return null;
-            }
+            } 
             return decrypted;
         } catch {
             sessionStorage.removeItem("user");
@@ -73,10 +73,12 @@ export const AuthProvider = ({ children }) => {
             setUser(storedValues.user);
             setVersion(storedValues.version);
 
+
             try {
                 const result = await getVersion(storedValues.token); 
                 if (result.success) {
-                    if (result.version !== storedValues.version) {
+
+                    if (result.data.version !== storedValues.version) {
                         //Si la versión no es correcta, cerrar sesión
                         await contextLogout();
                         await Swal.fire({

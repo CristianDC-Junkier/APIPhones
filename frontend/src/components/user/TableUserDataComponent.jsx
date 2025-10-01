@@ -106,16 +106,17 @@ const TableUserDataComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
-
+                        console.log(userItem);
                         return (
                             <tr key={idx}>
                                 <td className="text-center"> {userItem.id === undefined ? "-" : userItem.id}</td>
-                                <td className="text-center"> {userItem.name === undefined ? "-" : userItem.name }</td>
-                                <td className="text-center"> {userItem.number === undefined ? "-" : userItem.number}</td>
-                                <td className="text-center"> {userItem.extension === undefined ? "-" : userItem.extension}</td>
-                                <td className="text-center"> {userItem.userId === undefined ? "-" : userItem.user}</td>
-                                <td className="text-center"> {userItem.departmentId === undefined ? "-" : userItem.departmentId}</td>
-                                <td className="text-center"> {userItem.subdepartmentId === undefined ? "-" : userItem.subdepartmentId}</td>
+                                <td className="text-center"> {userItem.userData.name === undefined ? "-" : userItem.userData.name }</td>
+                                <td className="text-center"> {userItem.userData.number === undefined ? "-" : userItem.userData.number}</td>
+                                <td className="text-center"> {userItem.userData.extension === undefined ? "-" : userItem.userData.extension}</td>
+                                <td className="text-center"> {userItem.userData.email === undefined ? "-" : userItem.userData.email}</td>
+                                <td className="text-center"> {userItem.user === undefined ? "-" : userItem.user}</td>
+                                <td className="text-center"> {userItem.departmentName === undefined ? "-" : userItem.departmentId}</td>
+                                <td className="text-center"> {userItem.userData.subdepartmentName === undefined ? "-" : userItem.userData.subdepartmentName}</td>
                                 <td className="text-center">
                                     <div className="d-flex justify-content-center flex-wrap">
                                         <Button color="info" size="sm" className="me-1 mb-1">🔑</Button>
@@ -130,7 +131,7 @@ const TableUserDataComponent = ({
                     {rowsPerPage - currentUsers.length > 0 &&
                         [...Array(rowsPerPage - currentUsers.length)].map((_, idx) => (
                             <tr key={`empty-${idx}`} style={{ height: '50px' }}>
-                                <td colSpan={4}></td>
+                                <td colSpan={9}></td>
                             </tr>
                         ))
                     }

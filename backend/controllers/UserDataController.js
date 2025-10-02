@@ -37,6 +37,51 @@ class UserDataController {
             const allData = await UserData.findAll({
                 include: [
                     { model: Department, as: "department" },
+                    { model: SubDepartment, as: "subdepartment" },
+                    { model: UserAccount, as: "userAccount" }
+                ]
+            });
+            const formatted = allData.map(user => ({
+                id: user.id,
+                name: user.name,
+                extension: user.extension,
+                number: user.number,
+                email: user.email,
+                user: user.userAccount?.username,
+                departmentId: user.departmentId,
+                departmentName: user.department?.name || null,
+                subdepartmentId: user.subdepartmentId,
+                subdepartmentName: user.subdepartment?.name || null,
+            })
+            );
+
+            res.json({ users: formatted });
+        } catch (error) {
+            LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+    * Listar todos los UserData para el usuario autenticado, con todos los datos.
+    */
+    static async workerListByDepartment(req, res) {
+        try {
+            const requesterId = req.user.id;
+            const requesterDepartmentId = req.user.departmentId;
+
+            if (!requesterDepartmentId) {
+                return res.status(400).json({ error: "El usuario no tiene departamento asignado" });
+            }
+
+            const allData = await UserData.findAll({
+                where: {
+                    departmentId: requesterDepartmentId,
+                    id: { [Op.ne]: requesterId },// Excluye al que hace la petición
+                    usertype: { [Op.notIn]: ["ADMIN", "SUPERADMIN"] } // Excluye Admin y Superadmin
+                },
+                include: [
+                    { model: Department, as: "department" },
                     { model: SubDepartment, as: "subdepartment" }
                 ]
             });

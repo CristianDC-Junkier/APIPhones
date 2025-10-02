@@ -35,8 +35,8 @@ router.get("/:id", notWorker, UserAccountController.getOne);
 router.post("/worker/", notWorker, UserAccountController.createWorker);
 router.delete("/worker/:id", notWorker, canModifyUser, UserAccountController.deleteWorker);
 
-router.put("/profile-update", isAuthenticated, UserAccountController.updateMyProfileAccount);
-router.delete("/profile-del", isAuthenticated, UserAccountController.deleteSelf);
+router.put("/profile-update", isAuthenticated, UserAccountController.updateMyAccount);
+router.delete("/profile-del", isAuthenticated, UserAccountController.deleteMyAccount);
 router.put("/profile-PWD", isAuthenticated, UserAccountController.forcedPasswordChange);
 
 router.post("/", notWorker, UserAccountController.create);

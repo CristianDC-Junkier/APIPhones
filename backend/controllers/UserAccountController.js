@@ -475,10 +475,11 @@ class UserAccountController {
     * @param {Object} req - Objeto de petición con { params: { user }, body: { username, usertype, department, oldPassword, newPassword, version } }.
     * @param {Object} res.
     */
-    static async updateMyProfileAccount(req, res) {
+    static async updateMyAccount(req, res) {
         try {
-            const currentUser = req.user; // Usuario autenticado
-            const { username, usertype, department, oldPassword, newPassword, version } = req.body;
+            const currentUser = req.user; 
+            const { username, usertype, department, oldPassword, newPassword } = req.body;
+            const { version } = req.query;
 
             const user = await UserAccount.findByPk(currentUser.id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
@@ -562,11 +563,10 @@ class UserAccountController {
     * @param {Object} req - Objeto de petición con { params: { id }, body: { version } }.
     * @param {Object} res.
     */
-    static async deleteSelf(req, res) {
+    static async deleteMyAccount(req, res) {
         try {
-            const { id } = req.user.id;
-            const { version } = req.body;
-
+            const { id } = req.user;
+            const { version } = req.query;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });

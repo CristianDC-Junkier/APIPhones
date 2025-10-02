@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
                 sessionStorage.removeItem("user");
                 localStorage.removeItem("user");
                 return null;
-            } 
+            }
             return decrypted;
         } catch {
             sessionStorage.removeItem("user");
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
                         });
                     }
                 }
-            } catch  {
+            } catch {
                 //Si la cuenta no existe, cerrar sesión
                 await contextLogout();
                 await Swal.fire({
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     /** Loguear usuario */
     const contextLogin = async (credentials) => {
         const result = await login(credentials);
-        if (result.success) {
+        if (result.success === true) {
             const userLog = {
                 id: result.data.user.id,
                 username: result.data.user.username,
@@ -123,14 +123,15 @@ export const AuthProvider = ({ children }) => {
             setToken(result.data.token);
             setVersion(userLog.version);
             saveUserWithExpiry(result.data.token, userLog, credentials.remember);
+            return result;
         } else {
             setUser(null);
             setToken(null);
             setVersion(0);
             sessionStorage.removeItem("user");
             localStorage.removeItem("user");
+            return result;
         }
-        return result;
     };
 
     /**

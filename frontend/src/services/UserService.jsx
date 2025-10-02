@@ -12,8 +12,6 @@
  * 
  */
 
-//#region UserAccount Functions
-
 /**
  * Solicitud para obtener la lista de todos los usuario existentes con detalles
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
@@ -128,6 +126,7 @@ export const markPWDCUser = async (userId, password, token) => {
 
 /**
  * Solicitud de cambio de contraseña para un usuario que ha sido marcado para cambio de contraseña
+ * 
  * @param {String} newPassword - Nueva contraseña para el usuario marcado para el cambio de contraseña
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
@@ -144,43 +143,6 @@ export const changePasswordPWD = async (newPassword, token) => {
 }
 
 /**
- * Solicitud de cambio de infromación de la cuenta del perfil conectado
- * @param {String} info - Nueva información de inicio de sesion para el perfil concetado
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
- * @returns {JSON} - Devuelve la información recibida de la llamada
- */
-export const updateProfileAcc = async (info, token) => {
-    try {
-        const res = await api.put(`/acc/profile-update`, info, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return { success: true, data: res.data };
-    } catch (error) {
-        return { success: false, error: error.response?.data?.error };
-    }
-}
-
-/**
- * Solicitud de eliminación de un usuario
- * @param {Object} userId - el ID del usuario que se quiere eliminar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
- * @returns {JSON} - Devuelve la información recibida de la llamada
- */
-export const deleteSelf = async (token) => {
-    try {
-        const res = await api.delete(`/acc/profile-del`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return { success: true, data: res.data };
-    } catch (error) {
-        return { success: false, error: error.response?.data?.error };
-    }
-};
-
-//#endregion
-
-//#region UserData Functions
-/**
  * Solicitud para obtener la lista de todos los usuario existentes sin detalles
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
@@ -193,6 +155,7 @@ export const getUsersList = async () => {
         return { success: false, error: error.response?.data?.error };
     }
 };
+
 
 /**
  * Solicitud para obtener la información del usuario conectado
@@ -212,14 +175,53 @@ export const getProfile = async (token, version) => {
 };
 
 /**
- * Solicitud de modificar la información asociada al perfil
- * @param {String} profile - Nueva información del perfil
+ * Solicitud de cambio de infromación de la cuenta del perfil conectado
+ * 
+ * @param {String} useraccount - Nueva información de inicio de sesion para el perfil concetado
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const modifyProfile = async (profile, token) => {
+export const modifyProfileAcc = async (useraccount, token, version) => {
     try {
-        const res = await api.put('/data/profile-data', profile, {
+        const res = await api.put(`/acc/profile-update`, useraccount, {
+            params: { version },
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+}
+
+/**
+ * Solicitud de modificar la información asociada al perfil
+ * 
+ * @param {String} userdata - Nueva información del perfil
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const modifyProfileData = async (userdata, token, version) => {
+    try {
+        const res = await api.put('/data/profile-update', userdata, {
+                params: { version },
+                headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};
+
+/**
+ * Solicitud de eliminación de un usuario
+ * @param {Object} userId - el ID del usuario que se quiere eliminar
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const deleteProfileAcc = async (token, version) => {
+    try {
+        const res = await api.delete(`/acc/profile-del`, {
+            params: { version },
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
@@ -228,4 +230,21 @@ export const modifyProfile = async (profile, token) => {
     }
 };
 
-//#endregion
+/**
+ * Solicitud de eliminación de un usuario
+ * @param {Object} userId - el ID del usuario que se quiere eliminar
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const deleteProfileData = async (token, version) => {
+    try {
+        const res = await api.delete(`/data/profile-del`, {
+            params: { version },
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};
+

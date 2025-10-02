@@ -5,7 +5,7 @@ import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
 import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt } from 'react-icons/fa';
 import Spinner from '../../components/utils/SpinnerComponent';
 import { useAuth } from "../../hooks/useAuth";
-import { deleteSelf, getProfile, modifyProfile } from "../../services/UserService";
+import { deleteProfileAcc, getProfile, modifyProfileAcc, modifyProfileData } from "../../services/UserService";
 import BackButton from "../../components/utils/BackButtonComponent";
 import ModifyProfileComponent from '../../components/user/ModifyProfileComponent';
 
@@ -24,7 +24,6 @@ const UserProfile = () => {
                 const response = await getProfile(token, version);
                 if (response.success) {
                     setProfile(response.data);
-                    console.log(response.data);
                 } else if (response.error === "Token inválido") {
                     Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
                         .then(() => { logout(); navigate('/login'); });
@@ -45,22 +44,40 @@ const UserProfile = () => {
     const firstUserData = profile.userData?.[0] || {};
 
     // Modify profile
-    const handleModify = async (block) => {
+    const handleModify = async (type) => {
         try {
-            await ModifyProfileComponent({
-                token,
-                profile,
-                onConfirm: async (formValues) => {
-                    const result = await modifyProfile(formValues, token);
-                    if (result.success) {
-                        Swal.fire("Éxito", "Perfil modificado correctamente", "success");
-                        const response = await getProfile(token, version);
-                        if (response.success) setProfile(response.data);
-                    } else {
-                        Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
+            if (type === 'Account') {
+                await ModifyProfileComponent({ //Le hace falta otro Componente
+                    token,
+                    profile,
+                    onConfirm: async (formValues) => {
+                        const result = await modifyProfileAcc(formValues, token, version);
+                        if (result.success) {
+                            Swal.fire("Éxito", "Perfil modificado correctamente", "success");
+                            const response = await getProfile(token, version);
+                            if (response.success) setProfile(response.data);
+                        } else {
+                            Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
+                        }
                     }
-                }
-            });
+                });
+            }
+            else {
+                await ModifyProfileComponent({ // No funciona bien
+                    token,
+                    profile,
+                    onConfirm: async (formValues) => {
+                        const result = await modifyProfileData(formValues, token, version);
+                        if (result.success) {
+                            Swal.fire("Éxito", "Perfil modificado correctamente", "success");
+                            const response = await getProfile(token, version);
+                            if (response.success) setProfile(response.data);
+                        } else {
+                            Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
+                        }
+                    }
+                });
+            }
         } catch (err) {
             Swal.fire("Error", err.message || "Error al modificar perfil", "error");
         }
@@ -80,7 +97,7 @@ const UserProfile = () => {
             });
 
             if (swal.isConfirmed) {
-                const response = await deleteSelf(token);
+                const response = await deleteProfileAcc(token, version);
                 if (response.success) {
                     Swal.fire("Éxito", "Cuenta eliminada correctamente. Cerrando sesión", "success");
                     logout();
@@ -137,7 +154,7 @@ const UserProfile = () => {
                                     </Row>
                                 </div>
                                 <div className="d-flex justify-content-between mt-4 flex-wrap gap-2">
-                                    <Button color="primary" className="rounded-pill px-4" onClick={() => handleModify('account')}>
+                                    <Button color="primary" className="rounded-pill px-4" onClick={() => handleModify('Account')}>
                                         <FaEdit className="me-2" /> Modificar
                                     </Button>
                                     <Button color="danger" className="rounded-pill px-4" onClick={handleDelete}>

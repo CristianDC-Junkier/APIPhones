@@ -61,108 +61,6 @@ class UserDataController {
     }
 
     /**
-     * Recupera los datos completos del usuario usando solo el token.
-     * 
-     * @param {Object} req - Objeto de petición con {params: {id} version: {version}}.
-     * @param {Object} res 
-     */
-    static async getProfile(req, res) {
-        try {
-            const { version } = req.query;
-
-            const user = await UserAccount.findByPk(req.user.id, {
-                include: [
-                    { model: Department, as: 'department', attributes: ['id', 'name'] },
-                    {
-                        model: UserData,
-                        as: 'userData',
-                        include: [
-                            { model: Department, as: 'department', attributes: ['id', 'name'] },
-                            { model: SubDepartment, as: 'subdepartment', attributes: ['id', 'name'] }
-                        ]
-                    }
-                ]
-            });
-
-            if (user.version != version) return res.status(409).json({ error: "Su perfil ha sido modificado anteriormente" });
-
-            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-
-            res.json({
-                id: user.id,
-                username: user.username,
-                usertype: user.usertype,
-                forcePwdChange: user.forcePwdChange,
-                departmentId: user.departmentId,
-                departmentName: user.department?.name || null,
-                version: user.version,
-                createdAt: user.createdAt,
-                updatedAt: user.updatedAt,
-                userData: user.userData?.map(ud => ({
-                    id: ud.id,
-                    name: ud.name,
-                    extension: ud.extension,
-                    number: ud.number,
-                    email: ud.email,
-                    departmentId: ud.departmentId,
-                    departmentName: ud.department?.name || null,
-                    subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null,
-                    version: ud.version
-                })) || [] // si no tiene userData, devuelve un array vacío
-            });
-
-        } catch (error) {
-            LoggerController.error(`Error obteniendo perfil: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-    * Permite al usuario autenticado actualizar sus propios datos de UserData.
-    * 
-    * @param {Object} req - Objeto de petición { param: { id }, body: {id, name, extension, number, email, version}}
-    * @param {Object} res 
-    */
-    static async updateMyProfileData(req, res) {
-        try {
-            const userId = req.user.id;
-            const { id, name, extension, number, email, version } = req.body;
-
-            // Recuperar UserData del usuario
-            const userdata = await UserData.findOne({ where: { id: id, userAccountId: userId } });
-
-            if (!userdata) {
-                return res.status(404).json({ error: "Datos de Usuario no encontrado" });
-            }
-
-            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificados anteriormente" });
-
-            // Actualizar solo campos permitidos
-            if (name !== undefined) userdata.name = name;
-            if (extension !== undefined) userdata.extension = extension;
-            if (number !== undefined) userdata.number = number;
-            if (email !== undefined) userdata.email = email;
-
-            await userdata.save();
-
-            res.json({
-                user: {
-                    name: userdata.name,
-                    extension: userdata.extension,
-                    number: userdata.number,
-                    email: userdata.email
-                }
-            });
-
-            LoggerController.info(`Datos del usuario ${userId} actualizados`);
-        } catch (error) {
-            LoggerController.error(`Error actualizando los Datos de Usuario: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
     * Permite crear un UserData asignado directamente al usuario autenticado.
     *
     * @param {Object} req - { body: { name, extension, number, email, departmentId, subdepartmentId } }
@@ -305,6 +203,172 @@ class UserDataController {
 
         } catch (error) {
             LoggerController.error(`Error actualizando UserData: ${error.message}`);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+
+    /**
+    * Permite al usuario autenticado eliminar datos asociados.
+    * 
+    * @param {Object} req - Objeto de petición { param: { user }, query: { version }}
+    * @param {Object} res
+    */
+    static async delete(req, res) {
+        try {
+            const userId = req.user.id;
+
+            const { version } = req.query;
+
+            // Primero eliminamos los UserData asociados
+            await UserData.destroy({ where: { userAccountId: userId } });
+
+            // Luego eliminamos el usuario
+            const deleted = await UserAccount.destroy({ where: { id: userId } });
+
+            if (!deleted) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            LoggerController.info(`Usuario ${userId} eliminado correctamente`);
+            res.json({ success: true, message: "Cuenta eliminada correctamente" });
+
+        } catch (error) {
+            LoggerController.error(`Error eliminando usuario ${req.user.id}: ${error.message}`);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+    * Recupera los datos completos del usuario usando solo el token.
+    * 
+    * @param {Object} req - Objeto de petición con {params: {id} query: {version}}.
+    * @param {Object} res 
+    */
+    static async getProfile(req, res) {
+        try {
+            const { version } = req.query;
+
+            const user = await UserAccount.findByPk(req.user.id, {
+                include: [
+                    { model: Department, as: 'department', attributes: ['id', 'name'] },
+                    {
+                        model: UserData,
+                        as: 'userData',
+                        include: [
+                            { model: Department, as: 'department', attributes: ['id', 'name'] },
+                            { model: SubDepartment, as: 'subdepartment', attributes: ['id', 'name'] }
+                        ]
+                    }
+                ]
+            });
+
+            if (user.version != version) return res.status(409).json({ error: "Su perfil ha sido modificado anteriormente" });
+
+            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
+            res.json({
+                id: user.id,
+                username: user.username,
+                usertype: user.usertype,
+                forcePwdChange: user.forcePwdChange,
+                departmentId: user.departmentId,
+                departmentName: user.department?.name || null,
+                version: user.version,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                userData: user.userData?.map(ud => ({
+                    id: ud.id,
+                    name: ud.name,
+                    extension: ud.extension,
+                    number: ud.number,
+                    email: ud.email,
+                    departmentId: ud.departmentId,
+                    departmentName: ud.department?.name || null,
+                    subdepartmentId: ud.subdepartmentId,
+                    subdepartmentName: ud.subdepartment?.name || null,
+                    version: ud.version
+                })) || [] // si no tiene userData, devuelve un array vacío
+            });
+
+        } catch (error) {
+            LoggerController.error(`Error obteniendo perfil: ${error.message}`);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+    * Permite al usuario autenticado actualizar sus propios datos de UserData.
+    * 
+    * @param {Object} req - Objeto de petición { param: { user }, query: { version }, body: {id, name, extension, number, email}}
+    * @param {Object} res 
+    */
+    static async updateMyProfile(req, res) {
+        try {
+            const userId = req.user.id;
+            const { version } = req.query;
+            const { id, name, extension, number, email } = req.body;
+
+            // Recuperar UserData del usuario
+            const userdata = await UserData.findOne({ where: { id: id, userAccountId: userId } });
+
+            if (!userdata) {
+                return res.status(404).json({ error: "Datos de Usuario no encontrado" });
+            }
+
+            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificados anteriormente" });
+
+            // Actualizar solo campos permitidos
+            if (name !== undefined) userdata.name = name;
+            if (extension !== undefined) userdata.extension = extension;
+            if (number !== undefined) userdata.number = number;
+            if (email !== undefined) userdata.email = email;
+
+            await userdata.save();
+
+            res.json({
+                user: {
+                    name: userdata.name,
+                    extension: userdata.extension,
+                    number: userdata.number,
+                    email: userdata.email
+                }
+            });
+
+            LoggerController.info(`Datos del usuario ${userId} actualizados`);
+        } catch (error) {
+            LoggerController.error(`Error actualizando los Datos de Usuario: ${error.message}`);
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+    * Permite al usuario autenticado eliminar datos asociados.
+    * 
+    * @param {Object} req - Objeto de petición { param: { user }, query: { version }}
+    * @param {Object} res
+    */
+    static async deleteMyProfile(req, res) {
+        try {
+            const userId = req.user.id;
+
+            const { version } = req.query;
+
+            // Primero eliminamos los UserData asociados
+            await UserData.destroy({ where: { userAccountId: userId } });
+
+            // Luego eliminamos el usuario
+            const deleted = await UserAccount.destroy({ where: { id: userId } });
+
+            if (!deleted) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            LoggerController.info(`Usuario ${userId} eliminado correctamente`);
+            res.json({ success: true, message: "Cuenta eliminada correctamente" });
+
+        } catch (error) {
+            LoggerController.error(`Error eliminando usuario ${req.user.id}: ${error.message}`);
             res.status(500).json({ error: error.message });
         }
     }

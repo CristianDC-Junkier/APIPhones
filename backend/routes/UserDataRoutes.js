@@ -26,10 +26,12 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
 
 router.get("/", UserDataController.publicList);
 router.get("/worker", isAuthenticated, UserDataController.workerList);
-router.get("/profile", isAuthenticated, UserDataController.getProfile);
+router.post("/", notWorker, UserDataController.create);
+router.put("/:id", notWorker, canModifyUser, UserDataController.update);
+router.delete("/:id", notWorker, UserDataController.update);
 
-router.put("/profile-data", isAuthenticated, UserDataController.updateMyProfileData);
-router.post("/", isAuthenticated, UserDataController.create);
-router.put("/:id", isAuthenticated, UserDataController.update);
+router.get("/profile", isAuthenticated, UserDataController.getProfile);
+router.put("/profile-update", isAuthenticated, UserDataController.updateMyProfile);
+router.delete("/profile-delete", isAuthenticated, UserDataController.deleteMyProfile);
 
 module.exports = router;

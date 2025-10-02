@@ -183,10 +183,13 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
                 if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
                 if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-                return { name, extension, number, email, departmentId: step1Values.departmentId,  subdepartmentId };
+                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId };
             }
         });
         if (!swalStep2.value) return;
+    }
+    else {
+        swalStep2 = { value: null };
     }
 
     if (action === "modify" && !step1Values.password) {

@@ -18,7 +18,7 @@ const TableUserDataComponent = ({
     token
 }) => {
     const filteredUsers = useMemo(
-        () => users.filter(u => u.username.toLowerCase().includes(search.toLowerCase())),
+        () => users.filter(u => u.name.toLowerCase().includes(search.toLowerCase())),
         [users, search]
     );
 
@@ -106,17 +106,16 @@ const TableUserDataComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
-                        console.log(userItem);
                         return (
                             <tr key={idx}>
                                 <td className="text-center"> {userItem.id === undefined ? "-" : userItem.id}</td>
-                                <td className="text-center"> {userItem.userData.name === undefined ? "-" : userItem.userData.name }</td>
-                                <td className="text-center"> {userItem.userData.number === undefined ? "-" : userItem.userData.number}</td>
-                                <td className="text-center"> {userItem.userData.extension === undefined ? "-" : userItem.userData.extension}</td>
-                                <td className="text-center"> {userItem.userData.email === undefined ? "-" : userItem.userData.email}</td>
+                                <td className="text-center"> {userItem.name === undefined ? "-" : userItem.name }</td>
+                                <td className="text-center"> {userItem.number === undefined ? "-" : userItem.number}</td>
+                                <td className="text-center"> {userItem.extension === undefined ? "-" : userItem.extension}</td>
+                                <td className="text-center"> {userItem.email === undefined ? "-" : userItem.email}</td>
                                 <td className="text-center"> {userItem.user === undefined ? "-" : userItem.user}</td>
-                                <td className="text-center"> {userItem.departmentName === undefined ? "-" : userItem.departmentId}</td>
-                                <td className="text-center"> {userItem.userData.subdepartmentName === undefined ? "-" : userItem.userData.subdepartmentName}</td>
+                                <td className="text-center"> {(userItem.departmentName === undefined || userItem.departmentName == null) ? "-" : userItem.departmentName}</td>
+                                <td className="text-center"> {(userItem.subdepartmentName === undefined || userItem.subdepartmentName == null) ? "-" : userItem.subdepartmentName}</td>
                                 <td className="text-center">
                                     <div className="d-flex justify-content-center flex-wrap">
                                         <Button color="info" size="sm" className="me-1 mb-1">🔑</Button>

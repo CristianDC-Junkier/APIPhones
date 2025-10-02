@@ -147,7 +147,7 @@ export const changePasswordPWD = async (newPassword, token) => {
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getUsersList = async () => {
+export const getPublicList = async () => {
     try {
         const res = await api.get('/data/');
         return { success: true, data: res.data };
@@ -156,6 +156,31 @@ export const getUsersList = async () => {
     }
 };
 
+
+/**
+ * Solicitud para obtener la lista de todos los usuario existentes con detalles
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @param {String|null} [department=null] - Departamento por el que filtrar (opcional)
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const getWorkerDataList = async (token, department = null) => {
+    try {
+        const endpoint = department
+            ? `/data/worker-department`
+            : '/data/worker';
+
+        const res = await api.get(endpoint, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        return { success: true, data: res.data };
+    } catch (error) {
+        return {
+            success: false,
+            error: error.response?.data?.error || error.message
+        };
+    }
+};
 
 /**
  * Solicitud para obtener la información del usuario conectado

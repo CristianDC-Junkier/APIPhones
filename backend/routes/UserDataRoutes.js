@@ -10,6 +10,7 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
  * Endpoints:
  * - GET    /                   → Listar todos los datos de usuario públicos.
  * - GET    /worker             → Listar todos los UserData para el usuario autenticado
+ * - GET    /worker-department  → Listar todos los UserData para el usuario autenticado por su departamento
  * - GET    /profile            → Obtener el perfil del usuario logueado.
  * 
  * - PUT    /profile            → Modificar el perfil del usuario logueado.

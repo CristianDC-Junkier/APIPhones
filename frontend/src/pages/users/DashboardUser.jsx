@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getUserDataList, createUser, createWorker } from "../../services/UserService";
+import { getUserDataList, getWorkerDataList, createUser, createWorker } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
@@ -44,13 +44,12 @@ const DashboardUser = () => {
         try {
             let responseUserData, responseUserAccounts;
             if (currentUser.usertype === "DEPARTMENT") {
-                responseUserData = await getUserDataList(token, currentUser.department);
+                responseUserData = await getWorkerDataList(token, currentUser.department);
                 responseUserAccounts = await getUserDataList(token, currentUser.department);
             } else {
-                responseUserData = await getUserDataList(token);
+                responseUserData = await getWorkerDataList(token);
                 responseUserAccounts = await getUserDataList(token);
             }
-
             if (responseUserData.success && responseUserAccounts.success) {
                 setUserData(responseUserData.data.users);
                 setUserAccounts(responseUserAccounts.data.users);

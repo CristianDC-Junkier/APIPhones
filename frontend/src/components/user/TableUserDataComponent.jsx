@@ -2,9 +2,9 @@
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import { modifyUser, deleteUser } from "../../services/UserService";
+import { modifyUserData, deleteUser } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
-import AddModifyUser from "./AddModifyUserComponent";
+import ModifyUserData from "./ModifyUserDataComponent";
 import Pagination from "../PaginationComponent";
 
 const TableUserDataComponent = ({
@@ -56,13 +56,13 @@ const TableUserDataComponent = ({
     });
 
     const handleModify = async (userItem) => {
-        await AddModifyUser({
+        console.log(userItem);
+        await ModifyUserData({
             token,
             userItem,
             currentUser,
-            action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyUser(userItem.id, formValues, token);
+                const result = await modifyUserData(userItem.id, formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
                     await refreshData();

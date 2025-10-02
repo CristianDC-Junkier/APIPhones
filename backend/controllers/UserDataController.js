@@ -52,6 +52,7 @@ class UserDataController {
                 departmentName: user.department?.name || null,
                 subdepartmentId: user.subdepartmentId,
                 subdepartmentName: user.subdepartment?.name || null,
+                version: user.version
             })
             );
 
@@ -95,6 +96,7 @@ class UserDataController {
                 departmentName: user.userData.department?.name || null,
                 subdepartmentId: user.userData.subdepartmentId,
                 subdepartmentName: user.userData.subdepartment?.name || null,
+                version: user.version
             })
             );
 

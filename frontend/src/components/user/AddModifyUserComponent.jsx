@@ -17,7 +17,6 @@ import { getDepartmentsList, getDepartmentById, getSubDepartmentsList } from "..
  * @param {Function} props.onConfirm - Callback que se ejecuta al confirmar los datos, recibe { userAccount, userData, userAccountId? }.
  */
 const AddModifyUserComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
-
     // Tipos de usuario disponibles según permisos del usuario actual
     const types = [{ label: "Trabajador", value: "WORKER" }];
     if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN") {
@@ -146,7 +145,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
             if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
 
-            return { username, password, usertype, departmentId };
+            return { username, password, usertype, departmentId, version: userItem.version };
         }
     });
 
@@ -183,7 +182,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
                 if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
                 if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId };
+                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: userItem.version };
             }
         });
         if (!swalStep2.value) return;

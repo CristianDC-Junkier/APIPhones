@@ -199,9 +199,10 @@ export const getUsersList = async () => {
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const userGetProfile = async (token) => {
+export const getProfile = async (token, version) => {
     try {
         const res = await api.get('/data/profile', {
+            params: { version },
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };

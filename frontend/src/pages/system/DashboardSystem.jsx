@@ -122,7 +122,7 @@ export default function DashboardSystem() {
             </div>
 
             {/* Métricas */}
-            <Row className="mb-2 text-center g-2">
+            <Row className="mb-2 mt-4 text-center g-2">
                 {[
                     { label: "CPU Usage (%)", value: cpuUsage, type: "warning" },
                     { label: "Memoria Usada (MB)", value: memoryUsed, type: "warning" },

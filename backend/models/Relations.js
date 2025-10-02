@@ -11,7 +11,7 @@ const UpdateModel = require("./UpdateModel");
 // ----------- DEFINIR RELACIONES -----------
 
 
-// Relaciones Department 1 ↔ 0..* UserData
+// Relacion Department 1 ↔ 0..* UserData
 Department.hasMany(UserData, {
     foreignKey: "departmentId",
     as: "users"
@@ -23,7 +23,7 @@ UserData.belongsTo(Department, {
     onUpdate: "CASCADE"
 });
 
-// Relaciones Department 1 ↔ 0..* SubDepartment
+// Relacion Department 1 ↔ 0..* SubDepartment
 Department.hasMany(SubDepartment, {
     foreignKey: "departmentId",
     as: "subdepartment"

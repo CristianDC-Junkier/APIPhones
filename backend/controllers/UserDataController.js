@@ -68,7 +68,8 @@ class UserDataController {
      */
     static async getProfile(req, res) {
         try {
-            const { version } = req.body;
+            const { version } = req.query;
+
             const user = await UserAccount.findByPk(req.user.id, {
                 include: [
                     { model: Department, as: 'department', attributes: ['id', 'name'] },
@@ -83,9 +84,9 @@ class UserDataController {
                 ]
             });
 
-            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-
             if (user.version != version) return res.status(409).json({ error: "Su perfil ha sido modificado anteriormente" });
+
+            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             res.json({
                 id: user.id,
@@ -95,6 +96,8 @@ class UserDataController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
                 userData: user.userData?.map(ud => ({
                     id: ud.id,
                     name: ud.name,
@@ -105,7 +108,7 @@ class UserDataController {
                     departmentName: ud.department?.name || null,
                     subdepartmentId: ud.subdepartmentId,
                     subdepartmentName: ud.subdepartment?.name || null,
-                    version: user.version
+                    version: ud.version
                 })) || [] // si no tiene userData, devuelve un array vacío
             });
 

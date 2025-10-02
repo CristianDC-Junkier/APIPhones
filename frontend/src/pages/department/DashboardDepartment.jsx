@@ -183,7 +183,7 @@ const DashboardDepartment = () => {
             </div>   
 
             {/* Tarjetas para cambiar de vista solo para ADMIN/SUPERADMIN */}
-            <Row className="mb-3 mt-1 justify-content-center g-3">
+            <Row className="mb-3 mt-4 justify-content-center g-3">
                 {currentUser?.usertype !== "DEPARTMENT" && (
                     <Col xs={6} sm={4} md={3}>
                         <Card

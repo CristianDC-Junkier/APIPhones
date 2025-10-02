@@ -1,252 +1,194 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button } from "reactstrap";
+import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
+import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt } from 'react-icons/fa';
 import Spinner from '../../components/utils/SpinnerComponent';
 import { useAuth } from "../../hooks/useAuth";
-import { deleteSelf, userGetProfile, modifyProfile, updateProfileAcc } from "../../services/UserService";
+import { deleteSelf, getProfile, modifyProfile } from "../../services/UserService";
 import BackButton from "../../components/utils/BackButtonComponent";
 import ModifyProfileComponent from '../../components/user/ModifyProfileComponent';
-
 
 const UserProfile = () => {
     const [profile, setProfile] = useState();
     const [loading, setLoading] = useState(true);
-
-
     const navigate = useNavigate();
-    const { user, token, logout } = useAuth();
+    const { token, version, logout } = useAuth();
 
+    // Fetch profile
     useEffect(() => {
         const fetchData = async () => {
             if (!token) return;
             setLoading(true);
-            let response;
-            response = await userGetProfile(token);
-            if (response.success) {
-                setProfile(response.data);
-            } else {
-                if (response.error === "Token inválido") {
+            try {
+                const response = await getProfile(token, version);
+                if (response.success) {
+                    setProfile(response.data);
+                    console.log(response.data);
+                } else if (response.error === "Token inválido") {
                     Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
                         .then(() => { logout(); navigate('/login'); });
-                    return;
+                } else {
+                    Swal.fire('Error', response.error || 'No se pudo cargar el perfil', 'error');
                 }
+            } catch (err) {
+                Swal.fire('Error', err.message || 'Error al obtener perfil', 'error');
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         };
         fetchData();
-    }, [token, logout, navigate]);
-
-    /*const handleChangeUsername = async () => {
-        const { value: username } = await Swal.fire({
-            title: "Cambio de contraseña",
-            input: 'text',
-            inputLabel: "Introduzca su nuevo nombre de usuario",
-            inputPlaceholder: 'Ingrese usuario',
-            showCancelButton: true
-        });
-
-        if (!username) return;
-
-        const result = await changeUsername({ username }, token);
-        if (result.success) {
-            Swal.fire('Éxito', 'Usuario modificado correctamente', 'success');
-            let response = await userGetProfile(token);
-            if (response.success) {
-                setProfile(response.data);
-            }
-        }
-        else Swal.fire('Error', result.error || 'No se pudo modificar el nombre de usuario', 'error');
-    }*/
-
-    const handleModify = async () => {
-        await ModifyProfileComponent({
-            token,
-            profile,
-            onConfirm: async (formValues) => {
-                const result = await modifyProfile(formValues, token);
-                if (result.success) {
-                    Swal.fire("Éxito", "Perfil modificado correctamente", "success");
-                    let response = await userGetProfile(token);
-                    if (response.success) {
-                        setProfile(response.data);
-                    }
-                } else {
-                    Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
-                }
-            }
-        });
-    };
-
-    const handleModifyAcc = async () => {
-        const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
-        const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
-        const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
-
-        const html = `
-<div>
-    <div style="${rowStyle} margin-top: 5vh">
-        <label style="${labelStyle}">Usuario <span style="color:red">*</span></label>
-        <input id="swal-username" style="${inputStyle}" placeholder="Usuario" value="${profile.username || ""}">
-    </div>
-  <div style="${rowStyle}">
-        <label style="${labelStyle}">Contraseña actual <span style="color:red">*</span></label>
-        <input id="swal-passwordOld" type="password" style="${inputStyle}" placeholder="Contraseña">
-  </div>
-
-  <div style="${rowStyle}">
-        <label style="${labelStyle}">Nueva contraseña <span style="color:red">*</span></label>
-        <input id="swal-passwordNew" type="password" style="${inputStyle}" placeholder="Contraseña">
-  </div>
-  <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
-</div>
-`;
-        const swal = await Swal.fire({
-            title: "Cuenta de Usuario",
-            html: html,
-            focusConfirm: false,
-            width: '600px',
-            showCancelButton: true,
-            cancelButtonText: "Cancelar",
-            confirmButtonText: "Aceptar",
-            preConfirm: () => {
-                const username = document.getElementById("swal-username").value.trim();
-                const oldPassword = document.getElementById("swal-passwordOld").value.trim();
-                const newPassword = document.getElementById("swal-passwordNew").value.trim();
-
-                if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
-                if (!oldPassword) { Swal.showValidationMessage("La contraseña actual no puede estar vacía"); return false; }
-                if (!newPassword) { Swal.showValidationMessage("La contraseña nueva no puede estar vacía"); return false; }
-
-                return { username, newPassword, oldPassword };
-            }
-        });
-
-        if (!swal.value) return;
-
-        const result = await updateProfileAcc(swal.value, token);
-        if (result.success) {
-            Swal.fire("Éxito", "Información de inicio de sesión cambiada correctamente. Cerrando sesión...", "success");
-            logout();
-            navigate('/');
-        } else {
-            Swal.fire("Error", result.error || "No se pudo modificar la cuenta", "error");
-        }
-    }
-
-    const handleDelete = async () => {
-        const swal = await Swal.fire({
-            title: "Eliminar Ususario",
-            html: "¿Está seguro de que quiere eliminar su usuario?<br>Esta acción no se podrá deshacer",
-            icon: 'warning',
-            iconColor: '#FF3131',
-            color: '#FF3131',
-            showCancelButton: 'true',
-            confirmButtonText: "Aceptar",
-            cancelButtonText: "Cancelar"
-        });
-
-        if (swal.isConfirmed) {
-            let response = await deleteSelf(token);
-            if (response.success) {
-                Swal.fire("Éxito", "Cuenta eliminada correctamente. Cerrando Sesión", "success");
-                logout();
-                navigate('/');
-            } else {
-                Swal.fire("Error", response.error || "No se eliminar el usuario", "error");
-            }
-        } else return;
-       
-    };
+    }, [logout, navigate, token, version]);
 
     if (loading) return <Spinner />;
 
+    const firstUserData = profile.userData?.[0] || {};
+
+    // Modify profile
+    const handleModify = async (block) => {
+        try {
+            await ModifyProfileComponent({
+                token,
+                profile,
+                onConfirm: async (formValues) => {
+                    const result = await modifyProfile(formValues, token);
+                    if (result.success) {
+                        Swal.fire("Éxito", "Perfil modificado correctamente", "success");
+                        const response = await getProfile(token, version);
+                        if (response.success) setProfile(response.data);
+                    } else {
+                        Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
+                    }
+                }
+            });
+        } catch (err) {
+            Swal.fire("Error", err.message || "Error al modificar perfil", "error");
+        }
+    };
+
+    // Delete profile
+    const handleDelete = async () => {
+        try {
+            const swal = await Swal.fire({
+                title: "Eliminar Usuario",
+                html: "¿Está seguro de que quiere eliminar su usuario?<br>Esta acción no se podrá deshacer",
+                icon: 'warning',
+                iconColor: '#FF3131',
+                showCancelButton: true,
+                confirmButtonText: "Aceptar",
+                cancelButtonText: "Cancelar"
+            });
+
+            if (swal.isConfirmed) {
+                const response = await deleteSelf(token);
+                if (response.success) {
+                    Swal.fire("Éxito", "Cuenta eliminada correctamente. Cerrando sesión", "success");
+                    logout();
+                    navigate('/');
+                } else {
+                    Swal.fire("Error", response.error || "No se eliminó el usuario", "error");
+                }
+            }
+        } catch (err) {
+            Swal.fire("Error", err.message || "Error al eliminar usuario", "error");
+        }
+    };
+
+    // Función para formatear fecha
+    const formatDate = (dateString) => {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+    };
+
     return (
-        <Row className="w-100 justify-content-center">
+        <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
+            {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
                 <BackButton back="/home" />
             </div>
-            <Col xs="8" sm="8" md="8" lg="5" xl="7">
-                <Card>
-                    <CardBody className="p-5">
-                        <Row className="mb-3 justify-content-start">
-                            <h3 className="mb-3">Información de la cuenta</h3>
-                            <Col md="4" className="ms-5">
-                                <p><strong>{"Nombre de Usuario:"}</strong></p>
-                            </Col>
-                            <Col md="7" >
-                                <p>{profile.username}</p>
-                            </Col>
-                        </Row>
-                        <Row className="mb-3 justify-content-center">
-                            <h3 className="mb-4">Acciones sobre la cuenta</h3>
-                            <Col md="5">
-                                <Button color="primary" outline onClick={() => handleModifyAcc()}>
-                                    {"Cambiar Información de Inicio de Sesión"}
-                                </Button>
-                            </Col>
-                        </Row>
 
-                        <hr className="my-3 border-3 border-dark py-1" />
-                        <h3 className="mb-3">Información del listín telefónico</h3>
-                        <h4 className="mb-3 ms-3">Pública</h4>
+            {/* Contenedor para centrar verticalmente */}
+            <div className="d-flex flex-grow-1 align-items-center">
+                <Row className="mb-3 mt-4 justify-content-center g-3 w-100">
+                    {/* BLOQUE 1: Información de la cuenta */}
+                    <Col xs="12" md="6" className="d-flex justify-content-center">
+                        <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
+                            <CardBody className="d-flex flex-column justify-content-between p-4">
+                                <div>
+                                    <h4 className="mb-4 text-primary d-flex align-items-center">
+                                        <FaUser className="me-2" /> Cuenta
+                                    </h4>
+                                    <Row className="mb-2">
+                                        <Col md="5"><strong>Usuario:</strong></Col>
+                                        <Col md="7">{profile.username || "-"}</Col>
+                                    </Row>
+                                    <Row className="mb-2">
+                                        <Col md="5"><strong>Departamento:</strong></Col>
+                                        <Col md="7">{profile.departmentName || "-"}</Col>
+                                    </Row>
+                                    <Row className="mb-2">
+                                        <Col md="5"><FaCalendarAlt className="me-2" /> Fecha de creación:</Col>
+                                        <Col md="7">{formatDate(profile.createdAt)}</Col>
+                                    </Row>
+                                    <Row className="mb-2">
+                                        <Col md="5"><FaCalendarAlt className="me-2" /> Última modificación:</Col>
+                                        <Col md="7">{formatDate(profile.updatedAt)}</Col>
+                                    </Row>
+                                </div>
+                                <div className="d-flex justify-content-between mt-4 flex-wrap gap-2">
+                                    <Button color="primary" className="rounded-pill px-4" onClick={() => handleModify('account')}>
+                                        <FaEdit className="me-2" /> Modificar
+                                    </Button>
+                                    <Button color="danger" className="rounded-pill px-4" onClick={handleDelete}>
+                                        <FaTrash className="me-2" /> Eliminar
+                                    </Button>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    </Col>
 
-                        <Row className="mb-2">
-                            <Col md="5" className="ms-5">
-                                <p><strong>{"Departamento:"}</strong></p>
-                            </Col>
-                            <Col md="6">
-                                <p>{profile.userData.departmentName}</p>
-                            </Col>
-                        </Row>
+                    {/* BLOQUE 2: Primer userData */}
+                    <Col xs="12" md="6" className="d-flex justify-content-center">
+                        <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
+                            <CardBody className="d-flex flex-column justify-content-between p-4">
+                                <div>
+                                    <h4 className="mb-4 text-success d-flex align-items-center">
+                                        <FaBuilding className="me-2" /> Datos Personales
+                                    </h4>
+                                    <Row className="mb-2">
+                                        <Col md="5"><FaUser className="me-2" /> Nombre:</Col>
+                                        <Col md="7">{firstUserData.name || "-"}</Col>
+                                    </Row>
+                                    <Row className="mb-2">
+                                        <Col md="5"><FaEnvelope className="me-2" /> Email:</Col>
+                                        <Col md="7">{firstUserData.email || "-"}</Col>
+                                    </Row>
+                                    <Row className="mb-2">
+                                        <Col md="5"><FaPhone className="me-2" /> Teléfono:</Col>
+                                        <Col md="7">{firstUserData.number || "-"}</Col>
+                                    </Row>
+                                    <Row className="mb-2">
+                                        <Col md="5"><strong>Extensión:</strong></Col>
+                                        <Col md="7">{firstUserData.extension || "-"}</Col>
+                                    </Row>
+                                    <Row className="mb-2">
+                                        <Col md="5"><strong>Subdepartamento:</strong></Col>
+                                        <Col md="7">{firstUserData.subdepartmentName || "-"}</Col>
+                                    </Row>
+                                </div>
+                                <div className="d-flex justify-content-start mt-4 flex-wrap gap-2">
+                                    <Button color="success" className="rounded-pill px-4" onClick={() => handleModify('userdata')}>
+                                        <FaEdit className="me-2" /> Modificar
+                                    </Button>
+                                </div>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                </Row>
+            </div>
+        </Container>
 
-                        <Row className="mb-2">
-                            <Col md="5" className="ms-5">
-                                <p><strong>{"Sub departamento:"}</strong></p>
-                            </Col>
-                            <Col md="6">
-                                <p>{profile.userData.subdepartmentName}</p>
-                            </Col>
-                        </Row>
-
-                        <Row className="mb-2">
-                            <Col md="5" className="ms-5">
-                                <p><strong>{"Teléfono: "}</strong>{profile.userData.number}</p>
-                            </Col>
-                            <Col md="6">
-                                <p><strong>{"Extensión: "}</strong>{profile.userData.extension}</p>
-                            </Col>
-                        </Row>
-
-                        <h4 className="mb-4 ms-3">No Pública</h4>
-                        <Row className="mb-2">
-                            <Col md="5" className="ms-5">
-
-                                <p><strong>{"Nombre: "}</strong>{profile.userData.name}</p>
-                            </Col>
-                            <Col md="6">
-                                <p><strong>{"Email: "}</strong>{profile.userData.email}</p>
-                            </Col>
-                        </Row>
-
-                        <hr className="my-3 border-3 border-dark py-1" />
-
-                        <Row className="mb-3 justify-content-center">
-                            <Col md="4">
-                                <Button color="primary" onClick={() => handleModify()}>
-                                    {"Modificar Perfil"}
-                                </Button>
-                            </Col>
-                            <Col md="4">
-                                <Button color="danger" onClick={() => handleDelete()}>
-                                    {"Eliminar Usuario"}
-                                </Button>
-                            </Col>
-                        </Row>
-                    </CardBody>
-                </Card>
-            </Col>
-        </Row>
     );
 };
 

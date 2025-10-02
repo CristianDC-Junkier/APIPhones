@@ -17,7 +17,7 @@ let isLoggingOut = false;
 api.interceptors.response.use(
     response => response,
     error => {
-        if (error.response?.status === 401 && !isLoggingOut) {
+        if ((error.response?.status === 401 || error.response?.status === 409) && !isLoggingOut) {
             isLoggingOut = true; // Se marca que ya está en proceso
 
             Swal.fire({

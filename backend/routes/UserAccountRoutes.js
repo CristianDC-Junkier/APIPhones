@@ -44,7 +44,4 @@ router.put("/:id", notWorker, canModifyUser, UserAccountController.update);
 router.put("/:id/forcepwd", notWorker, canModifyUser, UserAccountController.forcePasswordChange);
 router.delete("/:id", notWorker, canModifyUser, UserAccountController.delete);
 
-
-
-
 module.exports = router;

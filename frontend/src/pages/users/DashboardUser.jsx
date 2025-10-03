@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getUserDataList, getWorkerDataList, createUser, createWorker } from "../../services/UserService";
+import { getUserDataList, getWorkerDataList, createUser, createWorker, getProfile } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
@@ -37,6 +37,18 @@ const DashboardUser = () => {
         window.addEventListener("resize", updateRows);
         return () => window.removeEventListener("resize", updateRows);
     }, []);
+
+    const [user, setUser] = useState([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const response = await getProfile(token, currentUser.version);
+            if (response.success) {
+                setUser(response.data);
+            }
+        };
+        fetchData();
+    }, [token, currentUser.version]);
 
     const fetchUsers = async () => {
         if (!token) return;
@@ -174,7 +186,7 @@ const DashboardUser = () => {
                 /> :
                 <TableUserDataComponent
                     users={userData}
-                    currentUser={currentUser}
+                    currentUser={user}
                     token={token}
                     search={search}
                     setSearch={setSearch}

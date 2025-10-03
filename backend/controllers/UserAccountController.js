@@ -393,7 +393,8 @@ class UserAccountController {
     static async forcePasswordChange(req, res) {
         try {
             const { id } = req.params;
-            const { password, version } = req.body;
+            const { version } = req.query;
+            const { password } = req.body;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
@@ -421,7 +422,7 @@ class UserAccountController {
     static async delete(req, res) {
         try {
             const { id } = req.params;
-            const { version } = req.body;
+            const { version } = req.query;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
@@ -448,7 +449,7 @@ class UserAccountController {
     static async deleteWorker(req, res) {
         try {
             const { id } = req.params;
-            const { version } = req.body;
+            const { version } = req.query;
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });

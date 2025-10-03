@@ -102,6 +102,7 @@ class AuthController {
                 return res.json({ message: "Logout exitoso" });
             }
         } catch (error) {
+            console.log(error.message);
             LoggerController.error("Error en el logout: " + error.message);
             res.status(500).json({ error: "Error al cerrar sesión" });
         }

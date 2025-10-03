@@ -1,8 +1,8 @@
-﻿import React, { useMemo } from "react";
+﻿import React, { useMemo, useEffect, useState } from "react";
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import { modifyUserData, deleteUserData } from "../../services/UserService";
+import { modifyUserData, deleteUserData, getProfile } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
 import ModifyUserData from "./ModifyUserDataComponent";
 import Pagination from "../PaginationComponent";
@@ -17,6 +17,8 @@ const TableUserDataComponent = ({
     refreshData,
     token
 }) => {
+    
+
     const filteredUsers = useMemo(
         () => users.filter(u => u.name.toLowerCase().includes(search.toLowerCase())),
         [users, search]
@@ -105,25 +107,26 @@ const TableUserDataComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
-                        return (
-                            <tr key={idx}>
-                                <td className="text-center"> {userItem.id === undefined ? "-" : userItem.id}</td>
-                                <td className="text-center"> {userItem.name === undefined ? "-" : userItem.name }</td>
-                                <td className="text-center"> {userItem.number === undefined ? "-" : userItem.number}</td>
-                                <td className="text-center"> {userItem.extension === undefined ? "-" : userItem.extension}</td>
-                                <td className="text-center"> {userItem.email === undefined ? "-" : userItem.email}</td>
-                                <td className="text-center"> {userItem.user === undefined ? "-" : userItem.user}</td>
-                                <td className="text-center"> {(userItem.departmentName === undefined || userItem.departmentName == null) ? "-" : userItem.departmentName}</td>
-                                <td className="text-center"> {(userItem.subdepartmentName === undefined || userItem.subdepartmentName == null) ? "-" : userItem.subdepartmentName}</td>
-                                <td className="text-center">
-                                    <div className="d-flex justify-content-center flex-wrap">
-                                        <Button color="info" size="sm" className="me-1 mb-1">🔑</Button>
-                                        <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>
-                                        <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>
-                                    </div>
-                                </td>
-                            </tr>
-                        );
+                        if (currentUser.userData.find(({ id }) => id === userItem.id) === undefined) {
+                            return (
+                                <tr key={idx}>
+                                    <td className="text-center"> {userItem.id === undefined ? "-" : userItem.id}</td>
+                                    <td className="text-center"> {userItem.name === undefined ? "-" : userItem.name}</td>
+                                    <td className="text-center"> {userItem.number === undefined ? "-" : userItem.number}</td>
+                                    <td className="text-center"> {userItem.extension === undefined ? "-" : userItem.extension}</td>
+                                    <td className="text-center"> {userItem.email === undefined ? "-" : userItem.email}</td>
+                                    <td className="text-center"> {userItem.user === undefined ? "-" : userItem.user}</td>
+                                    <td className="text-center"> {(userItem.departmentName === undefined || userItem.departmentName == null) ? "-" : userItem.departmentName}</td>
+                                    <td className="text-center"> {(userItem.subdepartmentName === undefined || userItem.subdepartmentName == null) ? "-" : userItem.subdepartmentName}</td>
+                                    <td className="text-center">
+                                        <div className="d-flex justify-content-center flex-wrap">
+                                            <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>
+                                            <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
+                        };
                     })}
 
                     {rowsPerPage - currentUsers.length > 0 &&

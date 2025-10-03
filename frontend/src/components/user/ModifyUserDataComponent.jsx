@@ -128,8 +128,8 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
             if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
             if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
             if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
-            if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
-
+            if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
+            
             return { id: userItem.id, name, extension, number, email, departmentId, subdepartmentId, version: userItem.version };
         }
     });

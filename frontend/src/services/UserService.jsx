@@ -153,9 +153,28 @@ export const modifyUserData = async (id, user, token) => {
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const deleteUser = async (userId, token) => {
+export const deleteUser = async (userId, token, version) => {
     try {
         const res = await api.delete(`/acc/${userId}`, {
+            params: { version },
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};
+
+/**
+ * Solicitud de eliminación de un usuario
+ * @param {Object} userId - el ID del usuario que se quiere eliminar
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const deleteWorker = async (userId, token, version) => {
+    try {
+        const res = await api.delete(`/acc/worker/${userId}`, {
+            params: { version },
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
@@ -184,7 +203,7 @@ export const deleteUserData = async (userId, token, version) => {
 
 //#endregion
 
-//#region Password Change Actions
+//#region Forced Password Change Actions
 /**
  * Solicitud para marcar a un usuario para forzar un cambio de contraseña
  * @param {Object} userId - el ID del usuario que se quiere va a marcar
@@ -192,9 +211,10 @@ export const deleteUserData = async (userId, token, version) => {
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const markPWDCUser = async (userId, password, token) => {
+export const markPWDCUser = async (userId, password, token, version) => {
     try {
         const res = await api.put(`/acc/${userId}/forcepwd`, password, {
+            params: { version },
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };

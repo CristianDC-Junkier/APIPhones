@@ -65,12 +65,12 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 
     // HTML para selects y opciones
     const optionsHtml = types.map(t => `<option value="${t.value}" ${userItem?.usertype === t.value ? "selected" : ""}>${t.label}</option>`).join("");
-    const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.userData.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");
+    const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");
 
     const initialSubDeps = userItem?.departmentId
         ? subdepartments.filter(sd => sd.departmentId === userItem.departmentId)
         : subdepartments;
-    const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.userData.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
+    const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.userData[0]?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
 
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
@@ -105,19 +105,19 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 <div>
   <div style="${rowStyle} margin-top: 5vh">
     <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
-    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData.name || ""}">
+    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData[0]?.name || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Extensión</label>
-    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData.extension || ""}">
+    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData[0]?.extension || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Teléfono</label>
-    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData.number || ""}">
+    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData[0]?.number || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Email</label>
-    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData.email || ""}">
+    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData[0]?.email || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Subdepartamento</label>
@@ -145,7 +145,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
             if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
 
-            return { username, password, usertype, departmentId, version: currentUser.version };
+            return { username, password, usertype, departmentId, version: userItem.version };
         }
     });
 
@@ -153,7 +153,6 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     const step1Values = swalStep1.value;
     let swalStep2;
     if (step1Values.usertype === "WORKER") {
-
         // Paso 2
         swalStep2 = await Swal.fire({
             title: "Datos Extendidos",
@@ -180,9 +179,9 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
                 if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
                 if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
                 if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
-                if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
+                if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: currentUser.version };
+                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: userItem.version };
             }
         });
         if (!swalStep2.value) return;

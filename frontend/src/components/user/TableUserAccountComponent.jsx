@@ -2,7 +2,7 @@
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import { modifyUser, deleteUser } from "../../services/UserService";
+import { modifyUser, deleteUser, deleteWorker } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
 import AddModifyUser from "./AddModifyUserComponent";
 import Pagination from "../PaginationComponent";
@@ -60,6 +60,7 @@ const TableUserAccountComponent = ({
     });
 
     const handleModify = async (userItem) => {
+        //console.log(userItem);
         await AddModifyUser({
             token,
             userItem,
@@ -87,13 +88,19 @@ const TableUserAccountComponent = ({
     const handleDelete = async (userItem) => {
         try { await showCaptcha(userItem.id); }
         catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
-
-        const result = await deleteUser(userItem.id, token);
+        let result;
+        if (userItem.usertype === "WORKER") {
+            result = await deleteWorker(userItem.id, token, userItem.version);
+        }
+        else {
+            result = await deleteUser(userItem.id, token, userItem.version);
+        }
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
             await refreshData();
             if (userItem.id === currentUser.id) window.location.href = "/listin-telefonico/login";
         } else {
+            alert(result.error);
             Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
         }
     };
@@ -118,44 +125,46 @@ const TableUserAccountComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
+                        if (currentUser.id !== userItem.id) {
 
-                        let canModify = false;
-                        let canDelete = false;
-                        let canPWDC = false;
+                            let canModify = false;
+                            let canDelete = false;
+                            let canPWDC = false;
 
-                        switch (userItem.usertype) {
-                            case "SUPERADMIN":
-                                canModify = currentUser.usertype === "SUPERADMIN";
-                                break;
-                            case "ADMIN":
-                            case "DEPARTMENT":
-                                canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                break;
-                            case "WORKER":
-                                canModify = currentUser.usertype !== "WORKER";
-                                canDelete = currentUser.usertype !== "WORKER";
-                                canPWDC = currentUser.usertype !== "WORKER";
-                                break;
-                            default:
-                                break;
-                        }
+                            switch (userItem.usertype) {
+                                case "SUPERADMIN":
+                                    canModify = currentUser.usertype === "SUPERADMIN";
+                                    break;
+                                case "ADMIN":
+                                case "DEPARTMENT":
+                                    canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                    canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                    canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                    break;
+                                case "WORKER":
+                                    canModify = currentUser.usertype !== "WORKER";
+                                    canDelete = currentUser.usertype !== "WORKER";
+                                    canPWDC = currentUser.usertype !== "WORKER";
+                                    break;
+                                default:
+                                    break;
+                            }
 
-                        return (
-                            <tr key={idx} >
-                                <td className="text-center"> {userItem.id}</td>
-                                <td className="text-center"> {userItem.username}</td>
-                                <td className="text-center"> {tipoLabels[userItem.usertype]}</td>
-                                <td className="text-center">
-                                    <div className="d-flex justify-content-center flex-wrap">
-                                        {canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
-                                        {canModify && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
-                                        {canDelete && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
-                                    </div>
-                                </td>
-                            </tr>
-                        );
+                            return (
+                                <tr key={idx} >
+                                    <td className="text-center"> {userItem.id}</td>
+                                    <td className="text-center"> {userItem.username}</td>
+                                    <td className="text-center"> {tipoLabels[userItem.usertype]}</td>
+                                    <td className="text-center">
+                                        <div className="d-flex justify-content-center flex-wrap">
+                                            {canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
+                                            {canModify && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
+                                            {canDelete && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
+                                        </div>
+                                    </td>
+                                </tr>
+                            )
+                        };
                     })}
 
                     {rowsPerPage - currentUsers.length > 0 &&

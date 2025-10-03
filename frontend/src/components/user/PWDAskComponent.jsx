@@ -30,7 +30,7 @@ const PWDAskComponent = ({ isOpen, toggle, userItem, token }) => {
         }
 
         setLoading(true);
-        const result = await markPWDCUser(userItem.id, { password }, token);
+        const result = await markPWDCUser(userItem.id, { password }, token, userItem.version);
         setLoading(false);
 
         if (result.success) {

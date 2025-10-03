@@ -10,12 +10,13 @@ import BackButton from "../../components/utils/BackButtonComponent";
 import ModifyUserAccountComponent from '../../components/user/ModifyUserAccountComponent';
 import ModifyUserDataComponent from '../../components/user/ModifyUserDataComponent';
 
-const AdminProfile = () => {
+const ProfileUser = () => {
     const [profile, setProfile] = useState();
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const { token, version, logout, update, user } = useAuth();
 
+    // Recuperar usuario
     useEffect(() => {
         const fetchData = async () => {
             if (!token) return;
@@ -23,6 +24,7 @@ const AdminProfile = () => {
             try {
                 const response = await getProfile(token, version);
                 if (response.success) {
+                    console.log(response.data);
                     setProfile(response.data);
                 } else if (response.error === "Token inválido") {
                     Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
@@ -41,12 +43,13 @@ const AdminProfile = () => {
 
     if (loading) return <Spinner />;
 
-    const firstUserData = profile.userData?.[0] || {};
+    const userData = profile.userData;
 
+    // Modify profile
     const handleModify = async (type) => {
         try {
             if (type === 'Account') {
-                await ModifyUserAccountComponent({
+                await ModifyUserAccountComponent({ 
                     token,
                     profile,
                     onConfirm: async (formValues) => {
@@ -59,8 +62,9 @@ const AdminProfile = () => {
                         }
                     }
                 });
-            } else {
-                await ModifyUserDataComponent({
+            }
+            else {
+                await ModifyUserDataComponent({ 
                     token,
                     userItem: profile,
                     currentUser: user,
@@ -79,6 +83,7 @@ const AdminProfile = () => {
         }
     };
 
+    // Eliminar el Usuario 
     const handleDelete = async () => {
         try {
             const swal = await Swal.fire({
@@ -106,20 +111,24 @@ const AdminProfile = () => {
         }
     };
 
+    // Función para formatear fecha
     const formatDate = (dateString) => {
         if (!dateString) return "-";
         const date = new Date(dateString);
         return date.toLocaleDateString() + " " + date.toLocaleTimeString();
     };
-    console.log(profile);
+
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
+            {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
                 <BackButton back="/home" />
             </div>
 
+            {/* Contenedor para centrar verticalmente */}
             <div className="d-flex flex-grow-1 align-items-center">
                 <Row className="mb-3 mt-4 justify-content-center g-3 w-100">
+                    {/* BLOQUE 1: Información de la cuenta */}
                     <Col xs="12" md="6" className="d-flex justify-content-center">
                         <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
                             <CardBody className="d-flex flex-column justify-content-between p-4">
@@ -156,6 +165,7 @@ const AdminProfile = () => {
                         </Card>
                     </Col>
 
+                    {/* BLOQUE 2: Primer userData */}
                     <Col xs="12" md="6" className="d-flex justify-content-center">
                         <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
                             <CardBody className="d-flex flex-column justify-content-between p-4">
@@ -165,23 +175,23 @@ const AdminProfile = () => {
                                     </h4>
                                     <Row className="mb-2">
                                         <Col md="5"><FaUser className="me-2" /> Nombre:</Col>
-                                        <Col md="7">{firstUserData.name || "-"}</Col>
+                                        <Col md="7">{userData.name || "-"}</Col>
                                     </Row>
                                     <Row className="mb-2">
                                         <Col md="5"><FaEnvelope className="me-2" /> Email:</Col>
-                                        <Col md="7">{firstUserData.email || "-"}</Col>
+                                        <Col md="7">{userData.email || "-"}</Col>
                                     </Row>
                                     <Row className="mb-2">
                                         <Col md="5"><FaPhone className="me-2" /> Teléfono:</Col>
-                                        <Col md="7">{firstUserData.number || "-"}</Col>
+                                        <Col md="7">{userData.number || "-"}</Col>
                                     </Row>
                                     <Row className="mb-2">
                                         <Col md="5"><strong>Extensión:</strong></Col>
-                                        <Col md="7">{firstUserData.extension || "-"}</Col>
+                                        <Col md="7">{userData.extension || "-"}</Col>
                                     </Row>
                                     <Row className="mb-2">
                                         <Col md="5"><strong>Subdepartamento:</strong></Col>
-                                        <Col md="7">{firstUserData.subdepartmentName || "-"}</Col>
+                                        <Col md="7">{userData.subdepartmentName || "-"}</Col>
                                     </Row>
                                 </div>
                                 <div className="d-flex justify-content-start mt-4 flex-wrap gap-2">
@@ -195,7 +205,8 @@ const AdminProfile = () => {
                 </Row>
             </div>
         </Container>
+
     );
 };
 
-export default AdminProfile;
+export default ProfileUser;

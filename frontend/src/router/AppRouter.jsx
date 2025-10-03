@@ -7,7 +7,6 @@ import ExternalLayout from '../layouts/ExternalLayout';
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
 import RoleRoute from './RoleRoute';
-import ProfileRoute from './ProfileRoute';
 
 import LoginPage from '../pages/Login';
 import HomePage from '../pages/Home';
@@ -20,6 +19,8 @@ import AccessDeniedPage from '../pages/AccessDenied';
 import DashBoardUserPage from '../pages/users/DashboardUser';
 import DashboardSystemPage from '../pages/system/DashboardSystem';
 import DashboardDepartmentPage from '../pages/department/DashboardDepartment';
+
+import ProfileUserPage from '../pages/users/ProfileUser';
 
 
 import PrivacityPage from '../pages/politics/Privacity';
@@ -47,13 +48,13 @@ const AppRouter = () => {
 
                 {/* Rutas privadas */}
                 <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+                <Route path="/profile" element={<PrivateRoute><ProfileUserPage /> </PrivateRoute>} />
 
                 {/* Rutas privadas por rol */}
                 <Route path="/users" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN', 'DEPARTMENT']}><DashBoardUserPage /></RoleRoute>} />
                 <Route path="/departments" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN', 'DEPARTMENT']}><DashboardDepartmentPage /></RoleRoute>} />
                 <Route path="/logs" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardSystemPage /></RoleRoute>} />
-                {/* Rutas de perfil*/}
-                <Route path="/profile" element={<PrivateRoute><ProfileRoute /> </PrivateRoute>} />
+                
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>

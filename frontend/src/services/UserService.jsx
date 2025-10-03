@@ -143,7 +143,6 @@ export const modifyUserData = async (id, user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        console.log(error);
         return { success: false, error: error.response?.data?.error };
     }
 };
@@ -157,6 +156,25 @@ export const modifyUserData = async (id, user, token) => {
 export const deleteUser = async (userId, token) => {
     try {
         const res = await api.delete(`/acc/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
+};
+
+/**
+ * Solicitud de eliminación de un usuario
+ * @param {Object} userId - el ID del usuario que se quiere eliminar
+ * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const deleteUserData = async (userId, token, version) => {
+    try {
+        console.log(userId + " " + version);
+        const res = await api.delete(`/data/${userId}`, {
+            params: { version },
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };

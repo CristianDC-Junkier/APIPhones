@@ -24,15 +24,14 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
  * - `canModifyUser`   → Comprueba si el usuario puede ser modificado o borrado.
  */
 
+router.get("/profile", isAuthenticated, UserDataController.getProfile);
+router.put("/profile-update", isAuthenticated, UserDataController.updateMyProfile);
+router.delete("/profile-delete", isAuthenticated, UserDataController.deleteMyProfile);
 
 router.get("/", UserDataController.publicList);
 router.get("/worker", isAuthenticated, UserDataController.workerList);
 router.post("/", notWorker, UserDataController.create);
 router.put("/:id", notWorker, canModifyUser, UserDataController.update);
-router.delete("/:id", notWorker, UserDataController.update);
-
-router.get("/profile", isAuthenticated, UserDataController.getProfile);
-router.put("/profile-update", isAuthenticated, UserDataController.updateMyProfile);
-router.delete("/profile-delete", isAuthenticated, UserDataController.deleteMyProfile);
+router.delete("/:id", notWorker, UserDataController.delete);
 
 module.exports = router;

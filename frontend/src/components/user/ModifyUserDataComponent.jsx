@@ -21,6 +21,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
     let departments = [];
     let subdepartments = [];
     let isDepartmentDisabled = false;
+    console.log("Current User:", currentUser);
     if (currentUser.usertype === "DEPARTMENT") {
         // Solo su departamento y sus subdepartamentos
         const deptResp = await getDepartmentById(token, currentUser.department);

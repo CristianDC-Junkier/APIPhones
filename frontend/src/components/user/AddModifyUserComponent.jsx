@@ -145,7 +145,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
             if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
 
-            return { username, password, usertype, departmentId, version: userItem.version };
+            return { username, password, usertype, departmentId, version: currentUser.version };
         }
     });
 
@@ -182,7 +182,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
                 if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
                 if (number && !/^\+?\d{6,15}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: userItem.version };
+                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: currentUser.version };
             }
         });
         if (!swalStep2.value) return;

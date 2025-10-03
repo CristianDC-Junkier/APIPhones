@@ -477,6 +477,7 @@ class UserAccountController {
     */
     static async updateMyAccount(req, res) {
         try {
+            console.log("Request Body:", req.body);
             const currentUser = req.user; 
             const { username, usertype, department, oldPassword, newPassword } = req.body;
             const { version } = req.query;

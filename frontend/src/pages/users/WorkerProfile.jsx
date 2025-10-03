@@ -65,8 +65,8 @@ const WorkerProfile = () => {
             else {
                 await ModifyUserDataComponent({ 
                     token,
-                    profile,
-                    user,
+                    userItem: profile,
+                    currentUser: user,
                     onConfirm: async (formValues) => {
                         const result = await modifyProfileData(formValues, token, version);
                         if (result.success) {

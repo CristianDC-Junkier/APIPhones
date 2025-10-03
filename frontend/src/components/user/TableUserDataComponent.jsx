@@ -107,7 +107,7 @@ const TableUserDataComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
-                        if (currentUser.userData.find(({ id }) => id === userItem.id) === undefined) {
+                        if (currentUser.id !== userItem.id) {
                             return (
                                 <tr key={idx}>
                                     <td className="text-center"> {userItem.id === undefined ? "-" : userItem.id}</td>

@@ -70,7 +70,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     const initialSubDeps = userItem?.departmentId
         ? subdepartments.filter(sd => sd.departmentId === userItem.departmentId)
         : subdepartments;
-    const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.userData[0]?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
+    const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.userData?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
 
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
@@ -105,19 +105,19 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 <div>
   <div style="${rowStyle} margin-top: 5vh">
     <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
-    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData[0]?.name || ""}">
+    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData?.name || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Extensión</label>
-    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData[0]?.extension || ""}">
+    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData?.extension || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Teléfono</label>
-    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData[0]?.number || ""}">
+    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData?.number || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Email</label>
-    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData[0]?.email || ""}">
+    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData?.email || ""}">
   </div>
   <div style="${rowStyle}">
     <label style="${labelStyle}">Subdepartamento</label>
@@ -145,7 +145,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
             if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
 
-            return { username, password, usertype, departmentId, version: userItem.version };
+            return { username, password, usertype, departmentId, version: userItem?.version ? userItem.version : 0};
         }
     });
 
@@ -181,7 +181,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
                 if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
                 if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: userItem.version };
+                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: userItem?.version ? userItem.version : 0 };
             }
         });
         if (!swalStep2.value) return;

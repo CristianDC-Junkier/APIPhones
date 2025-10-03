@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';
  * Se abre automáticamente si user.forcePwdChange === true.
  */
 const PWDChangeModal = () => {
-    const { user, token, logout, updateUser } = useAuth();
+    const { user, token, logout, update } = useAuth();
     const navigate = useNavigate();
 
     const [modalOpen, setModalOpen] = useState(false);
@@ -44,7 +44,7 @@ const PWDChangeModal = () => {
         if (result.success) {
             // Actualizamos user y storage para reflejar que ya no requiere cambio de contraseña
             const updatedUser = { ...user, forcePwdChange: false };
-            updateUser(updatedUser);
+            update(updatedUser);
 
             await Swal.fire({
                 icon: 'success',

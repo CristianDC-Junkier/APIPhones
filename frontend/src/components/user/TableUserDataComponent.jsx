@@ -2,7 +2,7 @@
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import { modifyUserData, deleteUser } from "../../services/UserService";
+import { modifyUserData, deleteUserData } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
 import ModifyUserData from "./ModifyUserDataComponent";
 import Pagination from "../PaginationComponent";
@@ -56,7 +56,6 @@ const TableUserDataComponent = ({
     });
 
     const handleModify = async (userItem) => {
-        console.log(userItem);
         await ModifyUserData({
             token,
             userItem,
@@ -75,10 +74,11 @@ const TableUserDataComponent = ({
     };
 
     const handleDelete = async (userItem) => {
+        console.log(userItem.id);
         try { await showCaptcha(userItem.id); }
         catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
 
-        const result = await deleteUser(userItem.id, token);
+        const result = await deleteUserData(userItem.id, token, userItem.version);
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
             await refreshData();

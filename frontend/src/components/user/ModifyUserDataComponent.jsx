@@ -21,7 +21,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
     let departments = [];
     let subdepartments = [];
     let isDepartmentDisabled = false;
-    if (currentUser.usertype === "DEPARTMENT") {
+    if (currentUser.usertype === "DEPARTMENT" || currentUser.usertype === "WORKER") {
         // Solo su departamento y sus subdepartamentos
         const deptResp = await getDepartmentById(token, currentUser.department);
         const subResp = await getSubDepartmentsList(token, currentUser.department);
@@ -35,7 +35,8 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
             subdepartments = subResp.data.subdepartments ?? [];
             subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
         }
-    } else {
+    } else if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN")
+    {
         // Admin / superadmin: listas completas
         const [deptResp, subResp] = await Promise.all([
             getDepartmentsList(token),

@@ -1,8 +1,8 @@
 ﻿import React, { useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import Spinner from '../utils/SpinnerComponent';
-import PWDChangeComponent from '../user/PWDChangeComponent';
+import Spinner from '../components/utils/SpinnerComponent';
+import PWDChangeComponent from '../components/user/PWDChangeComponent';
 
 /**
  * Componente de ruta por roles.

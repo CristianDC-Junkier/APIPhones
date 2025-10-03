@@ -119,33 +119,3 @@ RefreshToken.beforeUpdate((token, options) => {
     }
 });
 
-/**
-* Hook: afterUpdate
-*
-* - Este hook se ejecuta **después de actualizar un UserAccount**.
-* - Si se modificó `departmentId`, todos los `UserData` asociados al usuario
-*   que **no pertenezcan al mismo departamento** serán desasociados
-*   (su `userAccountId` se pone en `null`).
-* - Evita disparar otros hooks de `UserData` para no generar loops.
-*/
-UserAccount.afterUpdate(async (user, options) => {
-    try {
-        // Verificamos si se actualizó departmentId
-        if (user.changed('departmentId')) {
-
-            // Obtenemos todos los UserData asociados
-            const userDatas = await user.getUserData();
-
-            for (const ud of userDatas) {
-                // Si el UserData no pertenece al mismo departamento, desasociarlo
-                if (ud.departmentId !== user.departmentId) {
-                    ud.userAccountId = null;
-                    await ud.save({ hooks: false }); // evitamos disparar hooks adicionales
-                }
-            }
-        }
-    } catch (err) {
-        console.error(`Error en afterUpdate de UserAccount: ${err.message}`);
-    }
-});
-

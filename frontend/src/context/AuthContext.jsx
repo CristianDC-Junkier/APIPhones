@@ -141,8 +141,6 @@ export const AuthProvider = ({ children }) => {
         setUser(newUser);
         setVersion(newUser.version || (version + 1)); // Incrementa si no viene versión del backend
 
-        console.log("Actualizando usuario en contexto");
-        console.log(newUser);
         // Guardar en storage
         const storage = localStorage.getItem("user") ? localStorage : sessionStorage;
         const existingEncrypted = storage.getItem("user");
@@ -158,8 +156,6 @@ export const AuthProvider = ({ children }) => {
                 };
                 const encrypted = CryptoJS.AES.encrypt(JSON.stringify(updatedItem), SECRET_KEY).toString();
                 storage.setItem("user", encrypted);
-                console.log("Usuario actualizado en storage");
-                console.log(updatedItem);
             } catch {
                 storage.removeItem("user");
             }

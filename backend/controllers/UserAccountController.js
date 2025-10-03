@@ -514,8 +514,7 @@ class UserAccountController {
 
             // --- Department (solo ADMIN/SUPERADMIN) ---
             if (["ADMIN", "SUPERADMIN"].includes(currentUser.usertype)) {
-                if (!department) return res.status(400).json({ error: "El departamento es obligatorio" });
-                updates.department = department;
+                updates.departmentId = department;
             }
 
             // --- Usertype ---

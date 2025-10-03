@@ -40,7 +40,6 @@ const WorkerList = () => {
             if (!token) return;
             const result = await getUserDataList(token);
             if (result.success) {
-                console.log(result.data.users);
               setUsers(result.data.users);
             }
             setLoading(false);

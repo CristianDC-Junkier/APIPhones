@@ -74,7 +74,6 @@ const TableUserDataComponent = ({
     };
 
     const handleDelete = async (userItem) => {
-        console.log(userItem.id);
         try { await showCaptcha(userItem.id); }
         catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
 

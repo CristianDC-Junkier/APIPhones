@@ -59,16 +59,17 @@ UserData.belongsTo(SubDepartment, {
     onUpdate: "CASCADE"
 });
 
-// Relaciones UserAccount (1 si es Worker) 0 ↔ 0..* (1 si es Worker) UserData
-UserAccount.hasMany(UserData, {
+// Relaciones UserAccount 0 ↔ 0..1  UserData
+UserAccount.hasOne(UserData, {
     foreignKey: "userAccountId",
     as: "userData",
 });
+
 UserData.belongsTo(UserAccount, {
     foreignKey: "userAccountId",
     as: "userAccount",
-    onDelete: "SET NULL",
-    onUpdate: "CASCADE"
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
 });
 
 // Relaciones UserAccount 1 ↔ 0..* RefreshToken

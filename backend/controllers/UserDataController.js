@@ -264,7 +264,6 @@ class UserDataController {
     static async delete(req, res) {
         try {
             const userId = req.user.id;
-            console.log(userId);
 
             const { version } = req.query;
 
@@ -399,7 +398,6 @@ class UserDataController {
     static async deleteMyProfile(req, res) {
         try {
             const userId = req.user.id;
-            console.log(userId);
 
             const { version } = req.query;
 

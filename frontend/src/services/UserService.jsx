@@ -172,7 +172,6 @@ export const deleteUser = async (userId, token) => {
  */
 export const deleteUserData = async (userId, token, version) => {
     try {
-        console.log(userId + " " + version);
         const res = await api.delete(`/data/${userId}`, {
             params: { version },
             headers: { Authorization: `Bearer ${token}` }

@@ -263,7 +263,8 @@ class UserDataController {
     */
     static async delete(req, res) {
         try {
-            const userId = req.user.id;
+            const userId = req.params.id;
+            console.log(userId);
 
             const { version } = req.query;
 

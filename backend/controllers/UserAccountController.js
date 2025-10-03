@@ -477,7 +477,6 @@ class UserAccountController {
     */
     static async updateMyAccount(req, res) {
         try {
-            console.log("Request Body:", req.body);
             const currentUser = req.user; 
             const { username, usertype, department, oldPassword, newPassword } = req.body;
             const { version } = req.query;
@@ -507,7 +506,7 @@ class UserAccountController {
             if (!username) return res.status(400).json({ error: "El nombre de usuario es obligatorio" });
 
             const exists = await UserAccount.findOne({
-                where: { username, id: { [Sequelize.Op.ne]: currentUser.id } }
+                where: { username, id: { [Op.ne]: currentUser.id } }
             });
             if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
 
@@ -546,7 +545,7 @@ class UserAccountController {
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
                     departmentId: user.departmentId,
-                    userversion: user.version,
+                    version: user.version,
                 }
             });
 

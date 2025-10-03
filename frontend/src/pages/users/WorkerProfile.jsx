@@ -55,7 +55,7 @@ const WorkerProfile = () => {
                         const result = await modifyProfileAcc(formValues, token, version);
                         if (result.success) {
                             Swal.fire("Éxito", "Datos de la cuenta modificados correctamente", "success");
-                            update(result.user, result.token);
+                            update(result.data.user, result.data.token);
                         } else {
                             Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
                         }

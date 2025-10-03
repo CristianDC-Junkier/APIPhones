@@ -10,8 +10,8 @@ import RoleRoute from '../components/redirect/RoleRoute';
 
 import LoginPage from '../pages/Login';
 import HomePage from '../pages/Home';
-import WorkerList from '../pages/lists/WorkerList';
-import PublicList from '../pages/lists/PublicList';
+import WorkerListPage from '../pages/lists/WorkerList';
+import PublicListPage from '../pages/lists/PublicList';
 
 import NotFoundPage from '../pages/NotFound';
 import AccessDeniedPage from '../pages/AccessDenied';
@@ -19,7 +19,7 @@ import AccessDeniedPage from '../pages/AccessDenied';
 import DashBoardUserPage from '../pages/users/DashboardUser';
 import DashboardSystemPage from '../pages/system/DashboardSystem';
 import DashboardDepartmentPage from '../pages/department/DashboardDepartment';
-import UserProfilePage from '../pages/users/UserProfile';
+import WorkerProfilePage from '../pages/users/WorkerProfile';
 
 import PrivacityPage from '../pages/politics/Privacity';
 import CookiesPage from '../pages/politics/Cookies';
@@ -51,13 +51,13 @@ const AppRouter = () => {
                 <Route path="/users" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN', 'DEPARTMENT']}><DashBoardUserPage /></RoleRoute>} />
                 <Route path="/departments" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN', 'DEPARTMENT']}><DashboardDepartmentPage /></RoleRoute>} />
                 <Route path="/logs" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardSystemPage /></RoleRoute>} />
-                <Route path="/profile" element={<RoleRoute allowedRoles={['WORKER', 'DEPARTMENT']}><UserProfilePage /></RoleRoute>} />
+                <Route path="/profile" element={<RoleRoute allowedRoles={['WORKER', 'DEPARTMENT']}><WorkerProfilePage /></RoleRoute>} />
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
             <Route element={<ExternalLayout />}>
-                <Route path="/workers" element={<WorkerList />} />
-                <Route path="/public" element={<PublicList /> } />
+                <Route path="/workers" element={<WorkerListPage />} />
+                <Route path="/public" element={<PublicListPage /> } />
             </Route>
 
         </Routes>

@@ -137,7 +137,7 @@ export const AuthProvider = ({ children }) => {
     /**
      * Actualiza el usuario y su versión en contexto y storage.
      */
-    const contextUpdate = (newUser) => {
+    const contextUpdate = (newUser, newToken) => {
         setUser(newUser);
         setVersion(newUser.version || (version + 1)); // Incrementa si no viene versión del backend
 
@@ -149,9 +149,10 @@ export const AuthProvider = ({ children }) => {
                 const bytes = CryptoJS.AES.decrypt(existingEncrypted, SECRET_KEY);
                 const decrypted = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
                 const updatedItem = {
-                    ...decrypted,
+                    token: newToken,
                     user: newUser,
-                    version: newUser.version || (decrypted.version || 0) + 1,
+                    version: newUser.version,
+                    expiry: decrypted.expiry
                 };
                 const encrypted = CryptoJS.AES.encrypt(JSON.stringify(updatedItem), SECRET_KEY).toString();
                 storage.setItem("user", encrypted);

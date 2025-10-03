@@ -7,13 +7,14 @@ import Spinner from '../../components/utils/SpinnerComponent';
 import { useAuth } from "../../hooks/useAuth";
 import { deleteProfileAcc, getProfile, modifyProfileAcc, modifyProfileData } from "../../services/UserService";
 import BackButton from "../../components/utils/BackButtonComponent";
-import ModifyProfileComponent from '../../components/user/ModifyProfileComponent';
+import ModifyUserAccountComponent from '../../components/user/ModifyUserAccountComponent';
+import ModifyUserDataComponent from '../../components/user/ModifyUserDataComponent';
 
-const UserProfile = () => {
+const WorkerProfile = () => {
     const [profile, setProfile] = useState();
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const { token, version, logout } = useAuth();
+    const { token, version, logout, update, user } = useAuth();
 
     // Fetch profile
     useEffect(() => {
@@ -47,15 +48,14 @@ const UserProfile = () => {
     const handleModify = async (type) => {
         try {
             if (type === 'Account') {
-                await ModifyProfileComponent({ //Le hace falta otro Componente
+                await ModifyUserAccountComponent({ 
                     token,
                     profile,
                     onConfirm: async (formValues) => {
                         const result = await modifyProfileAcc(formValues, token, version);
                         if (result.success) {
-                            Swal.fire("Éxito", "Perfil modificado correctamente", "success");
-                            const response = await getProfile(token, version);
-                            if (response.success) setProfile(response.data);
+                            Swal.fire("Éxito", "Datos de la cuenta modificados correctamente", "success");
+                            update(result.user, result.token);
                         } else {
                             Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
                         }
@@ -63,15 +63,14 @@ const UserProfile = () => {
                 });
             }
             else {
-                await ModifyProfileComponent({ // No funciona bien
+                await ModifyUserDataComponent({ 
                     token,
                     profile,
+                    user,
                     onConfirm: async (formValues) => {
                         const result = await modifyProfileData(formValues, token, version);
                         if (result.success) {
-                            Swal.fire("Éxito", "Perfil modificado correctamente", "success");
-                            const response = await getProfile(token, version);
-                            if (response.success) setProfile(response.data);
+                            Swal.fire("Éxito", "Datos de usuario modificados correctamente", "success");
                         } else {
                             Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
                         }
@@ -83,11 +82,11 @@ const UserProfile = () => {
         }
     };
 
-    // Delete profile
+    // Eliminar el Usuario 
     const handleDelete = async () => {
         try {
             const swal = await Swal.fire({
-                title: "Eliminar Usuario",
+                title: "Eliminar su Cuenta",
                 html: "¿Está seguro de que quiere eliminar su usuario?<br>Esta acción no se podrá deshacer",
                 icon: 'warning',
                 iconColor: '#FF3131',
@@ -209,4 +208,4 @@ const UserProfile = () => {
     );
 };
 
-export default UserProfile;
+export default WorkerProfile;

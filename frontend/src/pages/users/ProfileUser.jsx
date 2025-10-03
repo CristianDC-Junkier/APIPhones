@@ -24,7 +24,6 @@ const ProfileUser = () => {
             try {
                 const response = await getProfile(token, version);
                 if (response.success) {
-                    console.log(response.data);
                     setProfile(response.data);
                 } else if (response.error === "Token inválido") {
                     Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')

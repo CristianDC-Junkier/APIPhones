@@ -119,3 +119,31 @@ RefreshToken.beforeUpdate((token, options) => {
     }
 });
 
+// --- Hook: sincronizar departmentId de UserAccount → UserData ---
+UserAccount.afterUpdate(async (user, options) => {
+    if (user.changed("departmentId")) {
+        const userData = await UserData.findOne({ where: { userAccountId: user.id } });
+        if (userData && userData.departmentId !== user.departmentId) {
+            await userData.update(
+                { departmentId: user.departmentId },
+                { hooks: false }
+            );
+        }
+    }
+});
+
+// --- Hook: sincronizar departmentId de UserData → UserAccount ---
+UserData.afterUpdate(async (userData, options) => {
+    if (userData.changed("departmentId") && userData.userAccountId) {
+        const userAccount = await UserAccount.findByPk(userData.userAccountId);
+        if (userAccount && userAccount.departmentId !== userData.departmentId) {
+            await userAccount.update(
+                { departmentId: userData.departmentId },
+                { hooks: false } 
+            );
+        }
+    }
+});
+
+
+

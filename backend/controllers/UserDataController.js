@@ -66,7 +66,7 @@ class UserDataController {
     /**
     * Listar todos los UserData para el usuario autenticado, con todos los datos.
     */
-    static async workerListByDepartment(req, res) {
+    /*static async workerListByDepartment(req, res) {
         try {
             const requesterId = req.user.id;
             const requesterDepartmentId = req.user.departmentId;
@@ -105,7 +105,7 @@ class UserDataController {
             LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
             res.status(500).json({ error: error.message });
         }
-    }
+    }*/
 
     /**
     * Permite crear un UserData asignado directamente al usuario autenticado.
@@ -388,38 +388,6 @@ class UserDataController {
             res.status(500).json({ error: error.message });
         }
     }
-
-    /**
-    * Permite al usuario autenticado eliminar datos asociados.
-    * 
-    * @param {Object} req - Objeto de petición { param: { user }, query: { version }}
-    * @param {Object} res
-    */
-    static async deleteMyProfile(req, res) {
-        try {
-            const userId = req.user.id;
-
-            const { version } = req.query;
-
-            // Primero eliminamos los UserData asociados
-            await UserData.destroy({ where: { userAccountId: userId } });
-
-            // Luego eliminamos el usuario
-            const deleted = await UserAccount.destroy({ where: { id: userId } });
-
-            if (!deleted) {
-                return res.status(404).json({ error: "Usuario no encontrado" });
-            }
-
-            LoggerController.info(`Usuario ${userId} eliminado correctamente`);
-            res.json({ success: true, message: "Cuenta eliminada correctamente" });
-
-        } catch (error) {
-            LoggerController.error(`Error eliminando usuario ${req.user.id}: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
 
 }
 

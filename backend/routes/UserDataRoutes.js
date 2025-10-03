@@ -26,7 +26,6 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
 
 router.get("/profile", isAuthenticated, UserDataController.getProfile);
 router.put("/profile-update", isAuthenticated, UserDataController.updateMyProfile);
-router.delete("/profile-delete", isAuthenticated, UserDataController.deleteMyProfile);
 
 router.get("/", UserDataController.publicList);
 router.get("/worker", isAuthenticated, UserDataController.workerList);

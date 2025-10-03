@@ -47,18 +47,18 @@ class UserAccountController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
-                userData: user.userData?.map(ud => ({
-                    id: ud.id,
-                    name: ud.name,
-                    extension: ud.extension,
-                    number: ud.number,
-                    email: ud.email,
-                    departmentId: ud.departmentId,
-                    departmentName: ud.department?.name || null,
-                    subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null,
-                    version: user.version
-                })) || []
+                userData: user.userData ? {
+                    id: user.userData.id,
+                    name: user.userData.name,
+                    extension: user.userData.extension,
+                    number: user.userData.number,
+                    email: user.userData.email,
+                    departmentId: user.userData.departmentId,
+                    departmentName: user.userData.department?.name || null,
+                    subdepartmentId: user.userData.subdepartmentId,
+                    subdepartmentName: user.userData.subdepartment?.name || null,
+                    version: user.userData.version
+                } : null
             }));
 
             res.json({ users: formatted });
@@ -114,18 +114,18 @@ class UserAccountController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
-                userData: user.userData?.map(ud => ({
-                    id: ud.id,
-                    name: ud.name,
-                    extension: ud.extension,
-                    number: ud.number,
-                    email: ud.email,
-                    departmentId: ud.departmentId,
-                    departmentName: ud.department?.name || null,
-                    subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null,
-                    version: user.version
-                })) || [] // si no tiene userData, devuelve un array vacío
+                userData: user.userData ? {
+                    id: user.userData.id,
+                    name: user.userData.name,
+                    extension: user.userData.extension,
+                    number: user.userData.number,
+                    email: user.userData.email,
+                    departmentId: user.userData.departmentId,
+                    departmentName: user.userData.department?.name || null,
+                    subdepartmentId: user.userData.subdepartmentId,
+                    subdepartmentName: user.userData.subdepartment?.name || null,
+                    version: user.userData.version
+                } : null
             }));
 
             res.json({ users: formatted });
@@ -171,18 +171,18 @@ class UserAccountController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
-                userData: user.userData?.map(ud => ({
-                    id: ud.id,
-                    name: ud.name,
-                    extension: ud.extension,
-                    number: ud.number,
-                    email: ud.email,
-                    departmentId: ud.departmentId,
-                    departmentName: ud.department?.name || null,
-                    subdepartmentId: ud.subdepartmentId,
-                    subdepartmentName: ud.subdepartment?.name || null,
-                    version: user.version
-                })) || [] // si no tiene userData, devuelve un array vacío
+                userData: user.userData ? {
+                    id: user.userData.id,
+                    name: user.userData.name,
+                    extension: user.userData.extension,
+                    number: user.userData.number,
+                    email: user.userData.email,
+                    departmentId: user.userData.departmentId,
+                    departmentName: user.userData.department?.name || null,
+                    subdepartmentId: user.userData.subdepartmentId,
+                    subdepartmentName: user.userData.subdepartment?.name || null,
+                    version: user.userData.version
+                } : null
             });
 
         } catch (error) {
@@ -618,8 +618,6 @@ class UserAccountController {
             res.status(500).json({ error: error.message });
         }
     }
-
-
 
 }
 

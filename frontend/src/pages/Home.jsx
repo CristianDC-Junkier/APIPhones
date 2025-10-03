@@ -44,6 +44,7 @@ const Home = () => {
                 { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
                 { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
                 { label: 'Acceder Logs', icon: faScroll, action: () => navigate('/logs') },
+                { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
             ]
         }
     })();
@@ -63,7 +64,7 @@ const Home = () => {
         <Container
             fluid
             className="d-flex flex-column py-4"
-            style={{ minHeight: '70vh' }}
+            style={{ minHeight: '80vh' }}
         >
 
             {/* Botón de cierre de sesión */}
@@ -75,13 +76,18 @@ const Home = () => {
 
             {/* Botones con las acciones definidas */}
             <div className="d-flex flex-column justify-content-center align-items-center" style={{ flexGrow: 1 }}>
-                <Row className="g-3 mb-4 w-100">
+                <Row className="g-3 mb-4 w-100 justify-content-center">
                     {actions.map(({ label, icon, action }, idx) => (
-                        <Col xs="6" md={12 / actions.length} key={idx} className="d-flex justify-content-center">
+                        <Col
+                            key={idx}
+                            xs={12} sm={8} md={6} lg={4} xl={3}
+                            className="d-flex justify-content-center"
+                        >
                             <HomeButtonComponent label={label} icon={icon} onClick={action} />
                         </Col>
                     ))}
                 </Row>
+
             </div>
         </Container>
     );

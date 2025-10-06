@@ -62,6 +62,7 @@ const TableUserDataComponent = ({
             token,
             userItem,
             currentUser,
+            action: "modify",
             onConfirm: async (formValues) => {
                 const result = await modifyUserData(userItem.id, formValues, token);
                 if (result.success) {

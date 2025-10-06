@@ -17,6 +17,7 @@ import { getDepartmentsList, getDepartmentById, getSubDepartmentsList } from "..
  * @param {Function} props.onConfirm - Callback que se ejecuta al confirmar los datos, recibe { userAccount, userData, userAccountId? }.
  */
 const AddModifyUserComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
+
     // Tipos de usuario disponibles según permisos del usuario actual
     const types = [{ label: "Trabajador", value: "WORKER" }];
     if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN") {
@@ -168,7 +169,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 
     if (!swalStep1.value) return;
     const step1Values = swalStep1.value;
-    console.log(userItem?.userData);
+
     // Paso 2
     const swalStep2 = await Swal.fire({
         title: "Datos Extendidos",

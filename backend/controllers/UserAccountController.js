@@ -382,7 +382,7 @@ class UserAccountController {
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
-            if (user.version != version) return res.status(409).json({ error: "Su usuario ha sido modificado anteriormente" });
+            if (user.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
 
             user.forcePwdChange = true;
             user.password = password;
@@ -526,6 +526,7 @@ class UserAccountController {
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+
             if (user.version != version) return res.status(409).json({ error: "Su usuario ha sido modificado anteriormente" });
 
             if (user.usertype === "SUPERADMIN") {

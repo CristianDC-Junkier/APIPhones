@@ -108,7 +108,7 @@ class UserDataController {
     }*/
 
     /**
-    * Permite crear un UserData asignado directamente al usuario autenticado.
+    * Permite crear un UserData sin usuario asignado.
     *
     * @param {Object} req - { body: { name, extension, number, email, departmentId, subdepartmentId } }
     * @param {Object} res
@@ -116,15 +116,9 @@ class UserDataController {
     static async create(req, res) {
         try {
             const id = req.user.id;
-            const { name, extension, number, email, departmentId, subdepartmentId, userId } = req.body;
+            const { name, extension, number, email, departmentId, subdepartmentId } = req.body;
 
             const user = await UserAccount.findByPk(id);
-            let userToAssign = userId;
-
-            // Configurar tu id, si eres DEPARTMENT
-            if (user.usertype === "DEPARTMENT") {
-                userToAssign = id;
-            }
 
             // Validar si el departamento es el tuyo si eres DEPARTMENT
             if (user.usertype === "DEPARTMENT" && departmentId !== user.departmentId) {
@@ -146,13 +140,12 @@ class UserDataController {
                 extension,
                 number,
                 email,
-                userAccountId: userToAssign,
-                departmentId: departmentId || req.user.departmentId,
+                departmentId: departmentId || null,
                 subdepartmentId: subdepartmentId || null
             });
 
+            LoggerController.info(`UserData creado por el usuario ${user.username} con id ${id}`);
             res.status(201).json({ user: userdata });
-            LoggerController.info(`UserData creado para el usuario ${userId} con id ${userdata.id}`);
 
         } catch (error) {
             LoggerController.error(`Error creando UserData para el usuario: ${error.message}`);
@@ -271,7 +264,6 @@ class UserDataController {
 
             if (data.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
 
-            // Primero eliminamos los UserData asociados
             await data.destroy();
 
             LoggerController.info(`Datos de Usuario ${userDataId} eliminado correctamente`);

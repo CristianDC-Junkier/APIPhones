@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getUserDataList, getWorkerDataList, createUser, getProfile } from "../../services/UserService";
+import { getUserDataList, getWorkerDataList, createUser, createUserData, getProfile } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
@@ -113,7 +113,9 @@ const DashboardUser = () => {
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
-                const result = await createUser(formValues, token); //FALTA
+                console.log(formValues);
+
+                const result = await createUserData(formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Datos de usuario creados correctamente", "success");
                     await fetchUsers();

@@ -13,9 +13,10 @@ import { getDepartmentsList, getDepartmentById, getSubDepartmentsList } from "..
  * @param {string} props.token - Token de autenticación del usuario actual.
  * @param {Object} [props.userItem] - Usuario a modificar (si action === "modify").
  * @param {Object} props.currentUser - Usuario que está realizando la acción.
+ * @param {string} props.action - "create" o "modify".
  * @param {Function} props.onConfirm - Callback que se ejecuta al confirmar los datos, recibe { userAccount, userData, userAccountId? }.
  */
-const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm }) => {
+const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
 
     // Obtener departamentos y subdepartamentos
     let departments = [];
@@ -35,8 +36,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
             subdepartments = subResp.data.subdepartments ?? [];
             subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
         }
-    } else if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN")
-    {
+    } else if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN") {
         // Admin / superadmin: listas completas
         const [deptResp, subResp] = await Promise.all([
             getDepartmentsList(token),
@@ -130,13 +130,20 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
             if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
             if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
             if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
-            
-            return { id: userItem.id, name, extension, number, email, departmentId, subdepartmentId, version: userItem.version };
+
+            const data = { name, extension, number, email, departmentId, subdepartmentId };
+            if (userItem?.id) data.id = userItem.id;
+            if (userItem?.version) data.version = userItem.version;
+
+            return data;
         }
     });
     if (!swalStep.value) return;
-
-    onConfirm(swalStep.value);
+    if (action === "modify") {
+        onConfirm({ userData: swalStep.value, userAccountId: userItem?.userAccountId || null });
+    } else {
+        onConfirm(swalStep.value);
+    }
 };
 
 export default ModifyUserDataComponent;

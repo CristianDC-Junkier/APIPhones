@@ -32,7 +32,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     let departments = [];
     let subdepartments = [];
     let isDepartmentDisabled = false;
-    if (currentUser.usertype === "DEPARTMENT") {
+    if (currentUser.usertype === "DEPARTMENT" && action !== "modify") {
         // Solo su departamento y sus subdepartamentos
         const deptResp = await getDepartmentById(token, currentUser.department);
         const subResp = await getSubDepartmentsList(token, currentUser.department);
@@ -130,9 +130,9 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             <label style="${labelStyle}">Subdepartamento</label>
             <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
         </div>
-         <div style="${rowStyle}">
+        <div style="${rowStyle}">
             <label style="${labelStyle}">Visible</label>
-            <input id="swal-show" type="checkbox" ${userItem?.show ? "checked" : ""} style="transform: scale(1.2);">
+            <input id="swal-show" type="checkbox" ${userItem?.userData?.show ? "checked" : ""} style="transform: scale(1.2);">
         </div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;

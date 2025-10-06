@@ -142,46 +142,43 @@ const TableUserAccountComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
-                        if (currentUser.id !== userItem.id) {
+                        let canModify = false;
+                        let canDelete = false;
+                        let canPWDC = false;
 
-                            let canModify = false;
-                            let canDelete = false;
-                            let canPWDC = false;
+                        switch (userItem.usertype) {
+                            case "SUPERADMIN":
+                                canModify = currentUser.usertype === "SUPERADMIN";
+                                break;
+                            case "ADMIN":
+                            case "DEPARTMENT":
+                                canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
+                                break;
+                            case "WORKER":
+                                canModify = currentUser.usertype !== "WORKER";
+                                canDelete = currentUser.usertype !== "WORKER";
+                                canPWDC = currentUser.usertype !== "WORKER";
+                                break;
+                            default:
+                                break;
+                        }
 
-                            switch (userItem.usertype) {
-                                case "SUPERADMIN":
-                                    canModify = currentUser.usertype === "SUPERADMIN";
-                                    break;
-                                case "ADMIN":
-                                case "DEPARTMENT":
-                                    canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                    canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                    canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                    break;
-                                case "WORKER":
-                                    canModify = currentUser.usertype !== "WORKER";
-                                    canDelete = currentUser.usertype !== "WORKER";
-                                    canPWDC = currentUser.usertype !== "WORKER";
-                                    break;
-                                default:
-                                    break;
-                            }
-
-                            return (
-                                <tr key={idx} >
-                                    <td className="text-center"> {userItem.id}</td>
-                                    <td className="text-center"> {userItem.username}</td>
-                                    <td className="text-center"> {tipoLabels[userItem.usertype]}</td>
-                                    <td className="text-center">
-                                        <div className="d-flex justify-content-center flex-wrap">
-                                            {canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
-                                            {canModify && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
-                                            {canDelete && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
-                                        </div>
-                                    </td>
-                                </tr>
-                            )
-                        };
+                        return (
+                            <tr key={idx} >
+                                <td className="text-center"> {userItem.id}</td>
+                                <td className="text-center"> {userItem.username}</td>
+                                <td className="text-center"> {tipoLabels[userItem.usertype]}</td>
+                                <td className="text-center">
+                                    <div className="d-flex justify-content-center flex-wrap">
+                                        {currentUser.id !== userItem.id && canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
+                                        {currentUser.id !== userItem.id && canModify && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
+                                        {currentUser.id !== userItem.id && canDelete && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
+                                    </div>
+                                </td>
+                            </tr>
+                        )
                     })}
 
                     {rowsPerPage - currentUsers.length > 0 &&

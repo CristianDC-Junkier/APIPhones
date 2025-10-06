@@ -176,7 +176,7 @@ class UserDataController {
                 return res.status(404).json({ error: "Datos de Usuario no encontrado" });
             }
 
-            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificado por otro proceso" });
+            if (userdata.version != version) return res.status(403).json({ error: "Los datos de usuario ha sido modificado por otro proceso" });
 
             // Verificar que el usuario no es DEPARTMENT
             if (req.user.usertype !== "DEPARTMENT") {
@@ -266,7 +266,7 @@ class UserDataController {
             const data = await UserData.findByPk(userDataId);
             if (!data) return res.status(404).json({ error: "Datos de Usuario no encontrado" });
 
-            if (data.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
+            if (data.version != version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
 
             await data.destroy();
 

@@ -111,7 +111,6 @@ const TableUserDataComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
-                        if (currentUser.id !== userItem.id) {
                             return (
                                 <tr key={idx}>
                                     <td className="text-center"> {userItem.id === undefined ? "-" : userItem.id}</td>
@@ -124,13 +123,12 @@ const TableUserDataComponent = ({
                                     <td className="text-center"> {(userItem.subdepartmentName === undefined || userItem.subdepartmentName == null) ? "-" : userItem.subdepartmentName}</td>
                                     <td className="text-center">
                                         <div className="d-flex justify-content-center flex-wrap">
-                                            <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>
-                                            <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>
+                                            {currentUser.id !== userItem.id && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
+                                            {currentUser.id !== userItem.id && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
                                         </div>
                                     </td>
                                 </tr>
                             )
-                        };
                     })}
 
                     {rowsPerPage - currentUsers.length > 0 &&

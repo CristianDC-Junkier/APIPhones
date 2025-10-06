@@ -297,7 +297,7 @@ class UserAccountController {
                 return res.status(404).json({ error: "Datos de Usuario no encontrado" });
             }
 
-            if (targetUser.version != userAccount.version || targetUserData.version != userData.version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
+            if (targetUser.version != userAccount.version || targetUserData.version != userData.version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
 
 
             // Validar que el nuevo username sea único
@@ -307,10 +307,13 @@ class UserAccountController {
                 targetUser.username = userAccount.username;
             }
 
-            // Solo ADMIN/SUPERADMIN pueden cambiar usertype y departament
-            if (userAccount.usertype && ["ADMIN", "SUPERADMIN"].includes(req.user.usertype)) {
-                targetUser.usertype = userAccount.usertype;
+
+            if (userAccount.usertype && req.user.usertype !== "WORKER") {
                 targetUser.departmentId = userAccount.departmentId;
+            }
+            // Solo ADMIN/SUPERADMIN pueden cambiar usertype
+            if (["ADMIN", "SUPERADMIN"].includes(req.user.usertype)) {
+                targetUser.usertype = userAccount.usertype;
             }
 
             //Comprobar si se a escrito una nueva contraseña
@@ -321,35 +324,32 @@ class UserAccountController {
                 return res.status(400).json({ error: "Debe introducir una contraseña válida" });
             }
 
-            // Verificar que el usuario no es DEPARTMENT
-            if (req.user.usertype !== "DEPARTMENT") {
-                // Validar que el departamento y subdepartamento existen si se proporcionan
-                if (userData.departmentId) {
-                    const department = await Department.findByPk(userData.departmentId);
-                    if (!department) {
-                        return res.status(400).json({ error: "Departmento no válido" });
-                    }
-                }
-
-                // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
-                if (!userData.departmentId && userData.subdepartmentId) {
+            // Validar que el departamento y subdepartamento existen si se proporcionan
+            if (userData.departmentId) {
+                const department = await Department.findByPk(userData.departmentId);
+                if (!department) {
                     return res.status(400).json({ error: "Departmento no válido" });
                 }
-
-                // Validar que el subdepartamento pertenece al departamento indicado y que existe
-                if (userData.subdepartmentId) {
-                    const subdepartment = await SubDepartment.findByPk(userData.subdepartmentId);
-                    if (!subdepartment) {
-                        return res.status(400).json({ error: "Subdepartmento no válido" });
-                    }
-                    if (userData.departmentId && subdepartment.departmentId != userData.departmentId) {
-                        return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
-                    }
-                }
-
-                if (userData.departmentId !== undefined) targetUserData.departmentId = userData.departmentId;
-                if (userData.subdepartmentId !== undefined) targetUserData.subdepartmentId = userData.subdepartmentId;
             }
+
+            // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
+            if (!userData.departmentId && userData.subdepartmentId) {
+                return res.status(400).json({ error: "Departmento no válido" });
+            }
+
+            // Validar que el subdepartamento pertenece al departamento indicado y que existe
+            if (userData.subdepartmentId) {
+                const subdepartment = await SubDepartment.findByPk(userData.subdepartmentId);
+                if (!subdepartment) {
+                    return res.status(400).json({ error: "Subdepartmento no válido" });
+                }
+                if (userData.departmentId && subdepartment.departmentId != userData.departmentId) {
+                    return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
+                }
+            }
+
+            if (userData.departmentId !== undefined) targetUserData.departmentId = userData.departmentId;
+            if (userData.subdepartmentId !== undefined) targetUserData.subdepartmentId = userData.subdepartmentId;
 
             // Actualizar solo campos permitidos
             if (userData.name !== undefined) targetUserData.name = userData.name;
@@ -385,7 +385,7 @@ class UserAccountController {
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
-            if (user.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
+            if (user.version != version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
 
             user.forcePwdChange = true;
             user.password = password;
@@ -414,7 +414,7 @@ class UserAccountController {
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
             //if (user.usertype !== "WORKER") return res.status(400).json({ error: "El usuario no es un trabajador" });
 
-            if (user.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
+            if (user.version != version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
 
             const userData = await UserData.findOne({ where: { userAccountId: id } });
 
@@ -437,7 +437,7 @@ class UserAccountController {
     */
     static async updateMyAccount(req, res) {
         try {
-            const currentUser = req.user; 
+            const currentUser = req.user;
             const { username, usertype, department, oldPassword, newPassword } = req.body;
             const { version } = req.query;
 

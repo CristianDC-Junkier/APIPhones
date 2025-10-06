@@ -8,7 +8,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { deleteProfileAcc, getProfile, modifyProfileAcc, modifyProfileData } from "../../services/UserService";
 import BackButton from "../../components/utils/BackButtonComponent";
 import ModifyUserAccountComponent from '../../components/user/ModifyUserAccountComponent';
-import ModifyUserDataComponent from '../../components/user/ModifyUserDataComponent';
+import AddModifyUserDataCommponent from '../../components/user/AddModifyUserDataComponent';
 
 const ProfileUser = () => {
     const [profile, setProfile] = useState();
@@ -63,7 +63,7 @@ const ProfileUser = () => {
                 });
             }
             else {
-                await ModifyUserDataComponent({ 
+                await AddModifyUserDataCommponent({ 
                     token,
                     userItem: profile.userData,
                     currentUser: user,

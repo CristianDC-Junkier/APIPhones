@@ -10,7 +10,8 @@ import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
 import TableUserAccountComponent from "../../components/user/TableUserAccountComponent";
 import TableUserDataComponent from "../../components/user/TableUserDataComponent";
-import AddModifyUserCo from "../../components/user/AddModifyUserComponent";
+import AddModifyUserCommponent from "../../components/user/AddModifyUserComponent";
+import AddModifyUserDataCommponent from "../../components/user/AddModifyUserDataComponent";
 
 const DashboardUser = () => {
     const { user: currentUser, token, logout } = useAuth();
@@ -90,7 +91,7 @@ const DashboardUser = () => {
     useEffect(() => { fetchUsers(); }, [token, currentUser, logout, navigate]);
 
     const handleCreateUser = async () => {
-        await AddModifyUserCo({
+        await AddModifyUserCommponent({
             token,
             currentUser,
             action: "create",
@@ -116,6 +117,23 @@ const DashboardUser = () => {
         });
     };
 
+    const handleCreateUserData = async () => {
+        await AddModifyUserDataCommponent({
+            token,
+            currentUser,
+            action: "create",
+            onConfirm: async (formValues) => {
+                const result = await createUser(formValues, token); //FALTA
+                if (result.success) {
+                    Swal.fire("Éxito", "Datos de usuario creados correctamente", "success");
+                    await fetchUsers();
+                } else {
+                    Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
+                }
+            }
+        });
+    };
+
     if (loading) return <Spinner />;
 
     return (
@@ -127,13 +145,23 @@ const DashboardUser = () => {
 
             {/* Botón Crear Usuario */}
             <div className="position-absolute top-0 end-0 p-3">
-                <Button
-                    color="transparent"
-                    style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
-                    onClick={handleCreateUser}
-                >
-                    ➕ Crear Usuario
-                </Button>
+                {statsType === "Accounts" ?
+                    <Button
+                        color="transparent"
+                        style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
+                        onClick={handleCreateUser}
+                    >
+                        ➕ Crear Usuario
+                    </Button>
+                    :
+                    <Button
+                        color="transparent"
+                        style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
+                        onClick={handleCreateUserData}
+                    >
+                        ➕ Crear Datos de Usuario
+                    </Button>
+                }
             </div>
 
             {/* Tarjetas de estadísticas */}

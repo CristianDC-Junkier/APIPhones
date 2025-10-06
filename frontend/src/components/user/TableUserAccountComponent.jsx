@@ -1,8 +1,8 @@
-﻿import React, { useMemo, useState } from "react";
+﻿import React, { useMemo } from "react";
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import { modifyUser, deleteUser, deleteWorker } from "../../services/UserService";
+import { modifyUser, deleteUser, deleteWorker, markPWDCUser } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
 import AddModifyUser from "./AddModifyUserComponent";
 import Pagination from "../PaginationComponent";
@@ -18,8 +18,6 @@ const TableUserAccountComponent = ({
     refreshData,
     token
 }) => {
-    const [pwdModalOpen, setPwdModalOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
 
     const filteredUsers = useMemo(
         () => users.filter(u => u.username.toLowerCase().includes(search.toLowerCase())),
@@ -79,12 +77,6 @@ const TableUserAccountComponent = ({
         });
     };
 
-    // Reemplazamos handlePWDC para usar PWDAsk
-    const handlePWDC = (userItem) => {
-        setSelectedUser(userItem);
-        setPwdModalOpen(true);
-    };
-
     const handleDelete = async (userItem) => {
         try { await showCaptcha(userItem.id); }
         catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
@@ -102,6 +94,33 @@ const TableUserAccountComponent = ({
         } else {
             alert(result.error);
             Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
+        }
+    };
+
+    const handlePWDC = async (userItem) => {
+        try {
+            const password = await PWDAsk({ userItem });
+            if (!password) return;
+
+            const result = await markPWDCUser(userItem.id, { password }, token, userItem.version);
+            if (result.success) {
+                await Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Contraseña reiniciada correctamente',
+                    confirmButtonColor: '#3085d6',
+                });
+                await refreshData();
+            } else {
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.error || 'No se pudo reiniciar la contraseña al usuario',
+                    confirmButtonColor: '#d33',
+                });
+            }
+        } catch (err) {
+            Swal.fire("Error", err.message || "No se pudo marcar contraseña temporal", "error");
         }
     };
 
@@ -181,17 +200,6 @@ const TableUserAccountComponent = ({
                 <div className="mt-auto" style={{ minHeight: '40px' }}>
                     <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 </div>
-            )}
-
-            {/* Modal PWDAsk */}
-            {selectedUser && (
-                <PWDAsk
-                    isOpen={pwdModalOpen}
-                    toggle={() => setPwdModalOpen(false)}
-                    userItem={selectedUser}
-                    token={token}
-                    onSuccess={refreshData} // refrescar datos tras marcar contraseña
-                />
             )}
         </>
     );

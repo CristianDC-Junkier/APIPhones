@@ -78,53 +78,59 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
     const step1Html = `
-<div>
-  <div style="${rowStyle} margin-top: 5vh">
-    <label style="${labelStyle}">Usuario <span style="color:red">*</span></label>
-    <input id="swal-username" style="${inputStyle}" placeholder="Usuario" value="${userItem?.username || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Contraseña <span style="color:red">*</span></label>
-    <input id="swal-password" type="password" style="${inputStyle}" placeholder="Contraseña">
-  </div>
-  <div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
-    Se solicitará cambiar al conectarse por primera vez
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Tipo de Usuario <span style="color:red">*</span></label>
-    <select id="swal-type" style="${inputStyle}">${optionsHtml}</select>
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Departamento</label>
-    <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
-  </div>
-  <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
-</div>`;
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <div>
+        <div style="${rowStyle} margin-top: 5vh">
+            <label style="${labelStyle}">Usuario <span style="color:red">*</span></label>
+            <input id="swal-username" style="${inputStyle}" placeholder="Usuario" value="${userItem?.username || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Contraseña <span style="color:red">*</span></label>
+            <div style="flex:1; display:flex; align-items:center;">
+                <input id="swal-password" type="password" style="${inputStyle}" placeholder="Contraseña">
+                <button type="button" id="toggle-pass" style="margin-left:4px; border:none; background:transparent; cursor:pointer; width:36px; display:flex; justify-content:center; align-items:center;">
+                    <i id="icon-pass" class="fas fa-eye-slash"></i>
+                </button>
+            </div>
+        </div>
+        <div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
+            Se solicitará cambiar al conectarse por primera vez
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Tipo de Usuario <span style="color:red">*</span></label>
+            <select id="swal-type" style="${inputStyle}">${optionsHtml}</select>
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Departamento</label>
+            <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
+        </div>
+        <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
+    </div>`;
 
     const step2Html = `
-<div>
-  <div style="${rowStyle} margin-top: 5vh">
-    <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
-    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData?.name || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Extensión</label>
-    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData?.extension || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Teléfono</label>
-    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData?.number || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Email</label>
-    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData?.email || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Subdepartamento</label>
-    <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
-  </div>
-  <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
-</div>`;
+    <div>
+        <div style="${rowStyle} margin-top: 5vh">
+            <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
+            <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData?.name || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Extensión</label>
+            <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData?.extension || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Teléfono</label>
+            <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData?.number || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Email</label>
+            <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData?.email || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Subdepartamento</label>
+            <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
+        </div>
+        <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
+    </div>`;
 
     // Paso 1
     const swalStep1 = await Swal.fire({
@@ -135,6 +141,17 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         showCancelButton: true,
         cancelButtonText: "Cancelar",
         confirmButtonText: "Siguiente",
+        didOpen: () => {
+            const PwdInput = document.getElementById("swal-password");
+            const PwdToggle = document.getElementById("toggle-pass");
+            const PwdIcon = document.getElementById("icon-pass");
+
+            PwdToggle.addEventListener("click", () => {
+                const isHidden = PwdInput.type === "password";
+                PwdInput.type = isHidden ? "text" : "password";
+                PwdIcon.className = isHidden ? "fas fa-eye" : "fas fa-eye-slash";
+            });
+        },
         preConfirm: () => {
             const username = document.getElementById("swal-username").value.trim();
             const password = document.getElementById("swal-password").value.trim();
@@ -145,7 +162,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
             if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
 
-            return { username, password, usertype, departmentId, version: userItem?.version ? userItem.version : 0};
+            return { username, password, usertype, departmentId, version: userItem?.version ? userItem.version : 0 };
         }
     });
 

@@ -1,111 +1,80 @@
-﻿import React, { useState, useEffect } from 'react';
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button, Input, InputGroup, InputGroupText } from 'reactstrap';
-import { changePasswordPWD } from '../../services/UserService';
-import { useAuth } from '../../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import Swal from 'sweetalert2';
+﻿import React, { useEffect } from "react";
+import Swal from "sweetalert2";
+import { changePasswordPWD } from "../../services/UserService";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
-/**
- * Modal de cambio de contraseña.
- * Se abre automáticamente si user.forcePwdChange === true.
- */
-const PWDChangeModal = () => {
-    const { user, token, logout, update } = useAuth();
+const PWDChangeComponent = ({ user, token }) => {
+    const { update, logout } = useAuth();
     const navigate = useNavigate();
 
-    const [modalOpen, setModalOpen] = useState(false);
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-
     useEffect(() => {
-        if (user?.forcePwdChange) {
-            setModalOpen(true);
-        }
-    }, [user]);
+        const askPassword = async () => {
+            const rowStyle = "display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;";
+            const labelStyle = "width:150px; font-weight:bold; text-align:left;";
+            const inputStyle = "flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;";
 
-    const handleSubmit = async () => {
-        if (!password.trim()) {
-            Swal.fire({
-                icon: 'warning',
-                title: '¡Atención!',
-                text: 'La contraseña no puede estar vacía',
-                confirmButtonColor: '#3085d6',
+            const { value: password } = await Swal.fire({
+                title: "Cambio de contraseña",
+                html: `
+                    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+                    <p style="margin-bottom:1rem;">Ingrese la nueva contraseña para <strong>${user.username}</strong>:</p>
+                    <div style="${rowStyle}">
+                        <label style="${labelStyle}">Contraseña</label>
+                        <div style="flex:1; display:flex; align-items:center;">
+                            <input id="swal-password" type="password" style="${inputStyle}" placeholder="Nueva contraseña" />
+                            <button id="toggle-pass" type="button" style="margin-left:4px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; width:32px; height:32px;">
+                                <i id="icon-pass" class="fas fa-eye-slash" style="font-size:1rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `,
+                showCancelButton: false, 
+                confirmButtonText: "Confirmar",
+                width: 500,
+                focusConfirm: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                allowEnterKey: true,
+                showCloseButton: false,
+                preConfirm: () => {
+                    const input = document.getElementById("swal-password");
+                    const value = input.value.trim();
+                    if (!value) Swal.showValidationMessage("La contraseña no puede estar vacía");
+                    return value || false;
+                },
+                didOpen: () => {
+                    const input = document.getElementById("swal-password");
+                    const toggle = document.getElementById("toggle-pass");
+                    const icon = document.getElementById("icon-pass");
+                    toggle.addEventListener("click", () => {
+                        console.log("Click");
+                        const isHidden = input.type === "password";
+                        input.type = isHidden ? "text" : "password";
+                        icon.className = isHidden ? "fas fa-eye" : "fas fa-eye-slash";
+                    });
+                    input.focus();
+                },
             });
-            return;
-        }
 
-        setLoading(true);
-        const result = await changePasswordPWD({ newPassword: password }, token);
-        setLoading(false);
+            if (password) {
+                const res = await changePasswordPWD({ newPassword: password }, token);
 
-        if (result.success) {
-            // Actualizamos user y storage para reflejar que ya no requiere cambio de contraseña
-            const updatedUser = { ...user, forcePwdChange: false };
-            update(updatedUser);
+                if (res.success) {
+                    update({ ...user, forcePwdChange: false });
+                    await Swal.fire("¡Éxito!", "Contraseña actualizada correctamente", "success");
+                } else {
+                    await Swal.fire("Error", res.error || "No se pudo cambiar la contraseña", "error");
+                    await logout();
+                    navigate("/login", { replace: true });
+                }
+            }
+        };
 
-            await Swal.fire({
-                icon: 'success',
-                title: '¡Éxito!',
-                text: 'Contraseña actualizada correctamente',
-                confirmButtonColor: '#3085d6',
-            });
+        askPassword();
+    }, [user, token, update, logout, navigate]);
 
-            setModalOpen(false);
-        } else {
-            await Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: result.error || 'No se pudo cambiar la contraseña',
-                confirmButtonColor: '#d33',
-            });
-            await logout();
-            navigate('/login', { replace: true });
-        }
-    };
-
-    return (
-        <Modal
-            isOpen={modalOpen}
-            backdrop="static"
-            keyboard={false}
-            centered
-            style={{ maxWidth: '400px', borderRadius: '0.5rem' }}
-        >
-            <ModalHeader
-                tag="h2"
-                className="justify-content-center"
-                style={{ borderBottom: 'none', fontWeight: '600', color: '#545454' }}
-            >
-                Cambio de contraseña
-            </ModalHeader>
-
-            <ModalBody className="text-center">
-                <p>Introduzca a continuación una nueva contraseña para su usuario:</p>
-                <InputGroup>
-                    <Input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Nueva contraseña"
-                    />
-                    <InputGroupText
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setShowPassword(!showPassword)}
-                    >
-                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-                    </InputGroupText>
-                </InputGroup>
-            </ModalBody>
-            <ModalFooter className="justify-content-center" style={{ borderTop: 'none' }}>
-                <Button color="primary" onClick={handleSubmit} disabled={loading} style={{ minWidth: '100px' }}>
-                    {loading ? 'Guardando...' : 'Confirmar'}
-                </Button>
-            </ModalFooter>
-        </Modal>
-    );
+    return null; // No renderiza nada
 };
 
-export default PWDChangeModal;
+export default PWDChangeComponent;

@@ -67,36 +67,35 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
     const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
-    console.log(userItem);
 
     const Html = `
-<div>
-  <div style="${rowStyle} margin-top: 5vh">
-    <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
-    <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.name || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Extensión</label>
-    <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.extension || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Teléfono</label>
-    <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.number || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Email</label>
-    <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.email || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Departamento</label>
-    <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Subdepartamento</label>
-    <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
-  </div>
-  <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
-</div>`;
+    <div>
+        <div style="${rowStyle} margin-top: 5vh">
+            <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
+            <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.name || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Extensión</label>
+            <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.extension || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Teléfono</label>
+            <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.number || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Email</label>
+            <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.email || ""}">
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Departamento</label>
+            <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
+        </div>
+        <div style="${rowStyle}">
+            <label style="${labelStyle}">Subdepartamento</label>
+            <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
+        </div>
+        <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
+        </div>`;
 
     const swalStep = await Swal.fire({
         title: "Modificar Datos",

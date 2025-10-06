@@ -1,5 +1,5 @@
 ﻿import Swal from "sweetalert2";
-import { getDepartmentsList, getDepartmentById } from "../../services/DepartmentService";
+import { getDepartmentsList } from "../../services/DepartmentService";
 
 /**
  * Componente que permite modificar el perfil del usuario mediante un modal de SweetAlert2.
@@ -57,7 +57,7 @@ const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
                 <div style="flex:1; display:flex; align-items:center;">
                     <input id="swal-oldpassword" type="password" style="flex:1; ${inputStyle}" placeholder="Contraseña actual">
                     <button type="button" id="toggle-old" style="margin-left:4px; border:none; background:transparent; cursor:pointer; width:36px; display:flex; justify-content:center; align-items:center;">
-                        <i id="icon-old" class="fas fa-eye"></i>
+                        <i id="icon-old" class="fas fa-eye-slash"></i>
                     </button>
                 </div>
             </div>
@@ -67,7 +67,7 @@ const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
                 <div style="flex:1; display:flex; align-items:center;">
                     <input id="swal-newpassword" type="password" style="flex:1; ${inputStyle}" placeholder="Nueva contraseña">
                     <button type="button" id="toggle-new" style="margin-left:4px; border:none; background:transparent; cursor:pointer; width:36px; display:flex; justify-content:center; align-items:center;">
-                        <i id="icon-new" class="fas fa-eye"></i>
+                        <i id="icon-new" class="fas fa-eye-slash"></i>
                     </button>
                 </div>
             </div>
@@ -109,12 +109,12 @@ const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
             toggleOld.addEventListener("click", () => {
                 const isHidden = oldPwdInput.type === "password";
                 oldPwdInput.type = isHidden ? "text" : "password";
-                iconOld.className = isHidden ? "fas fa-eye-slash" : "fas fa-eye";
+                iconOld.className = isHidden ? "fas fa-eye" : "fas fa-eye-slash";
             });
             toggleNew.addEventListener("click", () => {
                 const isHidden = newPwdInput.type === "password";
                 newPwdInput.type = isHidden ? "text" : "password";
-                iconNew.className = isHidden ? "fas fa-eye-slash" : "fas fa-eye";
+                iconNew.className = isHidden ? "fas fa-eye" : "fas fa-eye-slash";
             });
         },
         preConfirm: () => {

@@ -17,7 +17,7 @@ import PWDChangeComponent from '../components/user/PWDChangeComponent';
  * @param {React.ReactNode} props.children - Componentes hijos que se mostrarán si el usuario tiene rol permitido.
  */
 const RoleRoute = ({ allowedRoles, children }) => {
-    const { user, loading } = useAuth();
+    const { user, token, loading } = useAuth();
 
     const navigate = useNavigate();
 
@@ -35,8 +35,8 @@ const RoleRoute = ({ allowedRoles, children }) => {
     return (
         <>
             {/* Prompt para cambio de contraseña si es necesario */}
-            {user?.forcePwdChange && <PWDChangeComponent />}
-            {children}
+            {user?.forcePwdChange && <PWDChangeComponent user={user} token={token} />}
+            {user ? children : <Spinner />}
         </>
     );
 };

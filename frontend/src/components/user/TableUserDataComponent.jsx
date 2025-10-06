@@ -1,11 +1,11 @@
-﻿import React, { useMemo, useEffect, useState } from "react";
+﻿import React, { useMemo } from "react";
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import { modifyUserData, deleteUserData, getProfile } from "../../services/UserService";
-import CaptchaSlider from '../utils/CaptchaSliderComponent';
-import ModifyUserData from "./ModifyUserDataComponent";
-import Pagination from "../PaginationComponent";
+import { modifyUserData, deleteUserData } from "../../services/UserService";
+import CaptchaSliderComponent from '../utils/CaptchaSliderComponent';
+import AddModifyUserDataCommponent from "./AddModifyUserDataComponent";
+import PaginationComponent from "../PaginationComponent";
 
 const TableUserDataComponent = ({
     users,
@@ -33,7 +33,7 @@ const TableUserDataComponent = ({
         let completed = false;
 
         reactRoot.render(
-            <CaptchaSlider onSuccess={() => {
+            <CaptchaSliderComponent onSuccess={() => {
                 completed = true;
                 Swal.close();
                 resolve(true);
@@ -58,7 +58,7 @@ const TableUserDataComponent = ({
     });
 
     const handleModify = async (userItem) => {
-        await ModifyUserData({
+        await AddModifyUserDataCommponent({
             token,
             userItem,
             currentUser,
@@ -141,7 +141,7 @@ const TableUserDataComponent = ({
 
             {totalPages > 1 && (
                 <div className="mt-auto" style={{ minHeight: '40px' }}>
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                    <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 </div>
             )}
         </>

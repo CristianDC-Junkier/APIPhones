@@ -80,13 +80,7 @@ const TableUserAccountComponent = ({
     const handleDelete = async (userItem) => {
         try { await showCaptcha(userItem.id); }
         catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
-        let result;
-        if (userItem.usertype === "WORKER") {
-            result = await deleteWorker(userItem.id, token, userItem.version);
-        }
-        else {
-            result = await deleteUser(userItem.id, token, userItem.version);
-        }
+        const result = await deleteUser(userItem.id, token, userItem.version);
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
             await refreshData();

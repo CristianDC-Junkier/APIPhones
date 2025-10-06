@@ -30,7 +30,7 @@ router.put("/profile-update", isAuthenticated, UserDataController.updateMyProfil
 router.get("/", UserDataController.publicList);
 router.get("/worker", isAuthenticated, UserDataController.workerList);
 router.post("/", notWorker, UserDataController.create);
-router.put("/:id", notWorker, canModifyUser, UserDataController.update);
+router.put("/:id", notWorker, UserDataController.update);
 router.delete("/:id", notWorker, UserDataController.delete);
 
 module.exports = router;

@@ -168,44 +168,39 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
 
     if (!swalStep1.value) return;
     const step1Values = swalStep1.value;
-    let swalStep2;
-    if (step1Values.usertype === "WORKER") {
-        // Paso 2
-        swalStep2 = await Swal.fire({
-            title: "Datos Extendidos",
-            html: step2Html,
-            focusConfirm: false,
-            width: '600px',
-            showCancelButton: true,
-            cancelButtonText: "Cancelar",
-            confirmButtonText: action === "create" ? "Crear" : "Aceptar",
-            didOpen: () => {
-                const subdepartmentSelect = document.getElementById("swal-subdepartment");
-                const filteredSubDeps = subdepartments.filter(sd => sd.departmentId === step1Values.departmentId);
-                const options = [{ id: null, name: "-- Seleccionar --" }, ...filteredSubDeps];
-                subdepartmentSelect.innerHTML = options.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
-            },
-            preConfirm: () => {
-                const name = document.getElementById("swal-name").value.trim();
-                const extension = document.getElementById("swal-extension").value.trim();
-                const number = document.getElementById("swal-number").value.trim();
-                const email = document.getElementById("swal-email").value.trim();
-                const subdepartmentIdRaw = document.getElementById("swal-subdepartment").value;
-                const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
+    console.log(userItem?.userData);
+    // Paso 2
+    const swalStep2 = await Swal.fire({
+        title: "Datos Extendidos",
+        html: step2Html,
+        focusConfirm: false,
+        width: '600px',
+        showCancelButton: true,
+        cancelButtonText: "Cancelar",
+        confirmButtonText: action === "create" ? "Crear" : "Aceptar",
+        didOpen: () => {
+            const subdepartmentSelect = document.getElementById("swal-subdepartment");
+            const filteredSubDeps = subdepartments.filter(sd => sd.departmentId === step1Values.departmentId);
+            const options = [{ id: null, name: "-- Seleccionar --" }, ...filteredSubDeps];
+            subdepartmentSelect.innerHTML = options.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+        },
+        preConfirm: () => {
+            const name = document.getElementById("swal-name").value.trim();
+            const extension = document.getElementById("swal-extension").value.trim();
+            const number = document.getElementById("swal-number").value.trim();
+            const email = document.getElementById("swal-email").value.trim();
+            const subdepartmentIdRaw = document.getElementById("swal-subdepartment").value;
+            const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
 
-                if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
-                if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
-                if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
-                if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
+            if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
+            if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
+            if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-                return { name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: userItem?.version ? userItem.version : 0 };
-            }
-        });
-        if (!swalStep2.value) return;
-    }
-    else {
-        swalStep2 = { value: null };
-    }
+            return { id: userItem?.userData.id, name, extension, number, email, departmentId: step1Values.departmentId, subdepartmentId, version: userItem?.userData.version ? userItem.userData.version : 0 };
+        }
+    });
+    if (!swalStep2.value) return;
 
     if (action === "modify" && !step1Values.password) {
         onConfirm({ userAccount: step1Values, userData: swalStep2.value, userAccountId: userItem?.userAccountId || null });

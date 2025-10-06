@@ -4,7 +4,7 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getUserDataList, getWorkerDataList, createUser, createWorker, getProfile } from "../../services/UserService";
+import { getUserDataList, getWorkerDataList, createUser, getProfile } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
@@ -96,22 +96,12 @@ const DashboardUser = () => {
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
-                if (formValues.userData) {
-                    const result = await createWorker(formValues, token);
-                    if (result.success) {
-                        Swal.fire("Éxito", "Usuario creado correctamente", "success");
-                        await fetchUsers();
-                    } else {
-                        Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
-                    }
+                const result = await createUser(formValues, token);
+                if (result.success) {
+                    Swal.fire("Éxito", "Usuario creado correctamente", "success");
+                    await fetchUsers();
                 } else {
-                    const result = await createUser(formValues, token);
-                    if (result.success) {
-                        Swal.fire("Éxito", "Usuario creado correctamente", "success");
-                        await fetchUsers();
-                    } else {
-                        Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
-                    }
+                    Swal.fire("Error", result.error || "No se pudo crear el usuario", "error");
                 }
             }
         });

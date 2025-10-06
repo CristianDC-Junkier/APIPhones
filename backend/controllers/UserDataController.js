@@ -199,7 +199,7 @@ class UserDataController {
                 }
 
                 // Validar que el subdepartamento pertenece al departamento indicado y que existe
-                if (departmentId) {
+                if (subdepartmentId) {
                     const subdepartment = await SubDepartment.findByPk(subdepartmentId);
                     if (!subdepartment) {
                         return res.status(400).json({ error: "Subdepartmento no válido" });
@@ -263,26 +263,22 @@ class UserDataController {
     */
     static async delete(req, res) {
         try {
-            const userId = req.params.id;
-            console.log(userId);
-
+            const userDataId = req.params.id;
             const { version } = req.query;
 
+            const data = await UserData.findByPk(userDataId);
+            if (!data) return res.status(404).json({ error: "Datos de Usuario no encontrado" });
+
+            if (data.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
+
             // Primero eliminamos los UserData asociados
-            await UserData.destroy({ where: { userAccountId: userId } });
+            await data.destroy();
 
-            // Luego eliminamos el usuario
-            const deleted = await UserAccount.destroy({ where: { id: userId } });
-
-            if (!deleted) {
-                return res.status(404).json({ error: "Usuario no encontrado" });
-            }
-
-            LoggerController.info(`Usuario ${userId} eliminado correctamente`);
-            res.json({ success: true, message: "Cuenta eliminada correctamente" });
+            LoggerController.info(`Datos de Usuario ${userDataId} eliminado correctamente`);
+            res.json({ success: true, message: "Datos eliminados correctamente" });
 
         } catch (error) {
-            LoggerController.error(`Error eliminando usuario ${req.user.id}: ${error.message}`);
+            LoggerController.error(`Error eliminando datos de usuario ${req.user.id}: ${error.message}`);
             res.status(500).json({ error: error.message });
         }
     }

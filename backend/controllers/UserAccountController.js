@@ -191,64 +191,10 @@ class UserAccountController {
         }
     }
 
-    /**
-    * Crea un nuevo usuario (Que no sea Worker)
-    * 
-    * @param {Object} req - { body: { userAccount }
-    * @param {Object} res
-    */
-    static async create(req, res) {
-        try {
-            const { userAccount } = req.body;
-
-            if (!userAccount) {
-                return res.status(400).json({ error: "Los datos se aportaron de forma incompleta" });
-            }
-
-            if (!userAccount.username || !userAccount.password) {
-                return res.status(400).json({ error: "Usuario y contraseña requeridos" });
-            }
-
-            // Verificar que el username no exista
-            const existingUser = await UserAccount.findOne({ where: { username: userAccount.username } });
-            if (existingUser) {
-                return res.status(400).json({ error: "El nombre de usuario ya está en uso" });
-            }
-
-            // Validar que el departamento y subdepartamento existen si se proporcionan
-            if (userAccount.departmentId) {
-                const department = await Department.findByPk(userAccount.departmentId);
-                if (!department) {
-                    return res.status(400).json({ error: "Departmento no válido" });
-                }
-            }
-
-            // Validar SUPERADMIN y WORKER
-            if ((userAccount.usertype === "SUPERADMIN") && req.user.usertype !== "SUPERADMIN") {
-                return res.status(403).json({ error: "Solo un SUPERADMIN puede crear a otro SUPERADMIN" });
-            } else if (userAccount.usertype === "WORKER") {
-                return res.status(403).json({ error: "No se pueden crear trabajadores con esta función" });
-            }
-
-            // Crear UserAccount
-            const user = await UserAccount.create({
-                username: userAccount.username,
-                password: userAccount.password,
-                usertype: userAccount.usertype,
-                forcePwdChange: true,
-                departmentId: userAccount.departmentId
-            });
-
-            LoggerController.info('Nuevo usuario ' + user.username + ' creado correctamente');
-            res.json({ id: user.id });
-        } catch (error) {
-            LoggerController.error('Error en la creación de usuario: ' + error.message);
-            res.status(400).json({ error: error.message });
-        }
-    }
+    
 
     /**
-    * Crea un nuevo usuario (Worker) junto con su UserData asociado.
+    * Crea un nuevo usuario junto con su UserData asociado.
     * 
     * @param {Object} req - { body: 
     * { userAccount: { username, password, usertype, departmentId }, 
@@ -256,7 +202,7 @@ class UserAccountController {
     * } }
     * @param {Object} res
     */
-    static async createWorker(req, res) {
+    static async create(req, res) {
         try {
             const { userAccount, userData } = req.body;
 
@@ -303,11 +249,6 @@ class UserAccountController {
                 }
             }
 
-            // WORKER
-            if (userAccount.usertype !== "WORKER") {
-                return res.status(403).json({ error: "Solo se pueden crear trabajadores con esta función" });
-            }
-
             // Crear UserAccount
             const user = await UserAccount.create({
                 username: userAccount.username,
@@ -341,16 +282,20 @@ class UserAccountController {
     static async update(req, res) {
         try {
             const targetUserId = req.params.id;
-            const { userAccount } = req.body;
+            const { userAccount, userData } = req.body;
 
-            if (!userAccount) {
+            if (!userAccount || !userData) {
                 return res.status(400).json({ error: "Los datos se aportaron de forma incompleta" });
             }
 
             const targetUser = await UserAccount.findByPk(targetUserId);
             if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
+            const targetUserData = await UserData.findByPk(userData.id);
+            if (!targetUserData) {
+                return res.status(404).json({ error: "Datos de Usuario no encontrado" });
+            }
 
-            if (targetUser.version != userAccount.version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
+            if (targetUser.version != userAccount.version || targetUserData.version != userData.version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
 
 
             // Validar que el nuevo username sea único
@@ -374,7 +319,45 @@ class UserAccountController {
                 return res.status(400).json({ error: "Debe introducir una contraseña válida" });
             }
 
+            // Verificar que el usuario no es DEPARTMENT
+            if (req.user.usertype !== "DEPARTMENT") {
+                // Validar que el departamento y subdepartamento existen si se proporcionan
+                if (userData.departmentId) {
+                    const department = await Department.findByPk(userData.departmentId);
+                    if (!department) {
+                        return res.status(400).json({ error: "Departmento no válido" });
+                    }
+                }
+
+                // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
+                if (!userData.departmentId && userData.subdepartmentId) {
+                    return res.status(400).json({ error: "Departmento no válido" });
+                }
+
+                // Validar que el subdepartamento pertenece al departamento indicado y que existe
+                if (userData.subdepartmentId) {
+                    const subdepartment = await SubDepartment.findByPk(userData.subdepartmentId);
+                    if (!subdepartment) {
+                        return res.status(400).json({ error: "Subdepartmento no válido" });
+                    }
+                    if (userData.departmentId && subdepartment.departmentId != userData.departmentId) {
+                        return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
+                    }
+                }
+
+                if (userData.departmentId !== undefined) targetUserData.departmentId = userData.departmentId;
+                if (userData.subdepartmentId !== undefined) targetUserData.subdepartmentId = userData.subdepartmentId;
+            }
+
+            // Actualizar solo campos permitidos
+            if (userData.name !== undefined) targetUserData.name = userData.name;
+            if (userData.extension !== undefined) targetUserData.extension = userData.extension;
+            if (userData.number !== undefined) targetUserData.number = userData.number;
+            if (userData.email !== undefined) targetUserData.email = userData.email;
+            if (userData.userId !== undefined) targetUserData.userAccountId = userData.userId;
+
             await targetUser.save();
+            await targetUserData.save();
 
             LoggerController.info(`Usuario ${targetUser.username} actualizado por ${req.user.username}`);
             res.json({ id: targetUserId });
@@ -414,7 +397,7 @@ class UserAccountController {
     }
 
     /**
-    * Elimina un usuario (No Worker) existente.
+    * Elimina un usuario (Worker) existente.
     * 
     * @param {Object} req - Objeto de petición con { params: { id }, body: { version } }.
     * @param {Object} res 
@@ -426,34 +409,7 @@ class UserAccountController {
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-            if (user.usertype === "WORKER") return res.status(400).json({ error: "El usuario es un trabajador" });
-
-            if (user.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
-
-            await user.destroy();
-
-            LoggerController.info(`Usuario ${user.username} eliminado por ${req.user.username}`);
-            res.json({ id });
-        } catch (error) {
-            LoggerController.error('Error en la eliminación de usuario: ' + error.message);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-    * Elimina un usuario (Worker) existente.
-    * 
-    * @param {Object} req - Objeto de petición con { params: { id }, body: { version } }.
-    * @param {Object} res 
-    */
-    static async deleteWorker(req, res) {
-        try {
-            const { id } = req.params;
-            const { version } = req.query;
-
-            const user = await UserAccount.findByPk(id);
-            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-            if (user.usertype !== "WORKER") return res.status(400).json({ error: "El usuario no es un trabajador" });
+            //if (user.usertype !== "WORKER") return res.status(400).json({ error: "El usuario no es un trabajador" });
 
             if (user.version != version) return res.status(409).json({ error: "El usuario ha sido modificado anteriormente" });
 

@@ -32,8 +32,8 @@ router.get("/list", isAuthenticated, UserAccountController.listUsers);
 router.get("/list-department", isAuthenticated, notWorker, UserAccountController.listUsersByDepartment);
 router.get("/:id", notWorker, UserAccountController.getOne);
 
-router.post("/worker/", notWorker, UserAccountController.createWorker);
-router.delete("/worker/:id", notWorker, canModifyUser, UserAccountController.deleteWorker);
+//router.post("/worker/", notWorker, UserAccountController.createWorker);
+//router.delete("/worker/:id", notWorker, canModifyUser, UserAccountController.deleteWorker);
 
 router.put("/profile-update", isAuthenticated, UserAccountController.updateMyAccount);
 router.delete("/profile-del", isAuthenticated, UserAccountController.deleteMyAccount);

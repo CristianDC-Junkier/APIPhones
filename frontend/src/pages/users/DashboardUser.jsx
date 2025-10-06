@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
+import { getDepartmentsList } from "../../services/DepartmentService";
 import { getUserDataList, getWorkerDataList, createUser, createUserData, getProfile } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
@@ -18,10 +19,16 @@ const DashboardUser = () => {
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
+
+    const [departments, setDepartments] = useState([]);
     const [userAccounts, setUserAccounts] = useState([]);
     const [userData, setUserData] = useState([]);
+
     const [statsType, setStatsType] = useState("Accounts");
+
     const [search, setSearch] = useState("");
+    const [selectedDepartment, setSelectedDepartment] = useState("");
+
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
 
@@ -89,6 +96,27 @@ const DashboardUser = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { fetchUsers(); }, [token, currentUser, logout, navigate]);
+
+    const fetchDepartments = async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+            if (currentUser.usertype !== "DEPARTMENT") {
+                // solo su departamento y sus subdepartamentos
+                const deptResp = await getDepartmentsList(token);
+
+                if (deptResp.success) {
+                    const depts = deptResp.data.departments ?? [];
+                    setDepartments(depts);
+                }
+            }
+        } catch (err) {
+            Swal.fire("Error", "No se pudo obtener la lista de departamentos", err);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => { fetchDepartments(); }, []);
 
     const handleCreateUser = async () => {
         await AddModifyUserCommponent({
@@ -195,13 +223,21 @@ const DashboardUser = () => {
                         onChange={e => setSearch(e.target.value)}
                         style={{ width: "250px" }}
                     />
-                    <Input
-                        type="text"
-                        placeholder="Buscar por departamento..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        style={{ width: "250px" }}
-                    />
+                    {currentUser?.usertype !== "DEPARTMENT" && (
+                        <Input
+                            type="select"
+                            value={selectedDepartment || ""}
+                            onChange={e => setSelectedDepartment(Number(e.target.value))}
+                            style={{ width: "240px" }}
+                        >
+                            <option value="">Todos los departamentos</option>
+                            {departments.map(d => (
+                                <option key={d.id} value={d.id}>
+                                    {d.name}
+                                </option>
+                            ))}
+                        </Input>
+                    )}
                 </div>
             </div>
 
@@ -212,6 +248,7 @@ const DashboardUser = () => {
                     currentUser={currentUser}
                     token={token}
                     search={search}
+                    selectedDepartment={selectedDepartment}
                     setSearch={setSearch}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
@@ -223,6 +260,7 @@ const DashboardUser = () => {
                     currentUser={user}
                     token={token}
                     search={search}
+                    selectedDepartment={selectedDepartment}
                     setSearch={setSearch}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}

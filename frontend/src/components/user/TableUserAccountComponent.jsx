@@ -11,6 +11,7 @@ import PWDAsk from "./PWDAskComponent";
 const TableUserAccountComponent = ({
     users,
     search,
+    selectedDepartment,
     rowsPerPage,
     currentPage,
     setCurrentPage,
@@ -19,10 +20,13 @@ const TableUserAccountComponent = ({
     token
 }) => {
 
-    const filteredUsers = useMemo(
-        () => users.filter(u => u.username.toLowerCase().includes(search.toLowerCase())),
-        [users, search]
-    );
+    const filteredUsers = useMemo(() => {
+        return users.filter(u => {
+            const matchesName = u.username.toLowerCase().includes(search.toLowerCase());
+            const matchesDept = selectedDepartment ? u.departmentId === selectedDepartment : true;
+            return matchesName && matchesDept;
+        });
+    }, [users, search, selectedDepartment]);
 
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);

@@ -66,7 +66,7 @@ class UserDataController {
     /**
     * Listar todos los UserData para el usuario autenticado, con todos los datos.
     */
-    /*static async workerListByDepartment(req, res) {
+    static async workerListByDepartment(req, res) {
         try {
             const requesterId = req.user.id;
             const requesterDepartmentId = req.user.departmentId;
@@ -79,23 +79,22 @@ class UserDataController {
                 where: {
                     departmentId: requesterDepartmentId,
                     id: { [Op.ne]: requesterId },// Excluye al que hace la petición
-                    usertype: { [Op.notIn]: ["ADMIN", "SUPERADMIN"] } // Excluye Admin y Superadmin
+                    //usertype: { [Op.notIn]: ["ADMIN", "SUPERADMIN"] } // Excluye Admin y Superadmin
                 },
                 include: [
                     { model: Department, as: "department" },
                     { model: SubDepartment, as: "subdepartment" }
                 ]
             });
-
             const formatted = allData.map(user => ({
-                name: user.userData.name,
-                extension: user.userData.extension,
-                number: user.userData.number,
-                email: user.userData.email,
-                departmentId: user.userData.departmentId,
-                departmentName: user.userData.department?.name || null,
-                subdepartmentId: user.userData.subdepartmentId,
-                subdepartmentName: user.userData.subdepartment?.name || null,
+                name: user.name,
+                extension: user.extension,
+                number: user.number,
+                email: user.email,
+                departmentId: user.departmentId,
+                departmentName: user.department?.name || null,
+                subdepartmentId: user.subdepartmentId,
+                subdepartmentName: user.subdepartment?.name || null,
                 version: user.version
             })
             );
@@ -105,7 +104,7 @@ class UserDataController {
             LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
             res.status(500).json({ error: error.message });
         }
-    }*/
+    }
 
     /**
     * Permite crear un UserData sin usuario asignado.

@@ -10,6 +10,7 @@ import PaginationComponent from "../PaginationComponent";
 const TableUserDataComponent = ({
     users,
     search,
+    selectedDepartment,
     rowsPerPage,
     currentPage,
     setCurrentPage,
@@ -17,12 +18,14 @@ const TableUserDataComponent = ({
     refreshData,
     token
 }) => {
-    
 
-    const filteredUsers = useMemo(
-        () => users.filter(u => u.name.toLowerCase().includes(search.toLowerCase())),
-        [users, search]
-    );
+    const filteredUsers = useMemo(() => {
+        return users.filter(u => {
+            const matchesName = u.name.toLowerCase().includes(search.toLowerCase());
+            const matchesDept = selectedDepartment ? u.departmentId === selectedDepartment : true;
+            return matchesName && matchesDept;
+        });
+    }, [users, search, selectedDepartment]);
 
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);

@@ -28,6 +28,7 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
 
 router.get("/", UserDataController.publicList);
 router.get("/worker", isAuthenticated, UserDataController.workerList);
+router.get("/worker-department", isAuthenticated, UserDataController.workerListByDepartment);
 
 router.post("/", notWorker, UserDataController.create);
 router.put("/:id", notWorker, canModifyUser, UserDataController.update);

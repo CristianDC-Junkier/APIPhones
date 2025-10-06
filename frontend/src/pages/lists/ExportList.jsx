@@ -67,6 +67,11 @@ export const exportPDF = async ({ colCount, listRef, lastUpdate, setLoading }) =
 
         const columnElements = clone.querySelectorAll(".row > .col-md-4");
 
+        // aumentar fontSize en todos los textos clonados
+        clone.querySelectorAll("h6, table, td, strong").forEach(el => {
+            el.style.fontSize = 1.15 + "rem";
+        });
+
         // título
         const drawTitle = () => {
             pdf.setFont("times", "bold");

@@ -183,7 +183,7 @@ class UserDataController {
 
             if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificado por otro proceso" });
 
-            // Verificar que el usuario es DEPARTMENT
+            // Verificar que el usuario no es DEPARTMENT
             if (req.user.usertype !== "DEPARTMENT") {
                 // Validar que el departamento y subdepartamento existen si se proporcionan
                 if (departmentId) {

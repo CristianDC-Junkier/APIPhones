@@ -160,15 +160,29 @@ const DashboardUser = () => {
             </Row>
 
             {/* Fila con tipo de usuario seleccionado + búsqueda */}
-            <div className="d-flex justify-content-between mb-3 align-items-center">
-                <div style={{ fontWeight: "bold", fontSize: "1rem" }}>{statsType === "Accounts" ? "Cuentas de Usuario" : "Datos de Trabajadores"}</div>
-                <Input
-                    type="text"
-                    placeholder="Buscar por usuario..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    style={{ width: "250px" }}
-                />
+            <div className="d-flex justify-content-between mb-2 align-items-center">
+                {/* título */}
+                <div style={{ fontWeight: "bold", fontSize: "1rem" }}>
+                    {statsType === "Accounts" ? "Cuentas de Usuario" : "Datos de Trabajadores"}
+                </div>
+
+                {/* contenedor de inputs */}
+                <div className="d-flex gap-2">
+                    <Input
+                        type="text"
+                        placeholder="Buscar por usuario..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        style={{ width: "250px" }}
+                    />
+                    <Input
+                        type="text"
+                        placeholder="Buscar por departamento..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        style={{ width: "250px" }}
+                    />
+                </div>
             </div>
 
             {/* Tabla de usuarios modular */}

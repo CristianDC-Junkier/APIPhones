@@ -67,6 +67,8 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, onConfirm
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
     const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
+    console.log(userItem);
+
     const Html = `
 <div>
   <div style="${rowStyle} margin-top: 5vh">

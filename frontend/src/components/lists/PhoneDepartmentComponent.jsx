@@ -19,7 +19,7 @@ const DepartamentoComponent = ({
             >
                 <h6
                     className="m-0 text-uppercase fw-bold flex-grow-1 text-center"
-                    style={{ fontSize: "1.05rem", color: "#000" }}
+                    style={{ fontSize: "1.00rem", color: "#000" }}
                 >
                     {nombreDepartamento}
                 </h6>
@@ -30,7 +30,7 @@ const DepartamentoComponent = ({
                 responsive
                 size="sm"
                 className="mb-0 text-center border-dark border-2 table-striped table-hover"
-                style={{ fontSize: "1.05rem" }}
+                style={{ fontSize: "0.9rem" }}
             >
                 <tbody>
                     {/* Trabajadores del departamento */}
@@ -44,10 +44,10 @@ const DepartamentoComponent = ({
                                 </>
                             ) : (
                                 <>
-                                        <td colSpan="2" className="text-uppercase">{t.name.split(" ").slice(0, 2).join(" ")}</td>
+                                    <td colSpan="2" className="text-uppercase">{t.name.split(" ").slice(0, 2).join(" ")}</td>
                                     <td
                                         className="text-uppercase email"
-                                        style={{ width: "50%", padding: "0.25rem", wordBreak: "break-word", overflowWrap: "break-word" }}
+                                        style={{ width: "60%", padding: "0.25rem", wordBreak: "break-word", overflowWrap: "break-word" }}
                                     >
                                         {t.email}
                                     </td>
@@ -63,7 +63,7 @@ const DepartamentoComponent = ({
                                 <td colSpan="4" className="p-1 border-dark border-1">
                                     <strong
                                         className="text-capitalize"
-                                        style={{ fontSize: "1rem", color: "#000" }}
+                                        style={{ fontSize: "0.9rem", color: "#000" }}
                                     >
                                         {subNombre}
                                     </strong>

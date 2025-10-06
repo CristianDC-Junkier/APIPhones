@@ -2,7 +2,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import MainLayout from '../layouts/MainLayout';
-import ExternalLayout from '../layouts/ExternalLayout';
+import ListLayout from '../layouts/ListLayout';
 
 import PublicRoute from './PublicRoute';
 import PrivateRoute from './PrivateRoute';
@@ -58,7 +58,7 @@ const AppRouter = () => {
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
-            <Route element={<ExternalLayout />}>
+            <Route element={<ListLayout />}>
                 <Route path="/workers" element={<WorkerListPage />} />
                 <Route path="/public" element={<PublicListPage /> } />
             </Route>

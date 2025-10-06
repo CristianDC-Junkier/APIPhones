@@ -65,7 +65,7 @@ const ProfileUser = () => {
             else {
                 await ModifyUserDataComponent({ 
                     token,
-                    userItem: profile,
+                    userItem: profile.userData,
                     currentUser: user,
                     onConfirm: async (formValues) => {
                         const result = await modifyProfileData(formValues, token, version);

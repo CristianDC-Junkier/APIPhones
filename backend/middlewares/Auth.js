@@ -109,7 +109,6 @@ async function isAuthenticated(req, res, next) {
         if (!payload || !payload.id) {
             return res.status(401).json({ success: false, message: "Token inválido" });
         }
-
         req.user = payload;
         next();
     } catch (err) {

@@ -57,6 +57,7 @@ class UserAccountController {
                     departmentName: user.userData.department?.name || null,
                     subdepartmentId: user.userData.subdepartmentId,
                     subdepartmentName: user.userData.subdepartment?.name || null,
+                    show: user.show,
                     version: user.userData.version
                 } : null
             }));
@@ -124,6 +125,7 @@ class UserAccountController {
                     departmentName: user.userData.department?.name || null,
                     subdepartmentId: user.userData.subdepartmentId,
                     subdepartmentName: user.userData.subdepartment?.name || null,
+                    show: user.show,
                     version: user.userData.version
                 } : null
             }));
@@ -181,6 +183,7 @@ class UserAccountController {
                     departmentName: user.userData.department?.name || null,
                     subdepartmentId: user.userData.subdepartmentId,
                     subdepartmentName: user.userData.subdepartment?.name || null,
+                    show: user.show,
                     version: user.userData.version
                 } : null
             });
@@ -192,7 +195,6 @@ class UserAccountController {
     }
 
     
-
     /**
     * Crea un nuevo usuario junto con su UserData asociado.
     * 
@@ -355,6 +357,7 @@ class UserAccountController {
             if (userData.number !== undefined) targetUserData.number = userData.number;
             if (userData.email !== undefined) targetUserData.email = userData.email;
             if (userData.userId !== undefined) targetUserData.userAccountId = userData.userId;
+            if (userData.show !== undefined) targetUserData.show = userData.show;
 
             await targetUser.save();
             await targetUserData.save();

@@ -13,7 +13,7 @@ class UserDataController {
         try {
             const allData = await UserData.findAll({
                 include: ["department", "subdepartment"],
-                where: { departmentId: { [Op.ne]: null } }
+                where: { departmentId: { [Op.ne]: null }, show : true }
             });
 
             const formatted = allData.map(user => ({
@@ -52,6 +52,7 @@ class UserDataController {
                 departmentName: user.department?.name || null,
                 subdepartmentId: user.subdepartmentId,
                 subdepartmentName: user.subdepartment?.name || null,
+                show: user.show,
                 version: user.version
             })
             );
@@ -95,6 +96,7 @@ class UserDataController {
                 departmentName: user.department?.name || null,
                 subdepartmentId: user.subdepartmentId,
                 subdepartmentName: user.subdepartment?.name || null,
+                show: user.show,
                 version: user.version
             })
             );
@@ -115,7 +117,7 @@ class UserDataController {
     static async create(req, res) {
         try {
             const id = req.user.id;
-            const { name, extension, number, email, departmentId, subdepartmentId } = req.body;
+            const { name, extension, number, email, departmentId, subdepartmentId, show } = req.body;
 
             const user = await UserAccount.findByPk(id);
 
@@ -140,7 +142,8 @@ class UserDataController {
                 number,
                 email,
                 departmentId: departmentId || null,
-                subdepartmentId: subdepartmentId || null
+                subdepartmentId: subdepartmentId || null,
+                show,
             });
 
             LoggerController.info(`UserData creado por el usuario ${user.username} con id ${id}`);
@@ -165,7 +168,7 @@ class UserDataController {
     static async update(req, res) {
         try {
             const currentUserId = req.user.id;
-            const { id, name, extension, number, email, userId, departmentId, subdepartmentId, version } = req.body;
+            const { id, name, extension, number, email, userId, departmentId, subdepartmentId, show, version } = req.body;
 
             // Recuperar UserData a modificar
             const userdata = await UserData.findByPk(id);
@@ -222,6 +225,7 @@ class UserDataController {
             if (number !== undefined) userdata.number = number;
             if (email !== undefined) userdata.email = email;
             if (userId !== undefined) userdata.userAccountId = userId;
+            if (show != undefined) userdata.show = show;
 
             await userdata.save();
 
@@ -232,6 +236,7 @@ class UserDataController {
                     extension: userdata.extension,
                     number: userdata.number,
                     email: userdata.email,
+                    show: userdata.show,
                     departmentId: userdata.departmentId,
                     subdepartmentId: userdata.subdepartmentId,
                     userId: userdata.userAccountId
@@ -318,6 +323,7 @@ class UserDataController {
                     extension: user.userData.extension,
                     number: user.userData.number,
                     email: user.userData.email,
+                    show: user.userData.show,
                     departmentId: user.userData.departmentId,
                     departmentName: user.userData.department?.name || null,
                     subdepartmentId: user.userData.subdepartmentId,
@@ -341,8 +347,7 @@ class UserDataController {
     static async updateMyProfile(req, res) {
         try {
             const userId = req.user.id;
-            const { version } = req.query;
-            const { id, name, extension, number, email } = req.body;
+            const { id, name, extension, number, email, version, show } = req.body;
 
             // Recuperar UserData del usuario
             const userdata = await UserData.findOne({ where: { id: id, userAccountId: userId } });
@@ -351,13 +356,14 @@ class UserDataController {
                 return res.status(404).json({ error: "Datos de Usuario no encontrado" });
             }
 
-            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificados anteriormente" });
+            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificados anteriormente" }); //ESTO NO ESTA BIEN
 
             // Actualizar solo campos permitidos
             if (name !== undefined) userdata.name = name;
             if (extension !== undefined) userdata.extension = extension;
             if (number !== undefined) userdata.number = number;
             if (email !== undefined) userdata.email = email;
+            if (show !== undefined) userdata.show = show;
 
             await userdata.save();
 
@@ -366,12 +372,14 @@ class UserDataController {
                     name: userdata.name,
                     extension: userdata.extension,
                     number: userdata.number,
-                    email: userdata.email
+                    email: userdata.email,
+                    show: userdata.show,
                 }
             });
 
             LoggerController.info(`Datos del usuario ${userId} actualizados`);
         } catch (error) {
+            consola.
             LoggerController.error(`Error actualizando los Datos de Usuario: ${error.message}`);
             res.status(500).json({ error: error.message });
         }

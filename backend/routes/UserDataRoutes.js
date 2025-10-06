@@ -11,12 +11,12 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
  * - GET    /                   → Listar todos los UserData públicos.
  * - GET    /worker             → Listar todos los UserData para el usuario autenticado
  * 
+ * - GET    /profile            → Obtener el perfil del usuario logueado.
+ * - PUT    /profile-update     → Modificar el perfil del usuario logueado.
+ * 
  * - POST   /                   → Crear un UserData asin asignación.
  * - PUT    /:id                → Modificar un los datos de usuario por ID (solo notWorker: departamento o superior).
  * - delete /:id                → Eliminar los datos de un usuario por ID (solo notWorker: departamento o superior).
- * 
- * - GET    /profile            → Obtener el perfil del usuario logueado.
- * - PUT    /profile-update     → Modificar el perfil del usuario logueado.
  *
  * Middleware:
  * - `adminOnly`       → Restringe el acceso a usuarios con roles de administrador.
@@ -30,12 +30,13 @@ router.get("/", UserDataController.publicList);
 router.get("/worker", isAuthenticated, UserDataController.workerList);
 router.get("/worker-department", isAuthenticated, UserDataController.workerListByDepartment);
 
+router.get("/profile", isAuthenticated, UserDataController.getProfile);
+router.put("/profile-update", isAuthenticated, UserDataController.updateMyProfile);
+
 router.post("/", notWorker, UserDataController.create);
 router.put("/:id", notWorker, canModifyUser, UserDataController.update);
 router.delete("/:id", notWorker, UserDataController.delete);
 
-router.get("/profile", isAuthenticated, UserDataController.getProfile);
-router.put("/profile-update", isAuthenticated, UserDataController.updateMyProfile);
 
 
 module.exports = router;

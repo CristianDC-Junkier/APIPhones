@@ -13,6 +13,7 @@ const { encrypt, decrypt } = require("../utils/Crypto");
  * - extension       → Extensión telefónica (cifrada, validado como número).
  * - number          → Número de teléfono (cifrado, validado con teléfono).
  * - email           → Correo electrónico (cifrado, validado como email).
+ * - show            → Mostrar en los listados públicos (true/false)
  * - departmentId    → Clave foránea a Department (obligatorio).
  * - subdepartmentId → Clave foránea a Subdepartment.
  * - userAccountId   → Clave foránea a UserAccount.
@@ -55,6 +56,11 @@ const UserData = sequelize.define("UserData", {
         allowNull: true,
         set(value) { this.setDataValue("email", encrypt(value)); },
         get() { const val = this.getDataValue("email"); return val ? decrypt(val) : null; },
+    },
+    show: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
     },
     version: {
         type: DataTypes.INTEGER,

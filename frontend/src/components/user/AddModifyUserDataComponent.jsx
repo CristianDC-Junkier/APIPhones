@@ -94,6 +94,10 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
             <label style="${labelStyle}">Subdepartamento</label>
             <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
         </div>
+         <div style="${rowStyle}">
+            <label style="${labelStyle}">Visible</label>
+            <input id="swal-show" type="checkbox" ${userItem?.show ? "checked" : ""} style="transform: scale(1.2);">
+        </div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
         </div>`;
 
@@ -125,15 +129,17 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
             const departmentId = departmentIdRaw === "null" ? null : parseInt(departmentIdRaw, 10);
             const subdepartmentIdRaw = document.getElementById("swal-subdepartment").value;
             const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
+            const show = document.getElementById("swal-show").checked;
 
             if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
             if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
             if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
             if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-            const data = { name, extension, number, email, departmentId, subdepartmentId };
-            if (userItem?.id) data.id = userItem.id;
-            if (userItem?.version) data.version = userItem.version;
+            const data = { name, extension, number, email, show, departmentId, subdepartmentId};
+
+            if (userItem?.id != undefined) data.id = userItem.id;
+            if (userItem?.version != undefined) data.version = userItem.version;
 
             return data;
         }

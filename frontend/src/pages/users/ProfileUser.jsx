@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
@@ -16,27 +17,28 @@ const ProfileUser = () => {
     const navigate = useNavigate();
     const { token, version, logout, update, user } = useAuth();
 
+    const fetchData = async () => {
+        if (!token) return;
+        setLoading(true);
+        try {
+            const response = await getProfile(token, version);
+            if (response.success) {
+                setProfile(response.data);
+            } else if (response.error === "Token inválido") {
+                Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
+                    .then(() => { logout(); navigate('/login'); });
+            } else {
+                Swal.fire('Error', response.error || 'No se pudo cargar el perfil', 'error');
+            }
+        } catch (err) {
+            Swal.fire('Error', err.message || 'Error al obtener perfil', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Recuperar usuario
     useEffect(() => {
-        const fetchData = async () => {
-            if (!token) return;
-            setLoading(true);
-            try {
-                const response = await getProfile(token, version);
-                if (response.success) {
-                    setProfile(response.data);
-                } else if (response.error === "Token inválido") {
-                    Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                        .then(() => { logout(); navigate('/login'); });
-                } else {
-                    Swal.fire('Error', response.error || 'No se pudo cargar el perfil', 'error');
-                }
-            } catch (err) {
-                Swal.fire('Error', err.message || 'Error al obtener perfil', 'error');
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchData();
     }, [logout, navigate, token, version]);
 
@@ -65,15 +67,16 @@ const ProfileUser = () => {
             else {
                 await AddModifyUserDataCommponent({ 
                     token,
-                    userItem: profile.userData,
+                    userItem: userData,
                     currentUser: user,
                     onConfirm: async (formValues) => {
-                        const result = await modifyProfileData(formValues, token, version);
+                        const result = await modifyProfileData(formValues, token);
                         if (result.success) {
                             Swal.fire("Éxito", "Datos de usuario modificados correctamente", "success");
                         } else {
                             Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
                         }
+                        await fetchData();
                     }
                 });
             }

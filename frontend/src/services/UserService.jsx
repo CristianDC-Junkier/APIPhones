@@ -23,7 +23,7 @@ export const getPublicList = async () => {
         const res = await api.get('/data/');
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -42,10 +42,7 @@ export const getWorkerDataList = async (token) => {
 
         return { success: true, data: res.data };
     } catch (error) {
-        return {
-            success: false,
-            error: error.response?.data?.error || error.message
-        };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -67,10 +64,7 @@ export const getUserDataList = async (token, department = null) => {
 
         return { success: true, data: res.data };
     } catch (error) {
-        return {
-            success: false,
-            error: error.response?.data?.error || error.message
-        };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -90,7 +84,7 @@ export const createUser = async (user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 /**
@@ -106,7 +100,7 @@ export const createUserData = async (userdata, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -123,7 +117,7 @@ export const modifyUser = async (id, user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -140,7 +134,7 @@ export const modifyUserData = async (id, user, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -158,7 +152,7 @@ export const deleteUser = async (userId, token, version) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -176,7 +170,7 @@ export const deleteUserData = async (userId, token, version) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -198,7 +192,7 @@ export const markPWDCUser = async (userId, password, token, version) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 }
 
@@ -215,7 +209,7 @@ export const changePasswordPWD = async (newPassword, token) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 }
 
@@ -235,7 +229,7 @@ export const getProfile = async (token, version) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -253,7 +247,7 @@ export const deleteProfileAcc = async (token, version) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -271,7 +265,7 @@ export const deleteProfileData = async (token, version) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 
@@ -290,7 +284,7 @@ export const modifyProfileAcc = async (useraccount, token, version) => {
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 }
 
@@ -301,15 +295,14 @@ export const modifyProfileAcc = async (useraccount, token, version) => {
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const modifyProfileData = async (userdata, token, version) => {
+export const modifyProfileData = async (userdata, token) => {
     try {
         const res = await api.put('/data/profile-update', userdata, {
-            params: { version },
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {
-        return { success: false, error: error.response?.data?.error };
+        return { success: false, error: error.response?.data?.message };
     }
 };
 

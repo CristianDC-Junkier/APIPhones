@@ -58,6 +58,7 @@ class AuthController {
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
                     departmentId: user.departmentId,
+                    show: user.show,
                     version: user.version,
                 }
             });

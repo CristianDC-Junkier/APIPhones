@@ -141,8 +141,6 @@ const DashboardUser = () => {
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
-                console.log(formValues);
-
                 const result = await createUserData(formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Datos de usuario creados correctamente", "success");
@@ -185,7 +183,7 @@ const DashboardUser = () => {
             </div>
 
             {/* Tarjetas de estadísticas */}
-            <Row className="mb-3 mt-1 justify-content-center g-3">
+            <Row className="mb-3 mt-3 justify-content-center g-3">
                 {[
                     { label: "Cuentas de Usuario", value: userAccounts.length, type: "Accounts" },
                     { label: "Datos de Trabajadores", value: userData.length, type: "Data" },
@@ -208,9 +206,9 @@ const DashboardUser = () => {
             </Row>
 
             {/* Fila con tipo de usuario seleccionado + búsqueda */}
-            <div className="d-flex justify-content-between mb-2 align-items-center">
+            <div className="d-flex flex-column flex-md-row justify-content-between mb-2 align-items-start align-items-md-center">
                 {/* título */}
-                <div style={{ fontWeight: "bold", fontSize: "1rem" }}>
+                <div className="fw-bold fs-6 mb-2 mb-md-0">
                     {statsType === "Accounts" ? "Cuentas de Usuario" : "Datos de Trabajadores"}
                 </div>
 
@@ -221,14 +219,14 @@ const DashboardUser = () => {
                         placeholder="Buscar por usuario..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        style={{ width: "250px" }}
+                        style={{ minWidth: "200px" }}
                     />
                     {currentUser?.usertype !== "DEPARTMENT" && (
                         <Input
                             type="select"
                             value={selectedDepartment || ""}
                             onChange={e => setSelectedDepartment(Number(e.target.value))}
-                            style={{ width: "240px" }}
+                            style={{ minWidth: "200px" }}
                         >
                             <option value="">Todos los departamentos</option>
                             {departments.map(d => (

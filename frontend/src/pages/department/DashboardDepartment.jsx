@@ -109,7 +109,7 @@ const DashboardDepartment = () => {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => {fetchDepartments();}, [token, currentUser, rowsPerPage]);
+    useEffect(() => { fetchDepartments(); }, [token, currentUser, rowsPerPage]);
 
 
 
@@ -180,12 +180,12 @@ const DashboardDepartment = () => {
                 >
                     ➕ {currentView === "departments" ? "Crear Departamento" : "Crear Subdepartamento"}
                 </Button>
-            </div>   
+            </div>
 
             {/* Tarjetas para cambiar de vista solo para ADMIN/SUPERADMIN */}
             <Row className="mb-3 mt-4 justify-content-center g-3">
                 {currentUser?.usertype !== "DEPARTMENT" && (
-                    <Col xs={6} sm={4} md={3}>
+                    <Col xs={6} sm={6} md={4} l={3} xl={3}>
                         <Card
                             className={`shadow-lg mb-2 border-2 ${currentView === "departments" ? "border-primary" : ""}`}
                             style={{ cursor: 'pointer' }}
@@ -197,51 +197,56 @@ const DashboardDepartment = () => {
                             </CardBody>
                         </Card>
                     </Col>
-                    )}
-                    <Col xs={6} sm={4} md={3}>
-                        <Card
-                            className={`shadow-lg mb-2 border-2 ${currentView === "subdepartments" ? "border-primary" : ""}`}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setCurrentView("subdepartments")}
-                        >
-                            <CardBody className="text-center pt-3">
-                                <CardTitle tag="h6">Subdepartamentos</CardTitle>
-                                <CardText className="fs-4 fw-bold">{subdepartments.length}</CardText>
-                            </CardBody>
-                        </Card>
-                    </Col>
-                </Row>
-            
-
-            <div className="d-flex justify-content-end mb-3 gap-2">
-                {/* Select de filtrado por departamento solo si es subdepartamentos y no DEPARTMENT */}
-                {currentView === "subdepartments" && currentUser?.usertype !== "DEPARTMENT" && (
-                    <Input
-                        type="select"
-                        value={selectedDepartment || ""}
-                        onChange={e => setSelectedDepartment(Number(e.target.value))}
-                        style={{ width: "240px" }}
-                    >
-                        <option value="">Todos los departamentos</option>
-                        {departments.map(d => (
-                            <option key={d.id} value={d.id}>
-                                {d.name}
-                            </option>
-                        ))}
-                    </Input>
                 )}
-                {/* Input de búsqueda siempre visible */}
-                <Input
-                    type="text"
-                    placeholder="Buscar por nombre..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    style={{ width: "250px" }}
-                />
+                <Col xs={6} sm={6} md={4} l={3} xl={3}>
+                    <Card
+                        className={`shadow-lg mb-2 border-2 ${currentView === "subdepartments" ? "border-primary" : ""}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setCurrentView("subdepartments")}
+                    >
+                        <CardBody className="text-center pt-3">
+                            <CardTitle tag="h6">Subdepartamentos</CardTitle>
+                            <CardText className="fs-4 fw-bold">{subdepartments.length}</CardText>
+                        </CardBody>
+                    </Card>
+                </Col>
+            </Row>
 
-               
+            {/* Fila con tipo de usuario seleccionado + búsqueda */}
+            <div className="d-flex flex-column flex-md-row justify-content-between mb-2 align-items-start align-items-md-center">
+                {/* título */}
+                <div className="fw-bold fs-6 mb-2 mb-md-0">
+                    {currentView === "subdepartments" ? "Subdepartamentos" : "Departamentos"}
+                </div>
+                <div className="d-flex  gap-2">
+                    {/* Select de filtrado por departamento solo si es subdepartamentos y no DEPARTMENT */}
+                    {currentView === "subdepartments" && currentUser?.usertype !== "DEPARTMENT" && (
+                        <Input
+                            type="select"
+                            value={selectedDepartment || ""}
+                            onChange={e => setSelectedDepartment(Number(e.target.value))}
+                            style={{ minWidth: "200px" }}
+                        >
+                            <option value="">Todos los departamentos</option>
+                            {departments.map(d => (
+                                <option key={d.id} value={d.id}>
+                                    {d.name}
+                                </option>
+                            ))}
+                        </Input>
+                    )}
+                    {/* Input de búsqueda siempre visible */}
+                    <Input
+                        type="text"
+                        placeholder="Buscar por nombre..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        style={{ minWidth: "200px" }}
+                    />
+
+
+                </div>
             </div>
-
 
 
             {/* Tabla de departamentos */}
@@ -273,7 +278,7 @@ const DashboardDepartment = () => {
                 />
             )}
         </Container>
-    );   
+    );
 };
 
 export default DashboardDepartment;

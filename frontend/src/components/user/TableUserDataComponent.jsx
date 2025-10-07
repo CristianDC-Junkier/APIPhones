@@ -94,6 +94,15 @@ const TableUserDataComponent = ({
             } else {
                 Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
             }
+
+            const remainingUsers = filteredUsers.length - 1;
+            const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
+
+            if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
+                setCurrentPage(totalPagesAfterDelete);
+            }
+
+            await refreshData();
         }
         await refreshData();
     };

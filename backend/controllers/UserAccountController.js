@@ -222,6 +222,12 @@ class UserAccountController {
                 return res.status(400).json({ error: "El nombre de usuario ya está en uso" });
             }
 
+            // Verificar que el username del data no exista
+            const existingData = await UserData.findOne({ where: { name: userData.name } });
+            if (existingData) {
+                return res.status(400).json({ error: "El nombre de los datos de usuario ya está en uso" });
+            }
+
             // Validar que el departamento del UserData y del User son el mismo
             if (userData.departmentId !== userAccount.departmentId) {
                 return res.status(400).json({ error: "El Departamento no es el mismo" });
@@ -305,6 +311,12 @@ class UserAccountController {
                 const exists = await UserAccount.findOne({ where: { username: userAccount.username } });
                 if (exists) return res.status(400).json({ error: "El nombre de usuario ya existe" });
                 targetUser.username = userAccount.username;
+            }
+
+              // Verificar que el username del data no exista
+            const existingData = await UserData.findOne({ where: { name: userData.name } });
+            if (existingData) {
+                return res.status(400).json({ error: "El nombre de los datos de usuario ya está en uso" });
             }
 
 
@@ -400,7 +412,7 @@ class UserAccountController {
     }
 
     /**
-    * Elimina un usuario (Worker) existente.
+    * Elimina un usuario  existente.
     * 
     * @param {Object} req - Objeto de petición con { params: { id }, body: { version } }.
     * @param {Object} res 
@@ -412,13 +424,17 @@ class UserAccountController {
 
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-            //if (user.usertype !== "WORKER") return res.status(400).json({ error: "El usuario no es un trabajador" });
 
             if (user.version != version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
 
             const userData = await UserData.findOne({ where: { userAccountId: id } });
 
-            await userData.destroy();
+            try {
+                await userData.destroy();
+            } catch (error) {
+                LoggerController.error('Error en la eliminación de los datos de usuario, cuando se intenta eliminar la cuenta: ' + error.message);
+            }
+
             await user.destroy();
 
             LoggerController.info(`Usuario Worker: ${user.username} y sus Datos de usuario, eliminado por ${req.user.username}`);
@@ -538,6 +554,14 @@ class UserAccountController {
                 const userData = await UserData.findOne({ where: { userAccountId: id } });
                 await userData.destroy();
 
+            }
+
+            const userData = await UserData.findOne({ where: { userAccountId: id } });
+
+            try {
+                await userData.destroy();
+            } catch (error) {
+                LoggerController.error('Error en la eliminación de los datos de usuario, cuando se intenta su perfil: ' + error.message);
             }
 
             await user.destroy();

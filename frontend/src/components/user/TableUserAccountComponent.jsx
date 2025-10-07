@@ -31,7 +31,7 @@ const TableUserAccountComponent = ({
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-    const showCaptcha = id => new Promise((resolve, reject) => {
+    const showCaptcha = () => new Promise((resolve, reject) => {
         const container = document.createElement('div');
         const reactRoot = createRoot(container);
         let completed = false;
@@ -46,7 +46,7 @@ const TableUserAccountComponent = ({
         );
 
         Swal.fire({
-            title: `Eliminar ${id === currentUser.id ? 'su Usuario' : 'el Usuario'}`,
+            title: `Eliminar el Usuario`,
             html: container,
             showConfirmButton: true,
             confirmButtonText: 'Continuar',
@@ -56,9 +56,7 @@ const TableUserAccountComponent = ({
             preConfirm: () => {
                 if (!completed) Swal.showValidationMessage('Debes completar el captcha');
             }
-        }).then(() => {
-            if (!completed) reject(new Error('Captcha no completado'));
-        });
+        })
     });
 
     const handleModify = async (userItem) => {
@@ -81,18 +79,29 @@ const TableUserAccountComponent = ({
     };
 
     const handleDelete = async (userItem) => {
-        try { await showCaptcha(userItem.id); }
-        catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
+        await showCaptcha();
         const result = await deleteUser(userItem.id, token, userItem.version);
+
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
+
+            const remainingUsers = filteredUsers.length - 1; 
+            const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
+
+            if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
+                setCurrentPage(totalPagesAfterDelete);
+            }
+
             await refreshData();
-            if (userItem.id === currentUser.id) window.location.href = "/listin-telefonico/login";
+
+            if (userItem.id === currentUser.id) {
+                window.location.href = "/listin-telefonico/login";
+            }
         } else {
-            alert(result.error);
             Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
         }
     };
+
 
     const handlePWDC = async (userItem) => {
         try {

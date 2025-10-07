@@ -44,14 +44,14 @@ app.use(`${basePath}/api/subdepartment`, SubDepartmentRoutes);
 //    res.sendFile(path.join(__dirname, "./dist/index.html"));
 //})
 
-app.get(`${basePath}/api`, (req, res) => {
-    res.redirect(`${basePath}/`); 
-});
-
-
 app.use('/', (req, res) => {
     res.redirect(`${basePath}/`);
 });
+
+app.get(`${basePath}/api`, (req, res) => {
+    res.redirect(`${basePath}/`);
+});
+
 
 
 async function start() {

@@ -189,7 +189,7 @@ const DashboardUser = () => {
                     { label: "Datos de Trabajadores", value: userData.length, type: "Data" },
                 ].map((metric, idx) => (
                     (currentUser?.usertype !== "DEPARTMENT" || metric.label === "Trabajadores") && (
-                        <Col key={idx} xs={6} sm={4} md={3}>
+                        <Col key={idx} xs={6} sm={4} md={4} l={4} xl={3}>
                             <Card
                                 className={`shadow-lg mb-2 border-2 ${statsType === metric.type ? "border-primary" : ""}`}
                                 style={{ cursor: 'pointer' }}

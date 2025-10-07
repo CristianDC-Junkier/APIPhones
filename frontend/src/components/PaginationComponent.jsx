@@ -32,7 +32,7 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }) => {
     };
 
     return (
-        <div className="pagination-controls d-flex justify-content-center mb-2 mt-0 flex-wrap gap-2">
+        <div className="pagination-controls d-flex justify-content-center mb-2 mt-2 flex-wrap gap-2">
             {pageNumbers.map((item, index) => {
                 if (item === 'prev') {
                     return (

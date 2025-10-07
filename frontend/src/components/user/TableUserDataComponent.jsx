@@ -95,7 +95,7 @@ const TableUserDataComponent = ({
 
     return (
         <>
-            <Table striped hover responsive className="shadow-sm rounded flex-grow-1">
+            <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-0">
                 <thead className="table-primary">
                     <tr>
                         <th className="text-center">ID</th>
@@ -104,8 +104,6 @@ const TableUserDataComponent = ({
                         <th className="text-center">Extensión</th>
                         <th className="text-center">Email</th>
                         <th className="text-center">Usuario</th>
-                        <th className="text-center">Departamento</th>
-                        <th className="text-center">Subdepartamento</th>
                         <th className="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -118,9 +116,7 @@ const TableUserDataComponent = ({
                                     <td className="text-center"> {userItem.number === undefined ? "-" : userItem.number}</td>
                                     <td className="text-center"> {userItem.extension === undefined ? "-" : userItem.extension}</td>
                                     <td className="text-center"> {userItem.email === undefined ? "-" : userItem.email}</td>
-                                    <td className="text-center"> {userItem.user === undefined ? "-" : userItem.user}</td>
-                                    <td className="text-center"> {(userItem.departmentName === undefined || userItem.departmentName == null) ? "-" : userItem.departmentName}</td>
-                                    <td className="text-center"> {(userItem.subdepartmentName === undefined || userItem.subdepartmentName == null) ? "-" : userItem.subdepartmentName}</td>
+                                    <td className="text-center"> {userItem.user === undefined ? "No" : "Si"}</td>
                                     <td className="text-center">
                                         <div className="d-flex justify-content-center flex-wrap">
                                             {currentUser.id !== userItem.id && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}

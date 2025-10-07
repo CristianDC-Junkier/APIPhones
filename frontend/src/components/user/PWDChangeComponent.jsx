@@ -48,7 +48,6 @@ const PWDChangeComponent = ({ user, token }) => {
                     const toggle = document.getElementById("toggle-pass");
                     const icon = document.getElementById("icon-pass");
                     toggle.addEventListener("click", () => {
-                        console.log("Click");
                         const isHidden = input.type === "password";
                         input.type = isHidden ? "text" : "password";
                         icon.className = isHidden ? "fas fa-eye" : "fas fa-eye-slash";

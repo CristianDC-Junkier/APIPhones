@@ -90,7 +90,7 @@ const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, cur
 
     return (
         <>
-            <Table striped hover responsive className="shadow-sm rounded flex-grow-1">
+            <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-0">
                 <thead className="table-primary">
                     <tr>
                         <th className="text-center">ID</th>

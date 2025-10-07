@@ -2,7 +2,7 @@
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
-import { modifyUserData, deleteUserData } from "../../services/UserService";
+import { modifyUserData, deleteUserData, deleteUser } from "../../services/UserService";
 import CaptchaSliderComponent from '../utils/CaptchaSliderComponent';
 import AddModifyUserDataCommponent from "./AddModifyUserDataComponent";
 import PaginationComponent from "../PaginationComponent";
@@ -30,7 +30,7 @@ const TableUserDataComponent = ({
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-    const showCaptcha = id => new Promise((resolve, reject) => {
+    const showCaptcha = user => new Promise((resolve, reject) => {
         const container = document.createElement('div');
         const reactRoot = createRoot(container);
         let completed = false;
@@ -45,7 +45,7 @@ const TableUserDataComponent = ({
         );
 
         Swal.fire({
-            title: `Eliminar ${id === currentUser.id ? 'su Usuario' : 'el Usuario'}`,
+            title: `${user === undefined ? 'Eliminar los datos de usuario' : 'Eliminar el Usuario'}`,
             html: container,
             showConfirmButton: true,
             confirmButtonText: 'Continuar',
@@ -55,8 +55,6 @@ const TableUserDataComponent = ({
             preConfirm: () => {
                 if (!completed) Swal.showValidationMessage('Debes completar el captcha');
             }
-        }).then(() => {
-            if (!completed) reject(new Error('Captcha no completado'));
         });
     });
 
@@ -70,27 +68,34 @@ const TableUserDataComponent = ({
                 const result = await modifyUserData(userItem.id, formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
-                    await refreshData();
-                    if (userItem.id === currentUser.id) window.location.href = "/listin-telefonico/login";
                 } else {
                     Swal.fire("Error", result.error || "No se pudo modificar el usuario", "error");
                 }
+                await refreshData();
             }
         });
     };
 
     const handleDelete = async (userItem) => {
-        try { await showCaptcha(userItem.id); }
+        try { await showCaptcha(userItem.user); }
         catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
-
-        const result = await deleteUserData(userItem.id, token, userItem.version);
-        if (result.success) {
-            Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
-            await refreshData();
-            if (userItem.id === currentUser.id) window.location.href = "/listin-telefonico/login";
+        let result;
+        if (userItem.user === undefined) {
+            result = await deleteUserData(userItem.id, token, userItem.version);
+            if (result.success) {
+                Swal.fire('Éxito', 'Datos de usuario eliminados correctamente', 'success');
+            } else {
+                Swal.fire('Error', result.error || 'No se pudo eliminar los datos del usuario', 'error');
+            }
         } else {
-            Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
+            result = await deleteUser(userItem.userId, token, userItem.userVersion);
+            if (result.success) {
+                Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
+            } else {
+                Swal.fire('Error', result.error || 'No se pudo eliminar el usuario', 'error');
+            }
         }
+        await refreshData();
     };
 
     return (

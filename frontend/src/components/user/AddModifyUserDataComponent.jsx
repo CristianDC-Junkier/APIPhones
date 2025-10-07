@@ -52,6 +52,8 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
             subdepartments = subResp.data.subdepartments ?? [];
             subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
         }
+
+        isDepartmentDisabled = userItem.user !== undefined && userItem.user !== null;
     }
 
     // HTML para selects y opciones
@@ -61,6 +63,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
         ? subdepartments.filter(sd => sd.departmentId === userItem.departmentId)
         : subdepartments;
     const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
+    
 
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';

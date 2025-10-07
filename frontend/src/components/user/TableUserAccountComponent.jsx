@@ -5,8 +5,8 @@ import Swal from "sweetalert2";
 import { modifyUser, deleteUser, markPWDCUser } from "../../services/UserService";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
 import AddModifyUser from "./AddModifyUserComponent";
-import Pagination from "../PaginationComponent";
-import PWDAsk from "./PWDAskComponent";
+import PaginationComponent from "../PaginationComponent";
+import PWDAskComponent from "./PWDAskComponent";
 
 const TableUserAccountComponent = ({
     users,
@@ -96,7 +96,7 @@ const TableUserAccountComponent = ({
 
     const handlePWDC = async (userItem) => {
         try {
-            const password = await PWDAsk({ userItem });
+            const password = await PWDAskComponent({ userItem });
             if (!password) return;
 
             const result = await markPWDCUser(userItem.id, { password }, token, userItem.version);
@@ -130,7 +130,7 @@ const TableUserAccountComponent = ({
 
     return (
         <>
-            <Table striped hover responsive className="shadow-sm rounded flex-grow-1">
+            <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-0">
                 <thead className="table-primary">
                     <tr>
                         <th className="text-center">ID</th>
@@ -192,7 +192,7 @@ const TableUserAccountComponent = ({
 
             {totalPages > 1 && (
                 <div className="mt-auto" style={{ minHeight: '40px' }}>
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                    <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 </div>
             )}
         </>

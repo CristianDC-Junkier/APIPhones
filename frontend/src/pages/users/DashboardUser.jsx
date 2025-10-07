@@ -26,7 +26,7 @@ const DashboardUser = () => {
 
     const [statsType, setStatsType] = useState("Accounts");
 
-    const [search, setSearch] = useState("");
+    const [selectedUser, setSelectedUser] = useState("");
     const [selectedDepartment, setSelectedDepartment] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -217,8 +217,8 @@ const DashboardUser = () => {
                     <Input
                         type="text"
                         placeholder="Buscar por usuario..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
+                        value={selectedUser}
+                        onChange={e => setSelectedUser(e.target.value)}
                         style={{ minWidth: "200px" }}
                     />
                     {currentUser?.usertype !== "DEPARTMENT" && (
@@ -245,9 +245,9 @@ const DashboardUser = () => {
                     users={userAccounts}
                     currentUser={currentUser}
                     token={token}
-                    search={search}
+                    search={selectedUser}
                     selectedDepartment={selectedDepartment}
-                    setSearch={setSearch}
+                    setSearch={setSelectedUser}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     rowsPerPage={rowsPerPage}
@@ -257,9 +257,9 @@ const DashboardUser = () => {
                     users={userData}
                     currentUser={user}
                     token={token}
-                    search={search}
+                    search={selectedUser}
                     selectedDepartment={selectedDepartment}
-                    setSearch={setSearch}
+                    setSearch={setSelectedUser}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     rowsPerPage={rowsPerPage}

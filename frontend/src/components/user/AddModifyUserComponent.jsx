@@ -204,7 +204,8 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
 
-            const data = { name, extension, number, email, show, subdepartmentId };
+            const departmentId = step1Values.departmentId;
+            const data = { name, extension, number, email, show, departmentId, subdepartmentId };
 
             if (userItem?.departmentId != undefined) data.departmentId = userItem?.userData.departmentId;
             if (userItem?.userData.id != undefined) data.id = userItem?.userData.id;

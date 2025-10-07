@@ -69,7 +69,7 @@ const Home = () => {
 
             {/* Botón de cierre de sesión */}
             <Row className="align-items-center m-0 p-0">
-                <Col className="d-flex justify-content-start p-2">
+                <Col className="d-flex justify-content-start">
                     <LogoutButton onClick={handleLogout} loading={loadingLogout} />
                 </Col>
             </Row>

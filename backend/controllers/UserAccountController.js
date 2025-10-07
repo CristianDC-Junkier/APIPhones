@@ -57,7 +57,7 @@ class UserAccountController {
                     departmentName: user.userData.department?.name || null,
                     subdepartmentId: user.userData.subdepartmentId,
                     subdepartmentName: user.userData.subdepartment?.name || null,
-                    show: user.show,
+                    show: user.userData.show,
                     version: user.userData.version
                 } : null
             }));
@@ -125,7 +125,7 @@ class UserAccountController {
                     departmentName: user.userData.department?.name || null,
                     subdepartmentId: user.userData.subdepartmentId,
                     subdepartmentName: user.userData.subdepartment?.name || null,
-                    show: user.show,
+                    show: user.userData.show,
                     version: user.userData.version
                 } : null
             }));

@@ -62,7 +62,6 @@ const TableUserAccountComponent = ({
     });
 
     const handleModify = async (userItem) => {
-        //console.log(userItem);
         await AddModifyUser({
             token,
             userItem,

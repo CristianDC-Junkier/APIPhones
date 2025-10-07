@@ -22,11 +22,9 @@
  * @param {String} token - Token del usuario conectado para comprobar autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getDepartmentsList = async (token) => {
+export const getDepartmentsList = async () => {
     try {
-        const res = await api.get('/department/', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/department/');
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

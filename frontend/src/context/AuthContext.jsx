@@ -178,7 +178,7 @@ export const AuthProvider = ({ children }) => {
 
     /** Obtener fecha del listín */
     const contextDate = async () => {
-        const result = await getDate(token);
+        const result = await getDate();
         if (result.success) return result.data.date;
         return "Fecha no disponible";
     };

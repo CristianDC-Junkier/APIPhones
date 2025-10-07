@@ -40,11 +40,9 @@ export const logout = async (token) => {
  * Solicitud de la fecha del listin
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getDate = async (token) => {
+export const getDate = async () => {
     try {
-        const response = await api.get('/date', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get('/date');
         return { success: true, data: response.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

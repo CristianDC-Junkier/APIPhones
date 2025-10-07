@@ -3,10 +3,10 @@ import { Table } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const DepartamentoComponent = ({
-    nombreDepartamento,
-    trabajadoresDepartamento,
-    nombresSubdepartamentos = [],
-    trabajadoresSubdepartamentos = [],
+    departmentName,
+    departmentWorkers,
+    subdepartmentNames = [],
+    subdepartmentWorkers = [],
     showPhones = true,
     publicAccess = false,
 }) => {
@@ -21,7 +21,7 @@ const DepartamentoComponent = ({
                     className="m-0 text-uppercase fw-bold flex-grow-1 text-center"
                     style={{ fontSize: "1.00rem", color: "#000" }}
                 >
-                    {nombreDepartamento}
+                    {departmentName}
                 </h6>
             </div>
 
@@ -34,7 +34,7 @@ const DepartamentoComponent = ({
             >
                 <tbody>
                     {/* Trabajadores del departamento */}
-                    {trabajadoresDepartamento.map((t, idx) => (
+                    {departmentWorkers.map((t, idx) => (
                         <tr key={idx} className="text-center">
                             {showPhones ? (
                                 <>
@@ -57,7 +57,7 @@ const DepartamentoComponent = ({
                     ))}
 
                     {/* Subdepartamentos */}
-                    {nombresSubdepartamentos.map((subNombre, idx) => (
+                    {subdepartmentNames.map((subNombre, idx) => (
                         <React.Fragment key={idx}>
                             <tr className="table-secondary">
                                 <td colSpan="4" className="p-1 border-dark border-1">
@@ -70,7 +70,7 @@ const DepartamentoComponent = ({
                                 </td>
                             </tr>
 
-                            {trabajadoresSubdepartamentos[idx]?.map((t, tIdx) => (
+                            {subdepartmentWorkers[idx]?.map((t, tIdx) => (
                                 <tr key={tIdx} className="text-center">
                                     {showPhones ? (
                                         <>

@@ -1,7 +1,9 @@
 ﻿import React, { useRef, useState, useEffect, useMemo } from "react";
 import { Col, Button, Spinner, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from 'react-router-dom';
+import { faFilePdf, faUserCircle } from "@fortawesome/free-solid-svg-icons";
+import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Swal from "sweetalert2";
 
@@ -19,7 +21,9 @@ const PublicList = () => {
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [users, setUsers] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
+
     const { date } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchDate = async () => {
@@ -137,8 +141,14 @@ const PublicList = () => {
 
     return (
         <div className="container-fluid my-4">
-            <div style={{ position: "absolute", top: "10px", left: "10px" }}>
-                <BackButtonComponent back="/home" />
+            <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+                <Button
+                    color="primary"
+                    style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
+                    onClick={() =>  navigate('/login')}
+                >
+                    <FontAwesomeIcon icon={faUserCircle}/> Iniciar Sesión
+                </Button>
             </div>
 
             <div className="text-center my-4">

@@ -219,10 +219,10 @@ const WorkerList = () => {
                         {col.map((dep, depIdx) => (
                             <PhoneDepartmentComponent
                                 key={depIdx}
-                                nombreDepartamento={dep.nombre}
-                                trabajadoresDepartamento={dep.trabajadores}
-                                nombresSubdepartamentos={dep.subdepartamentos.map(sd => sd.nombre)}
-                                trabajadoresSubdepartamentos={dep.subdepartamentos.map(sd => sd.trabajadores)}
+                                departmentName={dep.nombre}
+                                departmentWorkers={dep.trabajadores}
+                                subdepartmentNames={dep.subdepartamentos.map(sd => sd.nombre)}
+                                subdepartmentWorkers={dep.subdepartamentos.map(sd => sd.trabajadores)}
                                 showPhones={showPhones}
                                 publicAccess={false}
                             />

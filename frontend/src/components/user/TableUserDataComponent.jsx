@@ -133,8 +133,8 @@ const TableUserDataComponent = ({
                                     <td className="text-center"> {userItem.user === undefined ? "No" : "Si"}</td>
                                     <td className="text-center">
                                         <div className="d-flex justify-content-center flex-wrap">
-                                            {currentUser.id !== userItem.id && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
-                                            {currentUser.id !== userItem.id && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
+                                            {currentUser.id !== userItem.userId && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
+                                            {currentUser.id !== userItem.userId && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
                                         </div>
                                     </td>
                                 </tr>

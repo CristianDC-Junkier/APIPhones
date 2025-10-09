@@ -94,8 +94,9 @@ const PublicList = () => {
     )
         .map(dep => {
             // Ordenar trabajadores del departamento principal
+
             const sortedWorkers = dep.workers.sort((a, b) =>
-                a.name.localeCompare(b.name)
+                (a.name).localeCompare(b.name)
             );
 
             // Convertir subdepartamentos a array y ordenar
@@ -103,10 +104,10 @@ const PublicList = () => {
                 .map(sub => ({
                     ...sub,
                     workers: sub.workers.sort((a, b) =>
-                        a.name.localeCompare(b.name)
+                        (a.name).localeCompare(b.name)
                     )
                 }))
-                .sort((a, b) => a.name.localeCompare(b.name));
+                .sort((a, b) => (a.name).localeCompare(b.name));
 
             return {
                 ...dep,
@@ -139,7 +140,7 @@ const PublicList = () => {
 
     return (
         <div className="container-fluid my-4">
-            <div style={{ position: "absolute", top: "10px", right: "10px" }}>
+            <div style={{ position: "absolute", top: "10px", left: "10px" }}>
                 <Button
                     color="primary"
                     style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}

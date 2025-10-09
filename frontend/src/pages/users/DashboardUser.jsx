@@ -101,22 +101,21 @@ const DashboardUser = () => {
         if (!token) return;
         setLoading(true);
         try {
-            if (currentUser.usertype !== "DEPARTMENT") {
-                // solo su departamento y sus subdepartamentos
-                const deptResp = await getDepartmentsList(token);
+            const deptResp = await getDepartmentsList(token);
 
-                if (deptResp.success) {
-                    const depts = deptResp.data.departments ?? [];
-                    setDepartments(depts);
-                }
+            if (deptResp.success) {
+                const depts = deptResp.data.departments ?? [];
+                setDepartments(depts);
             }
+
         } catch (err) {
             Swal.fire("Error", "No se pudo obtener la lista de departamentos", err);
         }
         setLoading(false);
     };
 
-    useEffect(() => { fetchDepartments(); }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { fetchDepartments(); }, [token]);
 
     const handleCreateUser = async () => {
         await AddModifyUserCommponent({
@@ -188,19 +187,19 @@ const DashboardUser = () => {
                     { label: "Cuentas de Usuario", value: userAccounts.length, type: "Accounts" },
                     { label: "Datos de Trabajadores", value: userData.length, type: "Data" },
                 ].map((metric, idx) => (
-                        <Col key={idx} xs={6} sm={4} md={4} l={4} xl={3}>
-                            <Card
-                                className={`shadow-lg mb-2 border-2 ${statsType === metric.type ? "border-primary" : ""}`}
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => { setStatsType(metric.type); setCurrentPage(1); }}
-                            >
-                                <CardBody className="text-center pt-3">
-                                    <CardTitle tag="h6">{metric.label}</CardTitle>
-                                    <CardText className="fs-4 fw-bold">{metric.value}</CardText>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                    )
+                    <Col key={idx} xs={6} sm={4} md={4} l={4} xl={3}>
+                        <Card
+                            className={`shadow-lg mb-2 border-2 ${statsType === metric.type ? "border-primary" : ""}`}
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => { setStatsType(metric.type); setCurrentPage(1); }}
+                        >
+                            <CardBody className="text-center pt-3">
+                                <CardTitle tag="h6">{metric.label}</CardTitle>
+                                <CardText className="fs-4 fw-bold">{metric.value}</CardText>
+                            </CardBody>
+                        </Card>
+                    </Col>
+                )
                 )}
             </Row>
 

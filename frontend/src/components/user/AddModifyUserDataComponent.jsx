@@ -22,7 +22,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
     let departments = [];
     let subdepartments = [];
     let isDepartmentDisabled = false;
-    if (currentUser.usertype === "DEPARTMENT" || currentUser.usertype === "WORKER") {
+    if (currentUser.usertype === "DEPARTMENT" && action !== "modify") {
         // Solo su departamento y sus subdepartamentos
         const deptResp = await getDepartmentById(token, currentUser.department);
         const subResp = await getSubDepartmentsList(token, currentUser.department);
@@ -36,7 +36,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
             subdepartments = subResp.data.subdepartments ?? [];
             subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
         }
-    } else if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN") {
+    } else {
         // Admin / superadmin: listas completas
         const [deptResp, subResp] = await Promise.all([
             getDepartmentsList(token),
@@ -52,8 +52,6 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
             subdepartments = subResp.data.subdepartments ?? [];
             subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
         }
-
-        isDepartmentDisabled = userItem.user !== undefined && userItem.user !== null;
     }
 
     // HTML para selects y opciones

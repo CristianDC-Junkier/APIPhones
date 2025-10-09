@@ -36,7 +36,7 @@ const AppRouter = () => {
     return (
         <Routes>
             <Route element={<MainLayout />}>
-                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/" element={<Navigate to="/public" replace />} />
                 <Route path="/accessdenied" element={<AccessDeniedPage />} />
 
                 <Route path="/privacity-politic" element={<PrivacityPage />} />

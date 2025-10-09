@@ -75,7 +75,7 @@ const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
             ${isAdmin
             ? `<div style="${rowStyle}">
                     <label style="${labelStyle}">Tipo de Usuario <span style="color:red">*</span></label>
-                    <select id="swal-usertype" style="${inputStyle}">${usertypeOptions}</select>
+                    <select id="swal-usertype" style="${inputStyle}" ${profile?.id === 1 ? "disabled" : ""}>${usertypeOptions}</select>
                   </div>`
             : ""}
 

@@ -144,9 +144,9 @@ const PublicList = () => {
                 <Button
                     color="primary"
                     style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
-                    onClick={() =>  navigate('/login')}
+                    onClick={() => navigate('/login')}
                 >
-                    <FontAwesomeIcon icon={faUserCircle}/> Iniciar Sesión
+                    <FontAwesomeIcon icon={faUserCircle} /> Iniciar Sesión
                 </Button>
             </div>
 

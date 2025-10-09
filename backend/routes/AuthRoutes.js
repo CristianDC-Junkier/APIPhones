@@ -17,7 +17,7 @@ const { isAuthenticated } = require("../middlewares/Auth");
 router.post("/login", AuthController.login);
 router.get("/logout", isAuthenticated, AuthController.logout);
 
-router.get("/date", isAuthenticated, AuthController.getDate);
+router.get("/date", AuthController.getDate);
 router.get("/version", isAuthenticated, AuthController.getVersion);
 
 

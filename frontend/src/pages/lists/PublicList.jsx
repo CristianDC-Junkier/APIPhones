@@ -1,5 +1,5 @@
-﻿import React, { useRef, useState, useEffect } from "react";
-import { Col, Button, Spinner } from "reactstrap";
+﻿import React, { useRef, useState, useEffect, useMemo } from "react";
+import { Col, Button, Spinner, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -7,17 +7,16 @@ import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComp
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
-import { getUsersList } from "../../services/UserService";
-
-
+import { getPublicList } from "../../services/UserService";
+import { getDepartmentsList } from "../../services/DepartmentService";
 
 const PublicList = () => {
     const listRef = useRef();
     const [loading, setLoading] = useState(false);
-    const [searchDepartment, setSearchDepartment] = useState("");
+    const [departments, setDepartments] = useState([]);
+    const [selectedDepartment, setSelectedDepartment] = useState("");
     const [users, setUsers] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
-    const { token } = useAuth();
     const { date } = useAuth();
 
     useEffect(() => {
@@ -32,44 +31,59 @@ const PublicList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
-            if (!token) return;
-            const result = await getUsersList(token);
+            //if (!token) return;
+            const result = await getPublicList();
             if (result.success) {
                 setUsers(result.data.users);
             }
             setLoading(false);
         };
         fetchUsers();
-    }, [token]);
+    }, []);
+
+    const fetchDepartments = async () => {
+        setLoading(true);
+        try {
+            const deptResp = await getDepartmentsList();
+            if (deptResp.success) {
+                const depts = deptResp.data.departments ?? [];
+                setDepartments(depts);
+            }
+        } catch (err) {
+            Swal.fire("Error", "No se pudo obtener la lista de departamentos", err);
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => { fetchDepartments(); }, []);
 
     // Construir departamentos a partir de users
-    const departamentosArray = Object.values(
-        users
-            .filter(u => u.userData && u.userData.departmentId)
+    const departmentsArray = Object.values(
+        users.filter(u => u && u.departmentId)
             .reduce((acc, u) => {
-                const depId = u.userData.departmentId;
-                const subdepId = u.userData.subdepartmentId;
+                const depId = u.departmentId;
+                const subdepId = u.subdepartmentId;
 
                 if (!acc[depId]) {
                     acc[depId] = {
                         id: depId,
-                        nombre: u.userData.departmentName || "Sin nombre",
-                        trabajadores: [],
-                        subdepartamentos: {}
+                        name: u.departmentName || "Sin nombre",
+                        workers: [],
+                        subdepartments: {}
                     };
                 }
 
                 if (subdepId) {
-                    if (!acc[depId].subdepartamentos[subdepId]) {
-                        acc[depId].subdepartamentos[subdepId] = {
+                    if (!acc[depId].subdepartments[subdepId]) {
+                        acc[depId].subdepartments[subdepId] = {
                             id: subdepId,
-                            nombre: u.userData.subdepartmentName || "Subdep",
-                            trabajadores: []
+                            name: u.subdepartmentName || "Subdep",
+                            workers: []
                         };
                     }
-                    acc[depId].subdepartamentos[subdepId].trabajadores.push(u.userData);
+                    acc[depId].subdepartments[subdepId].workers.push(u);
                 } else {
-                    acc[depId].trabajadores.push(u.userData);
+                    acc[depId].workers.push(u);
                 }
 
                 return acc;
@@ -77,51 +91,48 @@ const PublicList = () => {
     )
         .map(dep => {
             // Ordenar trabajadores del departamento principal
-            const sortedTrabajadores = dep.trabajadores.sort((a, b) =>
+            const sortedWorkers = dep.workers.sort((a, b) =>
                 a.name.localeCompare(b.name)
             );
 
             // Convertir subdepartamentos a array y ordenar
-            const sortedSubdeps = Object.values(dep.subdepartamentos)
+            const sortedSubdeps = Object.values(dep.subdepartments)
                 .map(sub => ({
                     ...sub,
-                    trabajadores: sub.trabajadores.sort((a, b) =>
+                    workers: sub.workers.sort((a, b) =>
                         a.name.localeCompare(b.name)
                     )
                 }))
-                .sort((a, b) => a.nombre.localeCompare(b.nombre));
+                .sort((a, b) => a.name.localeCompare(b.name));
 
             return {
                 ...dep,
-                trabajadores: sortedTrabajadores,
-                subdepartamentos: sortedSubdeps
+                workers: sortedWorkers,
+                subdepartments: sortedSubdeps
             };
         })
         // Finalmente ordenar departamentos
-        .sort((a, b) => a.nombre.localeCompare(b.nombre));
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     // Filtrar departamentos según búsqueda
-    const filteredDepartamentos = departamentosArray.filter(dep => {
-        // Si searchDepartment tiene texto, comprobar coincidencia
-        const matchDept = searchDepartment
-            ? dep.nombre.toLowerCase().includes(searchDepartment.toLowerCase())
-            : true;
-        return matchDept;
-    });
+    const filteredDepartments = useMemo(() => {
+        return departmentsArray.filter(u => {
+            const matchesDept = selectedDepartment ? u.id === selectedDepartment : true;
+            return matchesDept;
+        });
+    }, [departmentsArray, selectedDepartment]);
 
 
     // Distribución vertical-first sobre los filtrados
     const colCount = 3;
     const columns = Array.from({ length: colCount }, () => []);
-    const perColumn = Math.ceil(filteredDepartamentos.length / colCount);
+    const perColumn = Math.ceil(filteredDepartments.length / colCount);
 
     for (let i = 0; i < colCount; i++) {
         const start = i * perColumn;
         const end = start + perColumn;
-        columns[i] = filteredDepartamentos.slice(start, end);
+        columns[i] = filteredDepartments.slice(start, end);
     }
-
-
 
     return (
         <div className="container-fluid my-4">
@@ -139,20 +150,26 @@ const PublicList = () => {
             <div className="d-flex justify-content-between mb-2">
                 <div className="d-flex gap-2" style={{ marginLeft: "26px" }}>
                     {/* Departamento */}
-                    <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Buscar departamento..."
-                        value={searchDepartment}
-                        onChange={(e) => setSearchDepartment(e.target.value)}
-                    />
+                    <Input
+                        type="select"
+                        value={selectedDepartment || ""}
+                        onChange={e => setSelectedDepartment(Number(e.target.value))}
+                        style={{ minWidth: "200px" }}
+                    >
+                        <option value="">Todos los departamentos</option>
+                        {departments.map(d => (
+                            <option key={d.id} value={d.id}>
+                                {d.name}
+                            </option>
+                        ))}
+                    </Input>
                 </div>
                 <div className="d-flex gap-2" style={{ marginRight: "28px" }}>
                     <Button
                         color="secondary"
                         disabled={loading}
                         style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
-                        onClick={() => exportPDF({colCount, listRef, lastUpdate, setLoading })}
+                        onClick={() => exportPDF({ colCount, listRef, lastUpdate, setLoading })}
                     >
                         {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
                         {loading ? " Generando..." : " Exportar PDF"}
@@ -172,10 +189,10 @@ const PublicList = () => {
                         {col.map((dep, depIdx) => (
                             <PhoneDepartmentComponent
                                 key={depIdx}
-                                nombreDepartamento={dep.nombre}
-                                trabajadoresDepartamento={dep.trabajadores}
-                                nombresSubdepartamentos={dep.subdepartamentos.map(sd => sd.nombre)}
-                                trabajadoresSubdepartamentos={dep.subdepartamentos.map(sd => sd.trabajadores)}
+                                departmentName={dep.name}
+                                departmentWorkers={dep.workers}
+                                subdepartmentNames={dep.subdepartments.map(sd => sd.name)}
+                                subdepartmentWorkers={dep.subdepartments.map(sd => sd.workers)}
                                 showPhones={true}
                                 publicAccess={true}
                             />

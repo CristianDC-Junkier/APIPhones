@@ -61,6 +61,7 @@ const PublicList = () => {
     useEffect(() => { fetchDepartments(); }, []);
 
     // Construir departamentos a partir de users
+    // Construir departamentos a partir de users
     const departmentsArray = Object.values(
         users.filter(u => u && u.departmentId)
             .reduce((acc, u) => {
@@ -91,32 +92,31 @@ const PublicList = () => {
 
                 return acc;
             }, {})
-    )
-        .map(dep => {
-            // Ordenar trabajadores del departamento principal
+    ).map(dep => {
+        // Ordenar trabajadores del departamento principal usando username
+        const sortedWorkers = dep.workers.sort((a, b) =>
+            (a.username || "").localeCompare(b.username || "")
+        );
 
-            const sortedWorkers = dep.workers.sort((a, b) =>
-                (a.name).localeCompare(b.name)
-            );
+        // Convertir subdepartamentos a array y ordenar
+        const sortedSubdeps = Object.values(dep.subdepartments)
+            .map(sub => ({
+                ...sub,
+                workers: sub.workers.sort((a, b) =>
+                    (a.username || "").localeCompare(b.username || "")
+                )
+            }))
+            .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
-            // Convertir subdepartamentos a array y ordenar
-            const sortedSubdeps = Object.values(dep.subdepartments)
-                .map(sub => ({
-                    ...sub,
-                    workers: sub.workers.sort((a, b) =>
-                        (a.name).localeCompare(b.name)
-                    )
-                }))
-                .sort((a, b) => (a.name).localeCompare(b.name));
-
-            return {
-                ...dep,
-                workers: sortedWorkers,
-                subdepartments: sortedSubdeps
-            };
-        })
+        return {
+            ...dep,
+            workers: sortedWorkers,
+            subdepartments: sortedSubdeps
+        };
+    })
         // Finalmente ordenar departamentos
-        .sort((a, b) => a.name.localeCompare(b.name));
+        .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
 
     // Filtrar departamentos según búsqueda
     const filteredDepartments = useMemo(() => {

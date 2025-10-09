@@ -60,7 +60,7 @@ const AppRouter = () => {
             </Route>
             <Route element={<ListLayout />}>
                 <Route path="/workers" element={<PrivateRoute> <WorkerListPage /> </PrivateRoute>} />
-                <Route path="/public" element={<PublicListPage /> } />
+                <Route path="/public" element={<PublicRoute><PublicListPage /></PublicRoute>} />
             </Route>
 
         </Routes>

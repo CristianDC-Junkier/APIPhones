@@ -39,7 +39,7 @@ const DepartamentoComponent = ({
                             {showPhones ? (
                                 <>
                                     {!publicAccess && <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.number}</strong></td>}
-                                    <td style={{ width: publicAccess ? "20%" : "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
+                                    <td style={{ width: publicAccess ? "30%" : "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
                                     <td className="text-uppercase"> {publicAccess ? "-" : t.name} </td>
                                 </>
                             ) : (
@@ -74,9 +74,9 @@ const DepartamentoComponent = ({
                                 <tr key={tIdx} className="text-center">
                                     {showPhones ? (
                                         <>
-                                            <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.number}</strong></td>
-                                            <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
-                                            {!publicAccess && <td className="text-uppercase"> {t.name}</td>}
+                                            {!publicAccess && <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.number}</strong></td>}
+                                            <td style={{ width: publicAccess ? "30%" : "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
+                                            <td className="text-uppercase"> {publicAccess ? "-" : t.name} </td>
                                         </>
                                     ) : (
                                         <>

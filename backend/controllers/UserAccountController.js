@@ -92,7 +92,7 @@ class UserAccountController {
                 where: {
                     departmentId: requesterDepartmentId,
                     id: { [Op.ne]: requesterId },// Excluye al que hace la petición
-                    usertype: { [Op.notIn]: ["ADMIN", "SUPERADMIN"] } // Excluye Admin y Superadmin
+                    '$userAccount.usertype$': { [Op.notIn]: ["ADMIN", "SUPERADMIN"] } 
                 },
                 include: [
                     { model: Department, as: "department", attributes: ["id", "name"] },
@@ -313,10 +313,12 @@ class UserAccountController {
                 targetUser.username = userAccount.username;
             }
 
-              // Verificar que el username del data no exista
-            const existingData = await UserData.findOne({ where: { name: userData.name } });
-            if (existingData) {
-                return res.status(400).json({ error: "El nombre de los datos de usuario ya está en uso" });
+            // Verificar que el username del data no exista
+            if (userData.name && userData.name !== targetUserData.name) {
+                const existingData = await UserData.findOne({ where: { name: userData.name } });
+                if (existingData) {
+                    return res.status(400).json({ error: "El nombre de los datos de usuario ya está en uso" });
+                }
             }
 
 

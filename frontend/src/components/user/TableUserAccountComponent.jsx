@@ -145,6 +145,7 @@ const TableUserAccountComponent = ({
                         <th className="text-center">ID</th>
                         <th className="text-center">Usuario</th>
                         <th className="text-center">Tipo</th>
+                        <th className="text-center">Departamento</th>
                         <th className="text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -178,6 +179,7 @@ const TableUserAccountComponent = ({
                                 <td className="text-center"> {userItem.id}</td>
                                 <td className="text-center"> {userItem.username}</td>
                                 <td className="text-center"> {tipoLabels[userItem.usertype]}</td>
+                                <td className="text-center"> {userItem.departmentName !== undefined ? userItem.departmentName : " - "}</td>
                                 <td className="text-center">
                                     <div className="d-flex justify-content-center flex-wrap">
                                         {currentUser.id !== userItem.id && canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
@@ -192,7 +194,7 @@ const TableUserAccountComponent = ({
                     {rowsPerPage - currentUsers.length > 0 &&
                         [...Array(rowsPerPage - currentUsers.length)].map((_, idx) => (
                             <tr key={`empty-${idx}`} style={{ height: '50px' }}>
-                                <td colSpan={4}></td>
+                                <td colSpan={5}></td>
                             </tr>
                         ))
                     }

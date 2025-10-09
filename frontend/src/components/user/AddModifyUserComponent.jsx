@@ -72,7 +72,6 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         ? subdepartments.filter(sd => sd.departmentId === userItem.departmentId)
         : subdepartments;
     const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.userData?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
-
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
@@ -94,9 +93,10 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
                 </button>
             </div>
         </div>
-        <div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
+         ${action !== 'modify' ?
+        `<div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
             Se solicitará cambiar al conectarse por primera vez
-        </div>
+        </div>` : ''}
         <div style="${rowStyle}">
             <label style="${labelStyle}">Tipo de Usuario <span style="color:red">*</span></label>
             <select id="swal-type" style="${inputStyle}">${optionsHtml}</select>
@@ -132,7 +132,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         </div>
         <div style="${rowStyle}">
             <label style="${labelStyle}">Visible</label>
-            <input id="swal-show" type="checkbox" ${userItem?.userData?.show ? "checked" : ""} style="transform: scale(1.2);">
+            <input id="swal-show" type="checkbox" ${userItem?.userData?.show !== false ? "checked" : ""} style="transform: scale(1.2);">
         </div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;

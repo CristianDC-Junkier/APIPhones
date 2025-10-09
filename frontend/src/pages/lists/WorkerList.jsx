@@ -7,9 +7,9 @@ import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComp
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
-import { getUserDataList } from "../../services/UserService";
+import { getUsersList } from "../../services/UserService";
 
-import { generateMockUsers } from "./generate";
+//import { generateMockUsers } from "./generate";
 
 
 const WorkerList = () => {
@@ -38,7 +38,7 @@ const WorkerList = () => {
             //const mockData = generateMockUsers(100); // genera 100 empleados
             //setUsers(mockData);
             if (!token) return;
-            const result = await getUserDataList(token);
+            const result = await getUsersList(token);
             if (result.success) {
               setUsers(result.data.users);
             }

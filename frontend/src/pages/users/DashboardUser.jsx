@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
 import { getDepartmentsList } from "../../services/DepartmentService";
-import { getUserDataList, getWorkerDataList, createUser, createUserData, getProfile } from "../../services/UserService";
+import { getUsersList, getWorkerDataList, createUser, createUserData, getProfile } from "../../services/UserService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from '../../components/utils/SpinnerComponent';
@@ -65,10 +65,10 @@ const DashboardUser = () => {
             let responseUserData, responseUserAccounts;
             if (currentUser.usertype === "DEPARTMENT") {
                 responseUserData = await getWorkerDataList(token, currentUser.department);
-                responseUserAccounts = await getUserDataList(token, currentUser.department);
+                responseUserAccounts = await getUsersList(token, currentUser.department);
             } else {
                 responseUserData = await getWorkerDataList(token);
-                responseUserAccounts = await getUserDataList(token);
+                responseUserAccounts = await getUsersList(token);
             }
             if (responseUserData.success && responseUserAccounts.success) {
                 setUserData(responseUserData.data.users);
@@ -188,7 +188,6 @@ const DashboardUser = () => {
                     { label: "Cuentas de Usuario", value: userAccounts.length, type: "Accounts" },
                     { label: "Datos de Trabajadores", value: userData.length, type: "Data" },
                 ].map((metric, idx) => (
-                    (currentUser?.usertype !== "DEPARTMENT" || metric.label === "Trabajadores") && (
                         <Col key={idx} xs={6} sm={4} md={4} l={4} xl={3}>
                             <Card
                                 className={`shadow-lg mb-2 border-2 ${statsType === metric.type ? "border-primary" : ""}`}
@@ -202,7 +201,7 @@ const DashboardUser = () => {
                             </Card>
                         </Col>
                     )
-                ))}
+                )}
             </Row>
 
             {/* Fila con tipo de usuario seleccionado + búsqueda */}

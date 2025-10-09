@@ -30,11 +30,14 @@ export const getPublicList = async () => {
 /**
  * Solicitud para obtener la lista de todos los usuario existentes con detalles
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @param {String|null} [department=null] - Departamento por el que filtrar (opcional)
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getWorkerDataList = async (token) => {
+export const getWorkerDataList = async (token, department = null) => {
     try {
-        const endpoint = '/data/worker';
+        const endpoint = department
+            ? `/data/worker-department`
+            : '/data/worker';
 
         const res = await api.get(endpoint, {
             headers: { Authorization: `Bearer ${token}` }
@@ -52,7 +55,7 @@ export const getWorkerDataList = async (token) => {
  * @param {String|null} [department=null] - Departamento por el que filtrar (opcional)
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getUserDataList = async (token, department = null) => {
+export const getUsersList = async (token, department = null) => {
     try {
         const endpoint = department
             ? `/acc/list-department`

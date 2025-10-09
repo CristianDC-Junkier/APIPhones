@@ -5,10 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { faFilePdf, faUserCircle } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Swal from "sweetalert2";
 
 import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
-import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
 import { getPublicList } from "../../services/UserService";

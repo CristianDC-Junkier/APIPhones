@@ -3,6 +3,8 @@ import { Col, Button, Spinner, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
+import Swal from "sweetalert2";
+
 import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import { exportPDF } from "./ExportList";
@@ -31,7 +33,6 @@ const PublicList = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
-            //if (!token) return;
             const result = await getPublicList();
             if (result.success) {
                 setUsers(result.data.users);

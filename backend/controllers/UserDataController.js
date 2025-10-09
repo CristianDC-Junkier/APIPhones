@@ -84,7 +84,6 @@ class UserDataController {
             const allData = await UserData.findAll({
                 where: {
                     departmentId: requesterDepartmentId,
-                    id: { [Op.ne]: requesterId },// Excluye al que hace la petición
                     '$userAccount.usertype$': { [Op.notIn]: ["ADMIN", "SUPERADMIN"] }  
                 },
                 include: [

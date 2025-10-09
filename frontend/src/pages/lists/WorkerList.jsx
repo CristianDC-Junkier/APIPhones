@@ -146,8 +146,6 @@ const WorkerList = () => {
         columns[i] = filteredDepartamentos.slice(start, end);
     }
 
-
-
     return (
         <div className="container-fluid my-4">
             <div style={{ position: "absolute", top: "10px", left: "10px" }}>

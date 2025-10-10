@@ -3,7 +3,6 @@ import Swal from 'sweetalert2';
 
 /**
  * Servicio encargado de conectar con el servidor
- * baseURL cambia según el entorno (VITE_MODE)
  */
 
 const api = axios.create({

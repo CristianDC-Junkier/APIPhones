@@ -22,7 +22,6 @@ import DashboardDepartmentPage from '../pages/department/DashboardDepartment';
 
 import ProfileUserPage from '../pages/users/ProfileUser';
 
-
 import PrivacityPage from '../pages/politics/Privacity';
 import CookiesPage from '../pages/politics/Cookies';
 import CompromisePage from '../pages/politics/Compromise';

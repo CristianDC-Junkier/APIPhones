@@ -37,11 +37,11 @@ router.get("/:id", notWorker, UserAccountController.getOne);
 
 router.put("/profile-update", isAuthenticated, UserAccountController.updateMyAccount);
 router.delete("/profile-del", isAuthenticated, UserAccountController.deleteMyAccount);
-router.put("/profile-PWD", isAuthenticated, UserAccountController.forcedPasswordChange);
+router.patch("/profile-PWD", isAuthenticated, UserAccountController.forcedPasswordChange);
 
 router.post("/", notWorker, UserAccountController.create);
 router.put("/:id", notWorker, canModifyUser, UserAccountController.update);
-router.put("/:id/forcepwd", notWorker, canModifyUser, UserAccountController.forcePasswordChange);
+router.patch("/:id/forcepwd", notWorker, canModifyUser, UserAccountController.forcePasswordChange);
 router.delete("/:id", notWorker, canModifyUser, UserAccountController.delete);
 
 module.exports = router;

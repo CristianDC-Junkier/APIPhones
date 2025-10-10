@@ -26,7 +26,7 @@ UserAccount.afterUpdate(async (user, options) => {
 
 
 /**
- * Función auxiliar para actualizar el registro �nico de UpdateModel.
+ * Función auxiliar para actualizar el registro único de UpdateModel.
  * - Si existe, incrementa su versión y actualiza la fecha.
  * - Si no existe, crea un registro con id=1.
  */

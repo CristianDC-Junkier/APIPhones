@@ -12,7 +12,6 @@ const basePath = '/listin-telefonico';
 // --------------------------------
 const { initDatabase } = require("./config/dbInit");
 
-
 const app = express();
 
 app.use(cors());

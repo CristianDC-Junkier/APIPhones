@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { Button } from 'reactstrap';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // importamos los íconos
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; 
 
 const getPaginationNumbers = (page, totalPages) => {
     const pages = [];

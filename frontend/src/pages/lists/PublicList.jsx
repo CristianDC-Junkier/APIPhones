@@ -2,7 +2,7 @@
 import { Col, Button, Spinner, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from 'react-router-dom';
-import { faFilePdf, faUserCircle } from "@fortawesome/free-solid-svg-icons";
+import { faFilePdf, faUserCircle, faHome } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -20,7 +20,7 @@ const PublicList = () => {
     const [users, setUsers] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
 
-    const { date } = useAuth();
+    const { date, user } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -60,7 +60,6 @@ const PublicList = () => {
 
     useEffect(() => { fetchDepartments(); }, []);
 
-    // Construir departamentos a partir de users
     // Construir departamentos a partir de users
     const departmentsArray = Object.values(
         users.filter(u => u && u.departmentId)
@@ -146,7 +145,7 @@ const PublicList = () => {
                     style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
                     onClick={() => navigate('/login')}
                 >
-                    <FontAwesomeIcon icon={faUserCircle} /> Iniciar Sesión
+                    <FontAwesomeIcon icon={user ? faHome : faUserCircle} /> {user ? "Ir al menú" : "Iniciar Sesión"}
                 </Button>
             </div>
 

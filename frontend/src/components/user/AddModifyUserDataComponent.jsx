@@ -68,7 +68,6 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
     const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
-
     const Html = `
     <div>
         <div style="${rowStyle} margin-top: 5vh">
@@ -97,7 +96,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
         </div>
          <div style="${rowStyle}">
             <label style="${labelStyle}">Visible</label>
-            <input id="swal-show" type="checkbox" ${userItem?.show !== false ? "checked" : ""} style="transform: scale(1.2);">
+            <input id="swal-show" type="checkbox" ${userItem?.id === 1 ? "disabled" : ""} ${userItem?.show !== false ? "checked" : ""} style="transform: scale(1.2);">
         </div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
         </div>`;
@@ -138,7 +137,6 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
             if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
             const data = { name, extension, number, email, show, departmentId, subdepartmentId};
-
             if (userItem?.id != undefined) data.id = userItem.id;
             if (userItem?.version != undefined) data.version = userItem.version;
 

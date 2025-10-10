@@ -189,7 +189,7 @@ export const deleteUserData = async (userId, token, version) => {
  */
 export const markPWDCUser = async (userId, password, token, version) => {
     try {
-        const res = await api.patch(`/acc/${userId}/forcepwd`, { password }, {
+        const res = await api.patch(`/acc/${userId}/forcepwd`,  password , {
             params: { version },
             headers: { Authorization: `Bearer ${token}` }
         });
@@ -207,7 +207,7 @@ export const markPWDCUser = async (userId, password, token, version) => {
  */
 export const changePasswordPWD = async (newPassword, token) => {
     try {
-        const res = await api.patch(`acc/profile-PWD`, { newPassword }, {
+        const res = await api.patch(`acc/profile-PWD`, newPassword, {
             headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };

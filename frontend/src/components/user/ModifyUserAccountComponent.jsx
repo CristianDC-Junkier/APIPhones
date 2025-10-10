@@ -38,9 +38,9 @@ const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
     `;
 
     const departmentField = (isWorker || profile?.usertype === "DEPARTMENT")
-        ? `<input id="swal-department" style="${inputStyle}" placeholder="Departamento" value="${profile?.department || ""}" ${profile?.usertype === "DEPARTMENT" ? "disabled" : ""}>`
+        ? `<input id="swal-department" style="${inputStyle}" placeholder="Departamento" value="${profile?.departmentId || ""}" ${profile?.usertype === "DEPARTMENT" ? "disabled" : ""}>`
         : `<select id="swal-department" style="${inputStyle}; cursor:pointer;">
-      ${departments.map(d => `<option value="${d.id}" ${d.id === profile.department ? "selected" : ""}>${d.name}</option>`).join("")}
+      ${departments.map(d => `<option value="${d.id}" ${d.id === profile.departmentId ? "selected" : ""}>${d.name}</option>`).join("")}
     </select>`;
 
 

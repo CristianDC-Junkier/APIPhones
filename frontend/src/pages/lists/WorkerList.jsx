@@ -1,13 +1,14 @@
 ﻿import React, { useRef, useState, useEffect } from "react";
-import { Col, Button, Spinner, Input } from "reactstrap";
+import { Col, Button, Spinner, Input, Row } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import "bootstrap/dist/css/bootstrap.min.css";
 import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
+import Swal from "sweetalert2";
 import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
-import { getUsersList } from "../../services/UserService";
+import { getWorkerDataList } from "../../services/UserService";
 import { getDepartmentsList } from "../../services/DepartmentService";
 
 //import { generateMockUsers } from "./generate";
@@ -40,7 +41,7 @@ const WorkerList = () => {
             //const mockData = generateMockUsers(100); // genera 100 empleados
             //setUsers(mockData);
             if (!token) return;
-            const result = await getUsersList(token);
+            const result = await getWorkerDataList(token);
             if (result.success) {
               setUsers(result.data.users);
             }
@@ -67,15 +68,15 @@ const WorkerList = () => {
 
     // Construir departamentos a partir de users
     const departmentsArray = Object.values(
-        users.filter(u => u.userData && u.userData.departmentId)
+        users.filter(u => u && u.departmentId)
             .reduce((acc, u) => {
-                const depId = u.userData.departmentId;
-                const subdepId = u.userData.subdepartmentId;
+                const depId = u.departmentId;
+                const subdepId = u.subdepartmentId;
 
                 if (!acc[depId]) {
                     acc[depId] = {
                         id: depId,
-                        name: u.userData.departmentName || "Sin nombre",
+                        name: u.departmentName || "Sin nombre",
                         workers: [],
                         subdepartments: {}
                     };
@@ -85,13 +86,13 @@ const WorkerList = () => {
                     if (!acc[depId].subdepartments[subdepId]) {
                         acc[depId].subdepartments[subdepId] = {
                             id: subdepId,
-                            name: u.userData.subdepartmentName || "Subdep",
+                            name: u.subdepartmentName || "Subdep",
                             workers: []
                         };
                     }
-                    acc[depId].subdepartments[subdepId].workers.push(u.userData);
+                    acc[depId].subdepartments[subdepId].workers.push(u);
                 } else {
-                    acc[depId].workers.push(u.userData);
+                    acc[depId].workers.push(u);
                 }
 
                 return acc;
@@ -174,8 +175,9 @@ const WorkerList = () => {
             </div>
 
             {/* Buscador y botón exportar */}
-            <div className="d-flex justify-content-between mb-2">
-                <div className="d-flex gap-2" style={{ marginLeft: "26px" }}>
+            <Row className="d-flex justify-content-between mb-2">
+
+                <Col xs="11" md="5" className="d-flex gap-2" style={{ marginLeft: "20px", marginBottom: "10px"  }}>
                     {/* Departamento */}
                     <Input
                         type="select"
@@ -198,8 +200,8 @@ const WorkerList = () => {
                         value={searchUser}
                         onChange={(e) => setSearchUser(e.target.value)}
                     />
-                </div>
-                <div className="d-flex gap-2" style={{ marginRight: "28px" }}>
+                </Col>
+                <Col xs="11" md="4" className="d-flex gap-2 justify-content-end" style={{ marginLeft: "10px", marginRight: "20px", marginBottom: "9px" }}>
                     <Button
                         color={showPhones ? "primary" : "secondary"}
                         onClick={() => setShowPhones(true)}
@@ -225,8 +227,8 @@ const WorkerList = () => {
                         {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
                         {loading ? " Generando..." : " Exportar PDF"}
                     </Button>
-                </div>
-            </div>
+                </Col>
+            </Row>
 
 
             <div ref={listRef} className="row mx-3">

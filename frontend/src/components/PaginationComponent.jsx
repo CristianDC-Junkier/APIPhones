@@ -36,14 +36,14 @@ const PaginationComponent = ({ currentPage, totalPages, onPageChange }) => {
             {pageNumbers.map((item, index) => {
                 if (item === 'prev') {
                     return (
-                        <Button key={index} color="secondary" style={{ padding: "0.35rem 0.5rem",  }}  onClick={handlePrev}>
+                        <Button key={index} color="danger" style={{ padding: "0.35rem 0.5rem",  }}  onClick={handlePrev}>
                             <FaChevronLeft size={14} />
                         </Button>
                     );
                 }
                 if (item === 'next') {
                     return (
-                        <Button key={index} color="secondary" style={{ padding: "0.35rem 0.5rem" }}  onClick={handleNext}>
+                        <Button key={index} color="danger" style={{ padding: "0.35rem 0.5rem" }}  onClick={handleNext}>
                             <FaChevronRight size={14} />
                         </Button>
                     );

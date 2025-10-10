@@ -159,7 +159,7 @@ const ProfileUser = () => {
                                     <Button color="primary" className="rounded-pill px-4" onClick={() => handleModify('Account')}>
                                         <FaEdit className="me-2" /> Modificar
                                     </Button>
-                                    <Button color="danger" className="rounded-pill px-4" onClick={handleDelete}>
+                                    <Button color="danger" className="rounded-pill px-4" disabled={profile.id === 1 ? true : false} onClick={handleDelete}>
                                         <FaTrash className="me-2" /> Eliminar
                                     </Button>
                                 </div>

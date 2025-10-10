@@ -65,7 +65,7 @@ const TableUserDataComponent = ({
             currentUser,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyUserData(userItem.id, formValues, token);
+                const result = await modifyUserData(userItem.id, formValues.userData, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
                 } else {

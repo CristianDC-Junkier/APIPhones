@@ -39,7 +39,7 @@ async function adminOnly(req, res, next) {
         next();
     } catch (err) {
         LoggerController.warn('Token inválido: ' + err.message);
-        return res.status(401).json({ success: false, message: "Token inválido" });
+        return res.status(401).json({ error: "Token inválido" });
     }
 }
 
@@ -60,29 +60,29 @@ async function notWorker(req, res, next) {
     try {
         const authHeader = req.headers["authorization"];
         if (!authHeader) {
-            return res.status(401).json({ success: false, message: "Token requerido" });
+            return res.status(401).json({ error: "Token requerido" });
         }
 
         const token = authHeader.split(" ")[1];
         if (!token) {
-            return res.status(401).json({ success: false, message: "Token requerido" });
+            return res.status(401).json({ error: "Token requerido" });
         }
 
         const payload = await verifyToken(token);
         if (!payload || !payload.usertype) {
-            return res.status(401).json({ success: false, message: "Token inválido" });
+            return res.status(401).json({ error: "Token inválido" });
         }
 
         if (payload.usertype === "WORKER") {
             LoggerController.warn(`Acceso denegado para usuario: ${payload.username}`);
-            return res.status(401).json({ success: false, message: "No tienes permisos" });
+            return res.status(401).json({ error: "No tienes permisos" });
         }
 
         req.user = payload;
         next();
     } catch (err) {
         LoggerController.warn(`Token inválido: ${err.message}`);
-        return res.status(401).json({ success: false, message: "Token inválido" });
+        return res.status(401).json({ error: "Token inválido" });
     }
 }
 
@@ -100,20 +100,20 @@ async function notWorker(req, res, next) {
 async function isAuthenticated(req, res, next) {
     try {
         const authHeader = req.headers["authorization"];
-        if (!authHeader) return res.status(401).json({ success: false, message: "Token requerido" });
+        if (!authHeader) return res.status(401).json({ error: "Token requerido" });
 
         const token = authHeader.split(" ")[1];
-        if (!token) return res.status(401).json({ success: false, message: "Token requerido" });
+        if (!token) return res.status(401).json({ error: "Token requerido" });
 
         const payload = await verifyToken(token);
         if (!payload || !payload.id) {
-            return res.status(401).json({ success: false, message: "Token inválido" });
+            return res.status(401).json({ error: "Token inválido" });
         }
         req.user = payload;
         next();
     } catch (err) {
         LoggerController.warn(`Token inválido: ${err.message}`);
-        return res.status(401).json({ success: false, message: "Token inválido" });
+        return res.status(401).json({ error: "Token inválido" });
     }
 }
 
@@ -135,17 +135,17 @@ async function canModifyUser(req, res, next) {
         const targetUser = await UserAccount.findByPk(targetUserId, {
             include: [{ model: UserData, as: "userData" }]
         });
-        if (!targetUser) return res.status(404).json({ success: false, message: "Usuario no encontrado" });
+        if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
         // SUPERADMIN no se puede eliminar/modificar por otros
         if (targetUser.usertype === "SUPERADMIN" && req.method === "DELETE") {
-            return res.status(403).json({ success: false, message: "No puedes eliminar al SUPERADMIN" });
+            return res.status(403).json({ error: "No puedes eliminar al SUPERADMIN" });
         }
         // Buscar usuario que hace la petición
         const requester = await UserAccount.findByPk(requesterId, {
             include: [{ model: UserData, as: "userData" }]
         });
-        if (!requester) return res.status(403).json({ success: false, message: "Usuario que hace la petición no encontrado" });
+        if (!requester) return res.status(403).json({ error: "Usuario que hace la petición no encontrado" });
 
         // Validación de permisos
         if (requester.usertype === "SUPERADMIN") {
@@ -155,7 +155,7 @@ async function canModifyUser(req, res, next) {
         if (requester.usertype === "ADMIN") {
             // ADMIN no puede modificar/eliminar SUPERADMIN
             if (targetUser.usertype === "SUPERADMIN") {
-                return res.status(403).json({ success: false, message: "No puedes modificar/eliminar al SUPERADMIN" });
+                return res.status(403).json({ error: "No puedes modificar/eliminar al SUPERADMIN" });
             }
             return next();
         }
@@ -164,13 +164,13 @@ async function canModifyUser(req, res, next) {
         if (!requester.userData?.departmentId ||
             !targetUser.userData?.departmentId ||
             requester.userData.departmentId !== targetUser.userData.departmentId) {
-            return res.status(403).json({ success: false, message: "Solo puede operar sobre usuarios de su mismo departamento" });
+            return res.status(403).json({ error: "Solo puede operar sobre usuarios de su mismo departamento" });
         }
 
         next();
     } catch (error) {
         LoggerController.error("Error en autorización de usuario: " + error.message);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ error: error.message });
     }
 }
 

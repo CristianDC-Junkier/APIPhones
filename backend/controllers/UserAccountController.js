@@ -91,7 +91,7 @@ class UserAccountController {
             const usersInDepartment = await UserAccount.findAll({
                 where: {
                     departmentId: requesterDepartmentId,
-                    '$userAccount.usertype$': { [Op.notIn]: ["ADMIN", "SUPERADMIN"] } 
+                    '$userAccount.usertype$': { [Op.notIn]: ["ADMIN", "SUPERADMIN"] }
                 },
                 include: [
                     { model: Department, as: "department", attributes: ["id", "name"] },
@@ -193,7 +193,7 @@ class UserAccountController {
         }
     }
 
-    
+
     /**
     * Crea un nuevo usuario junto con su UserData asociado.
     * 
@@ -497,9 +497,14 @@ class UserAccountController {
             // --- Usertype ---
             if (currentUser.usertype === "SUPERADMIN") {
                 if (!usertype) return res.status(400).json({ error: "El tipo de usuario es obligatorio" });
-                updates.usertype = usertype;
-            } else if (currentUser.usertype === "ADMIN" && usertype && usertype !== "SUPERADMIN") {
-                updates.usertype = usertype;
+                if (currentUser.id !== 1) {
+                    updates.usertype = usertype;
+                }
+            } else if (currentUser.usertype === "ADMIN") {
+                if (!usertype) return res.status(400).json({ error: "El tipo de usuario es obligatorio" });
+                if (usertype !== "SUPERADMIN") {
+                    updates.usertype = usertype;
+                }
             }
 
             // Aplicar cambios

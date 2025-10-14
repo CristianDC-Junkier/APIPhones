@@ -145,6 +145,11 @@ async function canModifyUser(req, res, next) {
         const requester = await UserAccount.findByPk(requesterId, {
             include: [{ model: UserData, as: "userData" }]
         });
+
+        if (targetUserId === 1 && requesterId !== 1) {
+            return res.status(403).json({ error: "No puedes modificar/eliminar al SUPERADMIN por defecto" });
+        }
+        
         if (!requester) return res.status(403).json({ error: "Usuario que hace la petición no encontrado" });
 
         // Validación de permisos

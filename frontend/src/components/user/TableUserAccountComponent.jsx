@@ -151,6 +151,9 @@ const TableUserAccountComponent = ({
                 </thead>
                 <tbody>
                     {currentUsers.map((userItem, idx) => {
+                        const isCurrentUser = userItem.id === currentUser.id;
+                        const isFirst = userItem.id === 1;
+
                         let canModify = false;
                         let canDelete = false;
                         let canPWDC = false;
@@ -182,9 +185,9 @@ const TableUserAccountComponent = ({
                                 <td className="text-center"> {userItem.departmentName !== undefined ? userItem.departmentName : " - "}</td>
                                 <td className="text-center">
                                     <div className="d-flex justify-content-center flex-wrap">
-                                        {currentUser.id !== userItem.id && canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
-                                        {currentUser.id !== userItem.id && canModify && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
-                                        {currentUser.id !== userItem.id && canDelete && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
+                                        {!isFirst && !isCurrentUser && canPWDC && <Button color="info" size="sm" className="me-1 mb-1" onClick={() => handlePWDC(userItem)}>🔑</Button>}
+                                        {!isFirst && !isCurrentUser && canModify && <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(userItem)}>✏️</Button>}
+                                        {!isFirst && !isCurrentUser && canDelete && <Button color="danger" size="sm" className="me-1 mb-1" onClick={() => handleDelete(userItem)}>🗑️</Button>}
                                     </div>
                                 </td>
                             </tr>

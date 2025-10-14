@@ -1,4 +1,4 @@
-﻿const { UserAccount, UserData, Department, SubDepartment, } = require("../models/Relations");
+﻿const { UserAccount, UserData, Department, SubDepartment } = require("../models/Relations");
 
 const LoggerController = require("./LoggerController");
 const { generateToken } = require("../utils/JWT");
@@ -287,7 +287,9 @@ class UserAccountController {
     * 
     */
     static async update(req, res) {
+
         try {
+
             const targetUserId = req.params.id;
             const { userAccount, userData } = req.body;
 
@@ -556,10 +558,6 @@ class UserAccountController {
 
             if (user.usertype === "SUPERADMIN") {
                 return res.status(403).json({ error: "Un SUPERADMIN no puede eliminarse" });
-            } else if (user.usertype === "WORKER") {
-                const userData = await UserData.findOne({ where: { userAccountId: id } });
-                await userData.destroy();
-
             }
 
             const userData = await UserData.findOne({ where: { userAccountId: id } });

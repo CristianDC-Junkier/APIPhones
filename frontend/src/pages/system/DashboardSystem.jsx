@@ -129,7 +129,7 @@ export default function DashboardSystem() {
                     { label: "Threads Activos", value: threadsCount, type: "info" },
                     { label: "Uptime", value: uptimeSeconds !== null ? formatUptime(uptimeSeconds) : null, type: "primary" }
                 ].map((metric, idx) => (
-                    <Col key={idx} xs={6} md={3}>
+                    <Col key={idx} xs={6} md={6} lg={3}>
                         <Card className={`border-${metric.type} shadow-sm`}>
                             <CardBody>
                                 <CardTitle tag="h6">{metric.label}</CardTitle>
@@ -144,7 +144,7 @@ export default function DashboardSystem() {
                                                 case "Threads Activos":
                                                     return metric.value;
                                                 case "Uptime":
-                                                    return metric.value; // ya viene formateado con formatUptime
+                                                    return metric.value; 
                                                 default:
                                                     return metric.value;
                                             }

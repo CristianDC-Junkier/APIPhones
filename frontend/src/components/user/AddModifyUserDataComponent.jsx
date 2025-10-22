@@ -1,5 +1,5 @@
 ﻿import Swal from "sweetalert2";
-import { getDepartmentsList, getDepartmentById, getSubDepartmentsList } from "../../services/DepartmentService";
+import { getDepartmentsList, getSubDepartmentsList } from "../../services/DepartmentService";
 
 /**
  * Componente que permite crear o modificar un usuario mediante un modal de SweetAlert2.
@@ -21,38 +21,22 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
     // Obtener departamentos y subdepartamentos
     let departments = [];
     let subdepartments = [];
-    let isDepartmentDisabled = false;
-    if (currentUser.usertype === "DEPARTMENT" && action !== "modify") {
-        // Solo su departamento y sus subdepartamentos
-        const deptResp = await getDepartmentById(token, currentUser.department);
-        const subResp = await getSubDepartmentsList(token, currentUser.department);
 
-        if (deptResp.success) {
-            departments = [deptResp.data?.department].filter(Boolean);
-            isDepartmentDisabled = true;
-        }
+    const [deptResp, subResp] = await Promise.all([
+        getDepartmentsList(token),
+        getSubDepartmentsList(token)
+    ]);
 
-        if (subResp.success) {
-            subdepartments = subResp.data.subdepartments ?? [];
-            subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
-        }
-    } else {
-        // Admin / superadmin: listas completas
-        const [deptResp, subResp] = await Promise.all([
-            getDepartmentsList(token),
-            getSubDepartmentsList(token)
-        ]);
-
-        if (deptResp.success) {
-            departments = deptResp.data.departments ?? [];
-            departments.unshift({ id: null, name: "-- Seleccionar --" });
-        }
-
-        if (subResp.success) {
-            subdepartments = subResp.data.subdepartments ?? [];
-            subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
-        }
+    if (deptResp.success) {
+        departments = deptResp.data.departments ?? [];
+        departments.unshift({ id: null, name: "-- Seleccionar --" });
     }
+
+    if (subResp.success) {
+        subdepartments = subResp.data.subdepartments ?? [];
+        subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
+    }
+
 
     // HTML para selects y opciones
     const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");
@@ -61,7 +45,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
         ? subdepartments.filter(sd => sd.departmentId === userItem.departmentId)
         : subdepartments;
     const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
-    
+
 
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
@@ -88,7 +72,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
         </div>
         <div style="${rowStyle}">
             <label style="${labelStyle}">Departamento</label>
-            <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
+            <select id="swal-department" style="${inputStyle}">${departmentOptions}</select>
         </div>
         <div style="${rowStyle}">
             <label style="${labelStyle}">Subdepartamento</label>
@@ -136,7 +120,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
             if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
             if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
 
-            const data = { name, extension, number, email, show, departmentId, subdepartmentId};
+            const data = { name, extension, number, email, show, departmentId, subdepartmentId };
             if (userItem?.id != undefined) data.id = userItem.id;
             if (userItem?.version != undefined) data.version = userItem.version;
 

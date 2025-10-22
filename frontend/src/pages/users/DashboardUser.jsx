@@ -63,13 +63,10 @@ const DashboardUser = () => {
         setLoading(true);
         try {
             let responseUserData, responseUserAccounts;
-            if (currentUser.usertype === "DEPARTMENT") {
-                responseUserData = await getWorkerDataList(token, currentUser.department);
-                responseUserAccounts = await getUsersList(token, currentUser.department);
-            } else {
-                responseUserData = await getWorkerDataList(token);
-                responseUserAccounts = await getUsersList(token);
-            }
+
+            responseUserData = await getWorkerDataList(token);
+            responseUserAccounts = await getUsersList(token);
+
             if (responseUserData.success && responseUserAccounts.success) {
                 setUserData(responseUserData.data.users);
                 setUserAccounts(responseUserAccounts.data.users);

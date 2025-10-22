@@ -13,19 +13,14 @@ class DepartmentController {
     static async list(req, res) {
         try {
             const departments = await Department.findAll({
-                attributes: [
-                    "id",
-                    "name",
-                    [sequelize.fn("COUNT", sequelize.col("subdepartment.id")), "count"]
-                ],
                 include: [
                     {
                         model: SubDepartment,
                         as: "subdepartment",
-                        attributes: []
+                        attributes: ['id', 'name']
                     }
                 ],
-                group: ["Department.id"]
+                attributes: ["id", "name"]
             });
 
             res.json({ departments });

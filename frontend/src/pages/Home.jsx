@@ -29,14 +29,8 @@ const Home = () => {
     //Acciones disponibles según el tipo de usuario
     const actions = (() => {
         switch (user.usertype) {
-            case 'WORKER': return [
+            case 'USER': return [
                 { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
-                { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
-            ];
-            case 'DEPARTMENT': return [
-                { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
-                { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
-                { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
                 { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
             ];
             default: return [

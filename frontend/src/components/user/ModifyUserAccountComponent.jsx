@@ -5,7 +5,7 @@ import { getDepartmentsList } from "../../services/DepartmentService";
  * Componente que permite modificar el perfil del usuario mediante un modal de SweetAlert2.
  * 
  * Filtra departamentos y subdepartamentos según permisos del usuario actual:
- * - Los usuarios tipo DEPARTMENT y WORKER solo pueden ver su departamento y sus subdepartamentos.
+ * - Los usuarios tipo USER solo pueden ver su departamento y sus subdepartamentos.
  * - Para otros usuarios, se añade opción vacía "-- Seleccionar --" y todos los Departamentos.
  * 
  * @param {Object} props
@@ -15,7 +15,7 @@ import { getDepartmentsList } from "../../services/DepartmentService";
  */
 const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
     const isAdmin = ["ADMIN", "SUPERADMIN"].includes(profile?.usertype);
-    const isWorker = profile?.usertype === "WORKER";
+    const isWorker = profile?.usertype === "USER";
 
     let departments = [];
     if (!isWorker) {
@@ -31,14 +31,13 @@ const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
     const inputStyle = "flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;";
 
     const usertypeOptions = `
-        <option value="WORKER">Trabajador</option>
-        <option value="DEPARTMENT">Jefe de departamento</option>
+        <option value="USER">Usuario</option>
         <option value="ADMIN" ${profile?.usertype === "ADMIN" ? "selected" : ""}>Admin</option>
         ${profile?.usertype === "SUPERADMIN" ? `<option value="SUPERADMIN" selected>Superadmin</option>` : ""}
     `;
 
     const departmentField = (isWorker || profile?.usertype === "DEPARTMENT")
-        ? `<input id="swal-department" style="${inputStyle}" placeholder="Departamento" value="${profile?.departmentId || ""}" ${profile?.usertype === "DEPARTMENT" ? "disabled" : ""}>`
+        ? `<input id="swal-department" style="${inputStyle}" placeholder="Departamento" value="${profile?.departmentId || ""}">`
         : `<select id="swal-department" style="${inputStyle}; cursor:pointer;">
       ${departments.map(d => `<option value="${d.id}" ${d.id === profile.departmentId ? "selected" : ""}>${d.name}</option>`).join("")}
     </select>`;

@@ -133,8 +133,7 @@ const TableUserAccountComponent = ({
     const tipoLabels = {
         ADMIN: "Administrador",
         SUPERADMIN: "Superadministrador",
-        WORKER: "Trabajador",
-        DEPARTMENT: "Jefe de Departamento"
+        USER: "Usuario"
     };
 
     return (
@@ -163,15 +162,10 @@ const TableUserAccountComponent = ({
                                 canModify = currentUser.usertype === "SUPERADMIN";
                                 break;
                             case "ADMIN":
-                            case "DEPARTMENT":
-                                canModify = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canDelete = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                canPWDC = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
-                                break;
-                            case "WORKER":
-                                canModify = currentUser.usertype !== "WORKER";
-                                canDelete = currentUser.usertype !== "WORKER";
-                                canPWDC = currentUser.usertype !== "WORKER";
+                            case "USER":
+                                canModify = currentUser.usertype !== "USER";
+                                canDelete = currentUser.usertype !== "USER";
+                                canPWDC = currentUser.usertype !== "USER";
                                 break;
                             default:
                                 break;

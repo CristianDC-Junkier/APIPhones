@@ -83,8 +83,7 @@ class UserDataController {
 
             const allData = await UserData.findAll({
                 where: {
-                    departmentId: requesterDepartmentId,
-                    '$userAccount.usertype$': { [Op.notIn]: ["ADMIN", "SUPERADMIN"] }  
+                    departmentId: requesterDepartmentId
                 },
                 include: [
                     { model: Department, as: "department" },

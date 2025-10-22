@@ -25,20 +25,20 @@ const AddModifySubdepartmentComponent = async ({ departments, subdepartment, act
     const inputStyle = 'flex:1; padding:0.5rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
     const html = `
-<div style="width:100%; max-width:600px;">
-  <div style="${rowStyle} margin-top: 5vh">
-    <label style="${labelStyle}">Nombre <span style="color:red">*</span></label>
-    <input id="swal-name" style="${inputStyle}" placeholder="Nombre del subdepartamento" value="${subdepartment?.name || ""}">
-  </div>
-  <div style="${rowStyle}">
-    <label style="${labelStyle}">Departamento <span style="color:red">*</span></label>
-    <select id="swal-department" style="${inputStyle}" ${isDisabled ? "disabled" : ""}>
-      ${departmentOptions}
-    </select>
-  </div>
-  <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
-</div>
-`;
+    <div style="width:100%; max-width:600px;">
+        <div style="${rowStyle} margin-top: 5vh">
+        <label style="${labelStyle}">Nombre <span style="color:red">*</span></label>
+        <input id="swal-name" style="${inputStyle}" placeholder="Nombre del subdepartamento" value="${subdepartment?.name || ""}">
+        </div>
+        <div style="${rowStyle}">
+        <label style="${labelStyle}">Departamento <span style="color:red">*</span></label>
+        <select id="swal-department" style="${inputStyle}" ${isDisabled ? "disabled" : ""}>
+            ${departmentOptions}
+        </select>
+        </div>
+        <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
+    </div>
+    `;
 
     const result = await Swal.fire({
         title: action === "create" ? "Crear Subdepartamento" : "Modificar Subdepartamento",

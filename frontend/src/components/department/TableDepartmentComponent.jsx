@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from "react";
+﻿import React, { useMemo, useState, useEffect } from "react";
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
@@ -6,6 +6,12 @@ import CaptchaSlider from '../utils/CaptchaSliderComponent';
 import AddModifyDepartmentComponent from "./AddModifyDepartmentComponent";
 import { modifyDepartment, deleteDepartment } from "../../services/DepartmentService";
 import Pagination from "../../components/PaginationComponent";
+
+import AddBadgeComponent from "../../components/badge/AddBadgeComponent";
+import BadgeComponent from "../../components/badge/BadgeComponent";
+import RemovableBadgeComponent from "../../components/badge/RemovableBadgeComponent";
+import ShowMoreBadgeComponent from "../../components/badge/ShowMoreBadgeComponent";
+
 
 
 /**
@@ -19,6 +25,19 @@ import Pagination from "../../components/PaginationComponent";
  * @param {Function} props.refreshData - Función para recargar los datos
  */
 const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
+
+    // Hook para detectar pantalla pequeña
+    const useIsSmallScreen = (breakpoint = 500) => {
+        const [isSmall, setIsSmall] = useState(window.innerWidth < breakpoint);
+
+        useEffect(() => {
+            const handleResize = () => setIsSmall(window.innerWidth < breakpoint);
+            window.addEventListener("resize", handleResize);
+            return () => window.removeEventListener("resize", handleResize);
+        }, [breakpoint]);
+
+        return isSmall;
+    };
 
     const filteredDepartments = useMemo(
         () => departments.filter(d => d.name.toLowerCase().includes(search.toLowerCase())),
@@ -64,7 +83,7 @@ const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, cur
             department: dept,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyDepartment({ id: dept.id, name: formValues.name },token);
+                const result = await modifyDepartment({ id: dept.id, name: formValues.name }, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Departamento modificado correctamente", "success");
                     await refreshData();
@@ -88,23 +107,58 @@ const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, cur
         }
     };
 
+    const isSmallScreen = useIsSmallScreen(770);
+    //console.log(currentDepartments);
     return (
         <>
             <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-0">
                 <thead className="table-primary">
                     <tr>
-                        <th className="text-center">ID</th>
+                        <th>ID</th>
                         <th className="text-center">Nombre</th>
-                        <th className="text-center">Subdepartamentos</th>
-                        <th className="text-center">Acciones</th>
+                        <th className="text-center"
+                            style={{ width: isSmallScreen ? "15%" : "55%" }}> Subdepartamentos</th>
+                        <th className="text-center"
+                            style={{ width: isSmallScreen ? "55%" : "15%" }}>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {currentDepartments.map((dept, idx) => (
                         <tr key={idx}>
-                            <td className="text-center">{dept.id}</td>
+                            <td>{dept.id}</td>
                             <td className="text-center">{dept.name}</td>
-                            <td className="text-center">{dept.count ?? 0}</td>
+                            <td className="text-center">
+                                {isSmallScreen ? (
+                                    // Pantalla pequeña: solo mostrar botón "Mostrar más" o "+ Añadir"
+                                    dept.subdepartment && dept.subdepartment.length > 0 ? (
+                                        <ShowMoreBadgeComponent
+                                            user={dept}
+                                            objList={dept.subdepartment}
+                                            objType="subdepartamento"
+                                        />
+                                    ) : "0"
+                                ) : (
+                                    // Pantalla normal: mostrar badges + "Mostrar más" o "+ Añadir"
+                                    <>
+                                        {/* Mostrar los primeros dos departamentos */}
+                                        {dept.subdepartment && dept.subdepartment.length > 0 && dept.subdepartment.slice(0, 3).map(subD => (
+                                            <BadgeComponent
+                                                key={subD.id}
+                                                objName={subD.name}
+                                            />
+                                        ))}
+
+                                        {/* Si hay más de 2 departamentos, mostramos el botón "Mostrar más" */}
+                                        {dept.subdepartment.length > 3 ? (
+                                            <ShowMoreBadgeComponent
+                                                user={dept}
+                                                objList={dept.subdepartment}
+                                                objType="subdepartamento"
+                                            />
+                                            ) : (dept.subdepartment.length > 0 ? null : "Sin Subdepartamentos")
+                                        }
+                                    </>
+                                )}</td>
                             <td className="text-center">
                                 <div className="d-flex justify-content-center flex-wrap">
                                     <Button color="warning" size="sm" className="me-1 mb-1" onClick={() => handleModify(dept)}>✏️</Button>

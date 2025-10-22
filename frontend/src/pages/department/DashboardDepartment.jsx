@@ -54,52 +54,28 @@ const DashboardDepartment = () => {
         try {
             let deptResp, subResp;
 
-            if (currentUser.usertype === "DEPARTMENT") {
-                // solo su departamento y sus subdepartamentos
-                deptResp = await getDepartmentById(token, currentUser.department);
-                subResp = await getSubDepartmentsList(token, currentUser.department);
+            // admin / superadmin
+            [deptResp, subResp] = await Promise.all([
+                getDepartmentsList(token),
+                getSubDepartmentsList(token)
+            ]);
+            if (deptResp.success) {
+                const depts = deptResp.data.departments ?? [];
+                setDepartments(depts);
 
-                if (deptResp.success) {
-                    setDepartments([deptResp.data?.department].filter(Boolean));
+                const totalPages = Math.ceil(depts.length / rowsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    setCurrentPage(totalPages);
                 }
-                if (subResp.success) {
-                    const subs = subResp.data.subdepartments ?? [];
-                    setSubdepartments(subs);
+            }
 
-                    // ajustar paginación
-                    const totalPages = Math.ceil(subs.length / rowsPerPage);
-                    if (currentPage > totalPages && totalPages > 0) {
-                        setCurrentPage(totalPages);
-                    }
-                }
+            if (subResp.success) {
+                const subs = subResp.data.subdepartments ?? [];
+                setSubdepartments(subs);
 
-                // forzar vista en subdepartamentos
-                setCurrentView("subdepartments");
-            } else {
-                // admin / superadmin
-                [deptResp, subResp] = await Promise.all([
-                    getDepartmentsList(token),
-                    getSubDepartmentsList(token)
-                ]);
-
-                if (deptResp.success) {
-                    const depts = deptResp.data.departments ?? [];
-                    setDepartments(depts);
-
-                    const totalPages = Math.ceil(depts.length / rowsPerPage);
-                    if (currentPage > totalPages && totalPages > 0) {
-                        setCurrentPage(totalPages);
-                    }
-                }
-
-                if (subResp.success) {
-                    const subs = subResp.data.subdepartments ?? [];
-                    setSubdepartments(subs);
-
-                    const totalPages = Math.ceil(subs.length / rowsPerPage);
-                    if (currentPage > totalPages && totalPages > 0) {
-                        setCurrentPage(totalPages);
-                    }
+                const totalPages = Math.ceil(subs.length / rowsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    setCurrentPage(totalPages);
                 }
             }
         } catch (err) {
@@ -139,10 +115,6 @@ const DashboardDepartment = () => {
             action: "create",
             departments,
             onConfirm: async (formValues) => {
-                if (currentUser.usertype === "DEPARTMENT") {
-                    formValues.departmentId = currentUser.department;
-                }
-
                 const result = await createSubDepartment(formValues, token);
                 if (result.success) {
                     Swal.fire("Éxito", "Subdepartamento creado correctamente", "success");
@@ -184,7 +156,6 @@ const DashboardDepartment = () => {
 
             {/* Tarjetas para cambiar de vista solo para ADMIN/SUPERADMIN */}
             <Row className="mb-3 mt-4 justify-content-center g-3">
-                {currentUser?.usertype !== "DEPARTMENT" && (
                     <Col xs={6} sm={6} md={4} l={3} xl={3}>
                         <Card
                             className={`shadow-lg mb-2 border-2 ${currentView === "departments" ? "border-primary" : ""}`}
@@ -197,7 +168,6 @@ const DashboardDepartment = () => {
                             </CardBody>
                         </Card>
                     </Col>
-                )}
                 <Col xs={6} sm={6} md={4} l={3} xl={3}>
                     <Card
                         className={`shadow-lg mb-2 border-2 ${currentView === "subdepartments" ? "border-primary" : ""}`}
@@ -220,7 +190,7 @@ const DashboardDepartment = () => {
                 </div>
                 <div className="d-flex  gap-2">
                     {/* Select de filtrado por departamento solo si es subdepartamentos y no DEPARTMENT */}
-                    {currentView === "subdepartments" && currentUser?.usertype !== "DEPARTMENT" && (
+                    {currentView === "subdepartments" && (
                         <Input
                             type="select"
                             value={selectedDepartment || ""}
@@ -250,7 +220,7 @@ const DashboardDepartment = () => {
 
 
             {/* Tabla de departamentos */}
-            {currentUser?.usertype !== "DEPARTMENT" && currentView === "departments" && (
+            {currentView === "departments" && (
                 <TableDepartmentComponent
                     token={token}
                     currentUser={currentUser}

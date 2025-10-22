@@ -1,5 +1,5 @@
 ﻿import Swal from "sweetalert2";
-import { getDepartmentsList, getDepartmentById, getSubDepartmentsList } from "../../services/DepartmentService";
+import { getDepartmentsList, getSubDepartmentsList } from "../../services/DepartmentService";
 
 /**
  * Componente que permite crear o modificar un usuario mediante un modal de SweetAlert2.
@@ -19,9 +19,8 @@ import { getDepartmentsList, getDepartmentById, getSubDepartmentsList } from "..
 const AddModifyUserComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
 
     // Tipos de usuario disponibles según permisos del usuario actual
-    const types = [{ label: "Trabajador", value: "WORKER" }];
+    const types = [{ label: "Usuario", value: "USER" }];
     if (currentUser.usertype === "ADMIN" || currentUser.usertype === "SUPERADMIN") {
-        types.push({ label: "Jefe de Departamento", value: "DEPARTMENT" });
         types.push({ label: "Administrador", value: "ADMIN" });
     }
     if (currentUser.usertype === "SUPERADMIN") {
@@ -31,37 +30,20 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     // Obtener departamentos y subdepartamentos
     let departments = [];
     let subdepartments = [];
-    let isDepartmentDisabled = false;
-    if (currentUser.usertype === "DEPARTMENT" && action !== "modify") {
-        // Solo su departamento y sus subdepartamentos
-        const deptResp = await getDepartmentById(token, currentUser.department);
-        const subResp = await getSubDepartmentsList(token, currentUser.department);
 
-        if (deptResp.success) {
-            departments = [deptResp.data?.department].filter(Boolean);
-            isDepartmentDisabled = true;
-        }
+    const [deptResp, subResp] = await Promise.all([
+        getDepartmentsList(token),
+        getSubDepartmentsList(token)
+    ]);
 
-        if (subResp.success) {
-            subdepartments = subResp.data.subdepartments ?? [];
-            subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
-        }
-    } else {
-        // Admin / superadmin: listas completas
-        const [deptResp, subResp] = await Promise.all([
-            getDepartmentsList(token),
-            getSubDepartmentsList(token)
-        ]);
+    if (deptResp.success) {
+        departments = deptResp.data.departments ?? [];
+        departments.unshift({ id: null, name: "-- Seleccionar --" });
+    }
 
-        if (deptResp.success) {
-            departments = deptResp.data.departments ?? [];
-            departments.unshift({ id: null, name: "-- Seleccionar --" });
-        }
-
-        if (subResp.success) {
-            subdepartments = subResp.data.subdepartments ?? [];
-            subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
-        }
+    if (subResp.success) {
+        subdepartments = subResp.data.subdepartments ?? [];
+        subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
     }
 
     // HTML para selects y opciones
@@ -94,7 +76,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
             </div>
         </div>
          ${action !== 'modify' ?
-        `<div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
+            `<div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
             Se solicitará cambiar al conectarse por primera vez
         </div>` : ''}
         <div style="${rowStyle}">
@@ -103,7 +85,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         </div>
         <div style="${rowStyle}">
             <label style="${labelStyle}">Departamento</label>
-            <select id="swal-department" style="${inputStyle}" ${isDepartmentDisabled ? "disabled" : ""}>${departmentOptions}</select>
+            <select id="swal-department" style="${inputStyle}">${departmentOptions}</select>
         </div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;

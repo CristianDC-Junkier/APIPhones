@@ -4,20 +4,28 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
 import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt } from 'react-icons/fa';
-import Spinner from '../../components/utils/SpinnerComponent';
+
 import { useAuth } from "../../hooks/useAuth";
-import { deleteProfileAcc, getProfile, modifyProfileAcc, modifyProfileData } from "../../services/UserService";
+import { deleteProfileAcc, getProfile, modifyProfileAcc, modifyProfileData, getWorkerDataList } from "../../services/UserService";
+
 import BackButton from "../../components/utils/BackButtonComponent";
 import ModifyUserAccountComponent from '../../components/user/ModifyUserAccountComponent';
 import AddModifyUserDataCommponent from '../../components/user/AddModifyUserDataComponent';
+import Spinner from '../../components/utils/SpinnerComponent';
+import Pagination from "../../components/PaginationComponent";
+
 
 const ProfileUser = () => {
     const [profile, setProfile] = useState();
     const [loading, setLoading] = useState(true);
+    const [users, setUsers] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(1);
+
     const navigate = useNavigate();
     const { token, version, logout, update, user } = useAuth();
 
-    const fetchData = async () => {
+    const fetchProfile = async () => {
         if (!token) return;
         setLoading(true);
         try {
@@ -37,20 +45,40 @@ const ProfileUser = () => {
         }
     };
 
+    const fetchData = async () => {
+        if (!token || user.usertype !== "USER") return;
+        try {
+            const response = await getWorkerDataList(token, user.department);
+            if (response.success) {
+                setUsers(response.data.users);
+            } else if (response.error === "Token inválido") {
+                Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
+                    .then(() => { logout(); navigate('/login'); });
+            } else {
+                Swal.fire('Error', response.error || 'No se pudo cargar los datos', 'error');
+            }
+        } catch (err) {
+            Swal.fire('Error', err.message || 'Error al obtener los datos', 'error');
+        }
+    };
+
     // Recuperar usuario
     useEffect(() => {
         fetchData();
+        fetchProfile();
     }, [logout, navigate, token, version]);
 
     if (loading) return <Spinner />;
 
     const userData = profile.userData;
+    const totalPages = Math.ceil(users.length / rowsPerPage);
+    const currentUsers = users.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
     // Modify profile
     const handleModify = async (type) => {
         try {
             if (type === 'Account') {
-                await ModifyUserAccountComponent({ 
+                await ModifyUserAccountComponent({
                     token,
                     profile,
                     onConfirm: async (formValues) => {
@@ -65,7 +93,7 @@ const ProfileUser = () => {
                 });
             }
             else {
-                await AddModifyUserDataCommponent({ 
+                await AddModifyUserDataCommponent({
                     token,
                     userItem: userData,
                     currentUser: user,
@@ -76,7 +104,7 @@ const ProfileUser = () => {
                         } else {
                             Swal.fire("Error", result.error || "No se pudo modificar el perfil", "error");
                         }
-                        await fetchData();
+                        await fetchProfile();
                     }
                 });
             }
@@ -139,20 +167,20 @@ const ProfileUser = () => {
                                         <FaUser className="me-2" /> Cuenta
                                     </h4>
                                     <Row className="mb-2">
-                                        <Col md="5"><strong>Usuario:</strong></Col>
-                                        <Col md="7">{profile.username || "-"}</Col>
+                                        <Col md="6"><strong>Usuario:</strong></Col>
+                                        <Col md="6">{profile.username || "-"}</Col>
                                     </Row>
                                     <Row className="mb-2">
-                                        <Col md="5"><strong>Departamento:</strong></Col>
-                                        <Col md="7">{profile.departmentName || "-"}</Col>
+                                        <Col md="6"><strong>Departamento:</strong></Col>
+                                        <Col md="6">{profile.departmentName || "-"}</Col>
                                     </Row>
                                     <Row className="mb-2">
-                                        <Col md="5"><FaCalendarAlt className="me-2" /> Fecha de creación:</Col>
-                                        <Col md="7">{formatDate(profile.createdAt)}</Col>
+                                        <Col md="6"><FaCalendarAlt className="me-2" /> Fecha de creación:</Col>
+                                        <Col md="6">{formatDate(profile.createdAt)}</Col>
                                     </Row>
                                     <Row className="mb-2">
-                                        <Col md="5"><FaCalendarAlt className="me-2" /> Última modificación:</Col>
-                                        <Col md="7">{formatDate(profile.updatedAt)}</Col>
+                                        <Col md="6"><FaCalendarAlt className="me-2" /> Última modificación:</Col>
+                                        <Col md="6">{formatDate(profile.updatedAt)}</Col>
                                     </Row>
                                 </div>
                                 <div className="d-flex justify-content-between mt-4 flex-wrap gap-2">
@@ -167,47 +195,87 @@ const ProfileUser = () => {
                         </Card>
                     </Col>
 
-                    {/* BLOQUE 2: Primer userData */}
+                    {/* BLOQUE 2: userData */}
                     <Col xs="12" md="6" className="d-flex justify-content-center">
                         <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
-                            <CardBody className="d-flex flex-column justify-content-between p-4">
-                                <div>
-                                    <h4 className="mb-4 text-success d-flex align-items-center">
-                                        <FaBuilding className="me-2" /> Datos Personales
-                                    </h4>
-                                    <Row className="mb-2">
-                                        <Col md="5"><FaUser className="me-2" /> Nombre:</Col>
-                                        <Col md="7">{userData.name || "-"}</Col>
-                                    </Row>
-                                    <Row className="mb-2">
-                                        <Col md="5"><FaEnvelope className="me-2" /> Email:</Col>
-                                        <Col md="7">{userData.email || "-"}</Col>
-                                    </Row>
-                                    <Row className="mb-2">
-                                        <Col md="5"><FaPhone className="me-2" /> Teléfono:</Col>
-                                        <Col md="7">{userData.number || "-"}</Col>
-                                    </Row>
-                                    <Row className="mb-2">
-                                        <Col md="5"><strong>Extensión:</strong></Col>
-                                        <Col md="7">{userData.extension || "-"}</Col>
-                                    </Row>
-                                    <Row className="mb-2">
-                                        <Col md="5"><strong>Subdepartamento:</strong></Col>
-                                        <Col md="7">{userData.subdepartmentName || "-"}</Col>
-                                    </Row>
-                                </div>
-                                <div className="d-flex justify-content-start mt-4 flex-wrap gap-2">
-                                    <Button color="success" className="rounded-pill px-4" onClick={() => handleModify('userdata')}>
-                                        <FaEdit className="me-2" /> Modificar
-                                    </Button>
-                                </div>
-                            </CardBody>
+                            {user.usertype !== "USER" ? (
+                                <CardBody className="d-flex flex-column justify-content-between p-4">
+                                    <div>
+                                        <h4 className="mb-4 text-success d-flex align-items-center">
+                                            <FaBuilding className="me-2" /> Datos Personales
+                                        </h4>
+                                        <Row className="mb-2">
+                                            <Col md="5"><FaUser className="me-2" /> Nombre:</Col>
+                                            <Col md="7">{userData.name || "-"}</Col>
+                                        </Row>
+                                        <Row className="mb-2">
+                                            <Col md="5"><FaEnvelope className="me-2" /> Email:</Col>
+                                            <Col md="7">{userData.email || "-"}</Col>
+                                        </Row>
+                                        <Row className="mb-2">
+                                            <Col md="5"><FaPhone className="me-2" /> Teléfono:</Col>
+                                            <Col md="7">{userData.number || "-"}</Col>
+                                        </Row>
+                                        <Row className="mb-2">
+                                            <Col md="5"><strong>Extensión:</strong></Col>
+                                            <Col md="7">{userData.extension || "-"}</Col>
+                                        </Row>
+                                        <Row className="mb-2">
+                                            <Col md="5"><strong>Subdepartamento:</strong></Col>
+                                            <Col md="7">{userData.subdepartmentName || "-"}</Col>
+                                        </Row>
+                                    </div>
+                                    <div className="d-flex justify-content-start mt-4 flex-wrap gap-2">
+                                        <Button color="success" className="rounded-pill px-4 " onClick={() => handleModify('userdata')}>
+                                            <FaEdit className="me-2" /> Modificar
+                                        </Button>
+                                    </div>
+                                </CardBody>) :
+                                (currentUsers.map((us, idx) => (
+                                    <CardBody key={idx} className="d-flex flex-column justify-content-between p-4">
+                                        <div>
+                                            <h4 className="mb-4 text-success d-flex align-items-center">
+                                                <FaBuilding className="me-2" /> Datos Personales
+                                                <Button color="warning" className="rounded-pill px-4 position-absolute top-1 end-0 me-4" onClick={() => alert()}>
+                                                    <FaEdit className="me-2" /> Mandar Ticket
+                                                </Button>
+                                            </h4>
+                                            <Row className="mb-2">
+                                                <Col md="5"><FaUser className="me-2" /> Nombre:</Col>
+                                                <Col md="7">{us.name || "-"}</Col>
+                                            </Row>
+                                            <Row className="mb-2">
+                                                <Col md="5"><FaEnvelope className="me-2" /> Email:</Col>
+                                                <Col md="7">{us.email || "-"}</Col>
+                                            </Row>
+                                            <Row className="mb-2">
+                                                <Col md="5"><FaPhone className="me-2" /> Teléfono:</Col>
+                                                <Col md="7">{us.number || "-"}</Col>
+                                            </Row>
+                                            <Row className="mb-2">
+                                                <Col md="5"><strong>Extensión:</strong></Col>
+                                                <Col md="7">{us.extension || "-"}</Col>
+                                            </Row>
+                                            <Row className="mb-2">
+                                                <Col md="5"><strong>Subdepartamento:</strong></Col>
+                                                <Col md="7">{us.subdepartmentName || "-"}</Col>
+                                            </Row>
+                                        </div>
+                                        <div className="mt-3" style={{ minHeight: '40px' }}>
+                                            {totalPages > 1 ? (
+                                                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                            ) : (
+                                                <div style={{ height: '40px' }}></div>
+                                            )}
+                                        </div>
+                                    </CardBody>
+                                )))
+                            }
                         </Card>
                     </Col>
                 </Row>
             </div>
         </Container>
-
     );
 };
 

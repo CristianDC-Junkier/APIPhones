@@ -16,7 +16,7 @@ import { getDepartmentsList, getSubDepartmentsList } from "../../services/Depart
  * @param {string} props.action - "create" o "modify".
  * @param {Function} props.onConfirm - Callback que se ejecuta al confirmar los datos, recibe { userAccount, userData, userAccountId? }.
  */
-const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
+const ModifyUserDataComponent = async ({ token, userItem, action, onConfirm }) => {
 
     // Obtener departamentos y subdepartamentos
     let departments = [];
@@ -80,7 +80,7 @@ const ModifyUserDataComponent = async ({ token, userItem, currentUser, action, o
         </div>
          <div style="${rowStyle}">
             <label style="${labelStyle}">Visible</label>
-            <input id="swal-show" type="checkbox" ${userItem?.id === 1 ? "disabled" : ""} ${userItem?.show !== false ? "checked" : ""} style="transform: scale(1.2);">
+            <input id="swal-show" type="checkbox" ${userItem?.show !== false ? "checked" : ""} style="transform: scale(1.2);">
         </div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
         </div>`;

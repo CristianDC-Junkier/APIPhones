@@ -73,7 +73,7 @@ async function notWorker(req, res, next) {
             return res.status(401).json({ error: "Token inválido" });
         }
 
-        if (payload.usertype === "WORKER") {
+        if (payload.usertype === "USER") {
             LoggerController.warn(`Acceso denegado para usuario: ${payload.username}`);
             return res.status(401).json({ error: "No tienes permisos" });
         }
@@ -132,9 +132,7 @@ async function canModifyUser(req, res, next) {
         const requesterId = req.user.id;      // Usuario que hace la petición
 
         // Buscar usuario objetivo
-        const targetUser = await UserAccount.findByPk(targetUserId, {
-            include: [{ model: UserData, as: "userData" }]
-        });
+        const targetUser = await UserAccount.findByPk(targetUserId);
         if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
         // SUPERADMIN no se puede eliminar/modificar por otros
@@ -142,9 +140,7 @@ async function canModifyUser(req, res, next) {
             return res.status(403).json({ error: "No puedes eliminar al SUPERADMIN" });
         }
         // Buscar usuario que hace la petición
-        const requester = await UserAccount.findByPk(requesterId, {
-            include: [{ model: UserData, as: "userData" }]
-        });
+        const requester = await UserAccount.findByPk(requesterId);
 
         if (targetUserId === 1 && requesterId !== 1) {
             return res.status(403).json({ error: "No puedes modificar/eliminar al SUPERADMIN por defecto" });
@@ -163,13 +159,6 @@ async function canModifyUser(req, res, next) {
                 return res.status(403).json({ error: "No puedes modificar/eliminar al SUPERADMIN" });
             }
             return next();
-        }
-
-        // Usuarios normales: solo pueden modificar/eliminar dentro de su mismo departamento
-        if (!requester.userData?.departmentId ||
-            !targetUser.userData?.departmentId ||
-            requester.userData.departmentId !== targetUser.userData.departmentId) {
-            return res.status(403).json({ error: "Solo puede operar sobre usuarios de su mismo departamento" });
         }
 
         next();

@@ -27,14 +27,17 @@ class UserAccountController {
             // Traer todos los usuarios
             const users = await UserAccount.findAll({
                 include: [
-                    { model: Department, as: "department", attributes: ["id", "name"] },
                     {
-                        model: UserData,
-                        as: "userData",
+                        model: Department,
+                        as: "department",
                         include: [
-                            { model: Department, as: "department", attributes: ["id", "name"] },
-                            { model: SubDepartment, as: "subdepartment", attributes: ["id", "name"] }
-                        ]
+                            {
+                                model: SubDepartment,
+                                as: "subdepartment",
+                                attributes: ["id", "name"]
+                            }
+                        ],
+                        attributes: ["id", "name"]
                     }
                 ]
             });
@@ -47,19 +50,6 @@ class UserAccountController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
-                userData: user.userData ? {
-                    id: user.userData.id,
-                    name: user.userData.name,
-                    extension: user.userData.extension,
-                    number: user.userData.number,
-                    email: user.userData.email,
-                    departmentId: user.userData.departmentId,
-                    departmentName: user.userData.department?.name || null,
-                    subdepartmentId: user.userData.subdepartmentId,
-                    subdepartmentName: user.userData.subdepartment?.name || null,
-                    show: user.userData.show,
-                    version: user.userData.version
-                } : null
             }));
 
             res.json({ users: formatted });
@@ -94,14 +84,17 @@ class UserAccountController {
                     '$userAccount.usertype$': { [Op.notIn]: ["ADMIN", "SUPERADMIN"] }
                 },
                 include: [
-                    { model: Department, as: "department", attributes: ["id", "name"] },
                     {
-                        model: UserData,
-                        as: "userData",
+                        model: Department,
+                        as: "department",
                         include: [
-                            { model: Department, as: "department", attributes: ["id", "name"] },
-                            { model: SubDepartment, as: "subdepartment", attributes: ["id", "name"] }
-                        ]
+                            {
+                                model: SubDepartment,
+                                as: "subdepartment",
+                                attributes: ["id", "name"]
+                            }
+                        ],
+                        attributes: ["id", "name"]
                     }
                 ]
             });
@@ -114,19 +107,7 @@ class UserAccountController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
-                userData: user.userData ? {
-                    id: user.userData.id,
-                    name: user.userData.name,
-                    extension: user.userData.extension,
-                    number: user.userData.number,
-                    email: user.userData.email,
-                    departmentId: user.userData.departmentId,
-                    departmentName: user.userData.department?.name || null,
-                    subdepartmentId: user.userData.subdepartmentId,
-                    subdepartmentName: user.userData.subdepartment?.name || null,
-                    show: user.userData.show,
-                    version: user.userData.version
-                } : null
+                
             }));
 
             res.json({ users: formatted });
@@ -149,15 +130,17 @@ class UserAccountController {
             const { id } = req.params;
             const user = await UserAccount.findByPk(id, {
                 include: [
-                    { model: Department, as: 'department', attributes: ['id', 'name'] },
                     {
-                        model: UserData,
-                        as: 'userData',
-                        attributes: ['id', 'name', 'extension', 'number', 'email', 'departmentId', 'subdepartmentId'],
+                        model: Department,
+                        as: "department",
                         include: [
-                            { model: Department, as: 'department', attributes: ['id', 'name'] },
-                            { model: SubDepartment, as: 'subdepartment', attributes: ['id', 'name'] }
-                        ]
+                            {
+                                model: SubDepartment,
+                                as: "subdepartment",
+                                attributes: ["id", "name"]
+                            }
+                        ],
+                        attributes: ["id", "name"]
                     }
                 ]
             });
@@ -172,19 +155,7 @@ class UserAccountController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
-                userData: user.userData ? {
-                    id: user.userData.id,
-                    name: user.userData.name,
-                    extension: user.userData.extension,
-                    number: user.userData.number,
-                    email: user.userData.email,
-                    departmentId: user.userData.departmentId,
-                    departmentName: user.userData.department?.name || null,
-                    subdepartmentId: user.userData.subdepartmentId,
-                    subdepartmentName: user.userData.subdepartment?.name || null,
-                    show: user.show,
-                    version: user.userData.version
-                } : null
+                
             });
 
         } catch (error) {
@@ -205,9 +176,9 @@ class UserAccountController {
     */
     static async create(req, res) {
         try {
-            const { userAccount, userData } = req.body;
+            const { userAccount } = req.body;
 
-            if (!userAccount || !userData) {
+            if (!userAccount) {
                 return res.status(400).json({ error: "Los datos se aportaron de forma incompleta" });
             }
 
@@ -221,54 +192,13 @@ class UserAccountController {
                 return res.status(400).json({ error: "El nombre de usuario ya está en uso" });
             }
 
-            // Verificar que el username del data no exista
-            const existingData = await UserData.findOne({ where: { name: userData.name } });
-            if (existingData) {
-                return res.status(400).json({ error: "El nombre de los datos de usuario ya está en uso" });
-            }
-
-            // Validar que el departamento del UserData y del User son el mismo
-            if (userData.departmentId !== userAccount.departmentId) {
-                return res.status(400).json({ error: "El Departamento no es el mismo" });
-            }
-
-            // Validar que el departamento y subdepartamento existen si se proporcionan
-            if (userData.departmentId) {
-                const department = await Department.findByPk(userData.departmentId);
-                if (!department) {
-                    return res.status(400).json({ error: "Departmento no válido" });
-                }
-            }
-
-            // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
-            if (!userData.departmentId && userData.subdepartmentId) {
-                return res.status(400).json({ error: "Departmento no válido" });
-            }
-
-            // Validar que el subdepartamento pertenece al departamento indicado y que existe
-            if (userData.subdepartmentId) {
-                const subdepartment = await SubDepartment.findByPk(userData.subdepartmentId);
-                if (!subdepartment) {
-                    return res.status(400).json({ error: "Subdepartmento no válido" });
-                }
-                if (userData.departmentId && subdepartment.departmentId != userData.departmentId) {
-                    return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
-                }
-            }
-
             // Crear UserAccount
             const user = await UserAccount.create({
                 username: userAccount.username,
                 password: userAccount.password,
                 usertype: userAccount.usertype,
-                forcePwdChange: true,
+                forcePwdChange: userAccount.usertype === "USER" ? false : true,
                 departmentId: userAccount.departmentId
-            });
-
-            // Crear UserData 
-            await UserData.create({
-                ...userData,
-                userAccountId: user.id
             });
 
             LoggerController.info('Nuevo usuario trabajador ' + user.username + ' creado correctamente');
@@ -291,20 +221,16 @@ class UserAccountController {
         try {
 
             const targetUserId = req.params.id;
-            const { userAccount, userData } = req.body;
+            const { userAccount } = req.body;
 
-            if (!userAccount || !userData) {
+            if (!userAccount) {
                 return res.status(400).json({ error: "Los datos se aportaron de forma incompleta" });
             }
 
             const targetUser = await UserAccount.findByPk(targetUserId);
             if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
-            const targetUserData = await UserData.findByPk(userData.id);
-            if (!targetUserData) {
-                return res.status(404).json({ error: "Datos de Usuario no encontrado" });
-            }
 
-            if (targetUser.version != userAccount.version || targetUserData.version != userData.version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
+            if (targetUser.version != userAccount.version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
 
 
             // Validar que el nuevo username sea único
@@ -314,16 +240,7 @@ class UserAccountController {
                 targetUser.username = userAccount.username;
             }
 
-            // Verificar que el username del data no exista
-            if (userData.name && userData.name !== targetUserData.name) {
-                const existingData = await UserData.findOne({ where: { name: userData.name } });
-                if (existingData) {
-                    return res.status(400).json({ error: "El nombre de los datos de usuario ya está en uso" });
-                }
-            }
-
-
-            if (userAccount.usertype && req.user.usertype !== "WORKER") {
+            if (userAccount.usertype && req.user.usertype !== "USER") {
                 targetUser.departmentId = userAccount.departmentId;
             }
             // Solo ADMIN/SUPERADMIN pueden cambiar usertype
@@ -339,43 +256,7 @@ class UserAccountController {
                 return res.status(400).json({ error: "Debe introducir una contraseña válida" });
             }
 
-            // Validar que el departamento y subdepartamento existen si se proporcionan
-            if (userData.departmentId) {
-                const department = await Department.findByPk(userData.departmentId);
-                if (!department) {
-                    return res.status(400).json({ error: "Departmento no válido" });
-                }
-            }
-
-            // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
-            if (!userData.departmentId && userData.subdepartmentId) {
-                return res.status(400).json({ error: "Departmento no válido" });
-            }
-
-            // Validar que el subdepartamento pertenece al departamento indicado y que existe
-            if (userData.subdepartmentId) {
-                const subdepartment = await SubDepartment.findByPk(userData.subdepartmentId);
-                if (!subdepartment) {
-                    return res.status(400).json({ error: "Subdepartmento no válido" });
-                }
-                if (userData.departmentId && subdepartment.departmentId != userData.departmentId) {
-                    return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
-                }
-            }
-
-            if (userData.departmentId !== undefined) targetUserData.departmentId = userData.departmentId;
-            if (userData.subdepartmentId !== undefined) targetUserData.subdepartmentId = userData.subdepartmentId;
-
-            // Actualizar solo campos permitidos
-            if (userData.name !== undefined) targetUserData.name = userData.name;
-            if (userData.extension !== undefined) targetUserData.extension = userData.extension;
-            if (userData.number !== undefined) targetUserData.number = userData.number;
-            if (userData.email !== undefined) targetUserData.email = userData.email;
-            if (userData.userId !== undefined) targetUserData.userAccountId = userData.userId;
-            if (userData.show !== undefined) targetUserData.show = userData.show;
-
             await targetUser.save();
-            await targetUserData.save();
 
             LoggerController.info(`Usuario ${targetUser.username} actualizado por ${req.user.username}`);
             res.json({ id: targetUserId });
@@ -430,17 +311,9 @@ class UserAccountController {
 
             if (user.version != version) return res.status(403).json({ error: "El usuario ha sido modificado anteriormente" });
 
-            const userData = await UserData.findOne({ where: { userAccountId: id } });
+           await user.destroy();
 
-            try {
-                await userData.destroy();
-            } catch (error) {
-                LoggerController.error('Error en la eliminación de los datos de usuario, cuando se intenta eliminar la cuenta: ' + error.message);
-            }
-
-            await user.destroy();
-
-            LoggerController.info(`Usuario Worker: ${user.username} y sus Datos de usuario, eliminado por ${req.user.username}`);
+            LoggerController.info(`Usuario: ${user.username} eliminado por ${req.user.username}`);
             res.json({ id });
         } catch (error) {
             LoggerController.error('Error en la eliminación de usuario: ' + error.message);
@@ -558,14 +431,6 @@ class UserAccountController {
 
             if (user.usertype === "SUPERADMIN") {
                 return res.status(403).json({ error: "Un SUPERADMIN no puede eliminarse" });
-            }
-
-            const userData = await UserData.findOne({ where: { userAccountId: id } });
-
-            try {
-                await userData.destroy();
-            } catch (error) {
-                LoggerController.error('Error en la eliminación de los datos de usuario, cuando se intenta su perfil: ' + error.message);
             }
 
             await user.destroy();

@@ -50,10 +50,6 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     const optionsHtml = types.map(t => `<option value="${t.value}" ${userItem?.usertype === t.value ? "selected" : ""}>${t.label}</option>`).join("");
     const departmentOptions = departments.map(d => `<option value="${d.id}" ${userItem?.departmentId === d.id ? "selected" : ""}>${d.name}</option>`).join("");
 
-    const initialSubDeps = userItem?.departmentId
-        ? subdepartments.filter(sd => sd.departmentId === userItem.departmentId)
-        : subdepartments;
-    const subdepartmentOptions = initialSubDeps.map(s => `<option value="${s.id}" ${userItem?.userData?.subdepartmentId === s.id ? "selected" : ""}>${s.name}</option>`).join("");
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
@@ -90,35 +86,6 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;
 
-    const step2Html = `
-    <div>
-        <div style="${rowStyle} margin-top: 5vh">
-            <label style="${labelStyle}">Nombre completo <span style="color:red">*</span></label>
-            <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.userData?.name || ""}">
-        </div>
-        <div style="${rowStyle}">
-            <label style="${labelStyle}">Extensión</label>
-            <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.userData?.extension || ""}">
-        </div>
-        <div style="${rowStyle}">
-            <label style="${labelStyle}">Teléfono</label>
-            <input id="swal-number" style="${inputStyle}" placeholder="Teléfono" value="${userItem?.userData?.number || ""}">
-        </div>
-        <div style="${rowStyle}">
-            <label style="${labelStyle}">Email</label>
-            <input id="swal-email" type="email" style="${inputStyle}" placeholder="Email" value="${userItem?.userData?.email || ""}">
-        </div>
-        <div style="${rowStyle}">
-            <label style="${labelStyle}">Subdepartamento</label>
-            <select id="swal-subdepartment" style="${inputStyle}">${subdepartmentOptions}</select>
-        </div>
-        <div style="${rowStyle}">
-            <label style="${labelStyle}">Visible</label>
-            <input id="swal-show" type="checkbox" ${userItem?.userData?.show !== false ? "checked" : ""} style="transform: scale(1.2);">
-        </div>
-        <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
-    </div>`;
-
     // Paso 1
     const swalStep1 = await Swal.fire({
         title: "Cuenta de Usuario",
@@ -127,7 +94,7 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
         width: '600px',
         showCancelButton: true,
         cancelButtonText: "Cancelar",
-        confirmButtonText: "Siguiente",
+        confirmButtonText: "Aceptar",
         didOpen: () => {
             const PwdInput = document.getElementById("swal-password");
             const PwdToggle = document.getElementById("toggle-pass");
@@ -156,52 +123,11 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     if (!swalStep1.value) return;
     const step1Values = swalStep1.value;
 
-    // Paso 2
-    const swalStep2 = await Swal.fire({
-        title: "Datos Extendidos",
-        html: step2Html,
-        focusConfirm: false,
-        width: '600px',
-        showCancelButton: true,
-        cancelButtonText: "Cancelar",
-        confirmButtonText: action === "create" ? "Crear" : "Aceptar",
-        didOpen: () => {
-            const subdepartmentSelect = document.getElementById("swal-subdepartment");
-            const filteredSubDeps = subdepartments.filter(sd => sd.departmentId === step1Values.departmentId);
-            const options = [{ id: null, name: "-- Seleccionar --" }, ...filteredSubDeps];
-            subdepartmentSelect.innerHTML = options.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
-        },
-        preConfirm: () => {
-            const name = document.getElementById("swal-name").value.trim();
-            const extension = document.getElementById("swal-extension").value.trim();
-            const number = document.getElementById("swal-number").value.trim();
-            const email = document.getElementById("swal-email").value.trim();
-            const subdepartmentIdRaw = document.getElementById("swal-subdepartment").value;
-            const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
-            const show = document.getElementById("swal-show").checked;
-
-            if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
-            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
-            if (extension && !/^\d+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
-            if (number && !/^\+?\d{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
-
-
-            const departmentId = step1Values.departmentId;
-            const data = { name, extension, number, email, show, departmentId, subdepartmentId };
-
-            if (userItem?.departmentId != undefined) data.departmentId = userItem?.userData.departmentId;
-            if (userItem?.userData.id != undefined) data.id = userItem?.userData.id;
-            if (userItem?.userData.version != undefined) data.version = userItem?.userData.version;
-
-            return data;
-        }
-    });
-    if (!swalStep2.value) return;
-
+    
     if (action === "modify" && !step1Values.password) {
-        onConfirm({ userAccount: step1Values, userData: swalStep2.value, userAccountId: userItem?.userAccountId || null });
+        onConfirm({ userAccount: step1Values, userAccountId: userItem?.userAccountId || null });
     } else {
-        onConfirm({ userAccount: step1Values, userData: swalStep2.value });
+        onConfirm({ userAccount: step1Values });
     }
 };
 

@@ -64,7 +64,6 @@ export const getUsersList = async (token, department = null) => {
         const res = await api.get(endpoint, {
             headers: { Authorization: `Bearer ${token}` }
         });
-
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -255,24 +254,6 @@ export const deleteProfileAcc = async (token, version) => {
 };
 
 /**
- * Solicitud de eliminación de un usuario
- * @param {Object} userId - el ID del usuario que se quiere eliminar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
- * @returns {JSON} - Devuelve la información recibida de la llamada
- */
-export const deleteProfileData = async (token, version) => {
-    try {
-        const res = await api.delete(`/data/profile-del`, {
-            params: { version },
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return { success: true, data: res.data };
-    } catch (error) {
-        return { success: false, error: error.response?.data?.error };
-    }
-};
-
-/**
  * Solicitud de cambio de infromación de la cuenta del perfil conectado
  * 
  * @param {String} useraccount - Nueva información de inicio de sesion para el perfil concetado
@@ -290,23 +271,5 @@ export const modifyProfileAcc = async (useraccount, token, version) => {
         return { success: false, error: error.response?.data?.error };
     }
 }
-
-/**
- * Solicitud de modificar la información asociada al perfil
- * 
- * @param {String} userdata - Nueva información del perfil
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
- * @returns {JSON} - Devuelve la información recibida de la llamada
- */
-export const modifyProfileData = async (userdata, token) => {
-    try {
-        const res = await api.put('/data/profile-update', userdata, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        return { success: true, data: res.data };
-    } catch (error) {
-        return { success: false, error: error.response?.data?.error };
-    }
-};
 
 //#endregion

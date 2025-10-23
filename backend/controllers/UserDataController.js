@@ -40,8 +40,7 @@ class UserDataController {
             const allData = await UserData.findAll({
                 include: [
                     { model: Department, as: "department" },
-                    { model: SubDepartment, as: "subdepartment" },
-                    { model: UserAccount, as: "userAccount" }
+                    { model: SubDepartment, as: "subdepartment" }
                 ]
             });
             const formatted = allData.map(user => ({
@@ -50,9 +49,6 @@ class UserDataController {
                 extension: user.extension,
                 number: user.number,
                 email: user.email,
-                userId: user.userAccount?.id,
-                user: user.userAccount?.username,
-                userVersion: user.userAccount?.version,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 subdepartmentId: user.subdepartmentId,
@@ -88,7 +84,6 @@ class UserDataController {
                 include: [
                     { model: Department, as: "department" },
                     { model: SubDepartment, as: "subdepartment" },
-                    { model: UserAccount, as: "userAccount" }
                 ]
             });
             const formatted = allData.map(user => ({
@@ -97,9 +92,6 @@ class UserDataController {
                 extension: user.extension,
                 number: user.number,
                 email: user.email,
-                userId: user.userAccount?.id,
-                user: user.userAccount?.username,
-                userVersion: user.userAccount?.version,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 subdepartmentId: user.subdepartmentId,
@@ -187,7 +179,7 @@ class UserDataController {
             if (userdata.version != version) return res.status(403).json({ error: "Los datos de usuario ha sido modificado por otro proceso" });
 
             // Verificar que el usuario no es DEPARTMENT
-            if (req.user.usertype !== "DEPARTMENT") {
+            if (req.user.usertype !== "USER") {
                 // Validar que el departamento y subdepartamento existen si se proporcionan
                 if (departmentId) {
                     const department = await Department.findByPk(departmentId);
@@ -214,17 +206,6 @@ class UserDataController {
 
                 if (departmentId !== undefined) userdata.departmentId = departmentId;
                 if (subdepartmentId !== undefined) userdata.subdepartmentId = subdepartmentId;
-            }
-
-            // Validar que el userAccountId (userId) pertenece al mismo departamento
-            if (userId !== undefined) {
-                const userAccount = await UserAccount.findByPk(userId);
-                if (!userAccount) {
-                    return res.status(400).json({ error: "Usuario no válido" });
-                }
-                if (userdata.departmentId && userAccount.departmentId !== userdata.departmentId) {
-                    return res.status(400).json({ error: "El usuario asignado no pertenece al mismo departamento que el UserData" });
-                }
             }
 
             // Actualizar solo campos permitidos
@@ -299,14 +280,13 @@ class UserDataController {
 
             const user = await UserAccount.findByPk(req.user.id, {
                 include: [
-                    { model: Department, as: 'department', attributes: ['id', 'name'] },
                     {
-                        model: UserData,
-                        as: 'userData',
+                        model: Department,
+                        as: 'department',
                         include: [
-                            { model: Department, as: 'department', attributes: ['id', 'name'] },
                             { model: SubDepartment, as: 'subdepartment', attributes: ['id', 'name'] }
-                        ]
+                        ],
+                        attributes: ['id', 'name']
                     }
                 ]
             });
@@ -325,19 +305,7 @@ class UserDataController {
                 version: user.version,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
-                userData: user.userData ? {
-                    id: user.userData.id,
-                    name: user.userData.name,
-                    extension: user.userData.extension,
-                    number: user.userData.number,
-                    email: user.userData.email,
-                    show: user.userData.show,
-                    departmentId: user.userData.departmentId,
-                    departmentName: user.userData.department?.name || null,
-                    subdepartmentId: user.userData.subdepartmentId,
-                    subdepartmentName: user.userData.subdepartment?.name || null,
-                    version: user.userData.version
-                }: null
+                
             });
 
         } catch (error) {
@@ -345,54 +313,6 @@ class UserDataController {
             res.status(500).json({ error: error.message });
         }
     }
-
-    /**
-    * Permite al usuario autenticado actualizar sus propios datos de UserData.
-    * 
-    * @param {Object} req - Objeto de petición { param: { user }, query: { version }, body: {id, name, extension, number, email}}
-    * @param {Object} res 
-    */
-    static async updateMyProfile(req, res) {
-        try {
-            const userId = req.user.id;
-            const { id, name, extension, number, email, version, show } = req.body;
-
-            // Recuperar UserData del usuario
-            const userdata = await UserData.findOne({ where: { id: id, userAccountId: userId } });
-
-            if (!userdata) {
-                return res.status(404).json({ error: "Datos de Usuario no encontrado" });
-            }
-
-            if (userdata.version != version) return res.status(409).json({ error: "Los datos de usuario ha sido modificados anteriormente" }); //ESTO NO ESTA BIEN
-
-            // Actualizar solo campos permitidos
-            if (name !== undefined) userdata.name = name;
-            if (extension !== undefined) userdata.extension = extension;
-            if (number !== undefined) userdata.number = number;
-            if (email !== undefined) userdata.email = email;
-            if (show !== undefined) userdata.show = show;
-
-            await userdata.save();
-
-            res.json({
-                user: {
-                    name: userdata.name,
-                    extension: userdata.extension,
-                    number: userdata.number,
-                    email: userdata.email,
-                    show: userdata.show,
-                }
-            });
-
-            LoggerController.info(`Datos del usuario ${userId} actualizados`);
-        } catch (error) {
-            consola.
-            LoggerController.error(`Error actualizando los Datos de Usuario: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
 }
 
 module.exports = UserDataController;

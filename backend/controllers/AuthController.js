@@ -34,12 +34,12 @@ class AuthController {
                 where: { username },
                 include: [
                     {
-                        model: UserData,
-                        as: 'userData',
-                        include: [
-                            { model: Department, as: 'department' },
-                            { model: SubDepartment, as: 'subdepartment' }
-                        ]
+                        model: Department,
+                        as: 'department',
+                        include: [{
+                            model: SubDepartment,
+                            as: 'subdepartment'
+                        }]
                     }
                 ]
             });

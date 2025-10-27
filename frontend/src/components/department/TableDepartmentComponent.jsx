@@ -24,7 +24,7 @@ import ShowMoreBadgeComponent from "../../components/badge/ShowMoreBadgeComponen
  * @param {Function} props.setCurrentPage - Función para cambiar la página
  * @param {Function} props.refreshData - Función para recargar los datos
  */
-const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
+const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPage, setCurrentPage, refreshData }) => {
 
     // Hook para detectar pantalla pequeña
     const useIsSmallScreen = (breakpoint = 500) => {
@@ -83,7 +83,7 @@ const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, cur
             department: dept,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyDepartment({ id: dept.id, name: formValues.name }, token);
+                const result = await modifyDepartment({ id: dept.id, name: formValues.name });
                 if (result.success) {
                     Swal.fire("Éxito", "Departamento modificado correctamente", "success");
                     await refreshData();
@@ -98,7 +98,7 @@ const TableDepartmentComponent = ({ token, departments, search, rowsPerPage, cur
         try { await showCaptcha(dept.id); }
         catch (err) { Swal.fire('Atención', err.message || 'Captcha no completado', 'warning'); return; }
 
-        const result = await deleteDepartment(dept.id, token);
+        const result = await deleteDepartment(dept.id);
         if (result.success) {
             Swal.fire('Éxito', 'Departamento eliminado correctamente', 'success');
             await refreshData();

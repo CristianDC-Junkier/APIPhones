@@ -15,7 +15,7 @@ import AddModifyUserCommponent from "../../components/user/AddModifyUserComponen
 import AddModifyUserDataCommponent from "../../components/user/AddModifyUserDataComponent";
 
 const DashboardUser = () => {
-    const { user: currentUser, token, logout } = useAuth();
+    const { user: currentUser, logout } = useAuth();
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
@@ -50,22 +50,21 @@ const DashboardUser = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const response = await getProfile(token, currentUser.version);
+            const response = await getProfile(currentUser.version);
             if (response.success) {
                 setUser(response.data);
             }
         };
         fetchData();
-    }, [token, currentUser.version]);
+    }, [currentUser.version]);
 
     const fetchUsers = async () => {
-        if (!token) return;
         setLoading(true);
         try {
             let responseUserData, responseUserAccounts;
 
-            responseUserData = await getWorkerDataList(token);
-            responseUserAccounts = await getUsersList(token);
+            responseUserData = await getWorkerDataList();
+            responseUserAccounts = await getUsersList();
 
             if (responseUserData.success && responseUserAccounts.success) {
                 setUserData(responseUserData.data.users);
@@ -92,13 +91,12 @@ const DashboardUser = () => {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { fetchUsers(); }, [token, currentUser, logout, navigate]);
+    useEffect(() => { fetchUsers(); }, [currentUser, logout, navigate]);
 
     const fetchDepartments = async () => {
-        if (!token) return;
         setLoading(true);
         try {
-            const deptResp = await getDepartmentsList(token);
+            const deptResp = await getDepartmentsList();
 
             if (deptResp.success) {
                 const depts = deptResp.data.departments ?? [];
@@ -112,15 +110,14 @@ const DashboardUser = () => {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { fetchDepartments(); }, [token]);
+    useEffect(() => { fetchDepartments(); }, []);
 
     const handleCreateUser = async () => {
         await AddModifyUserCommponent({
-            token,
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
-                const result = await createUser(formValues, token);
+                const result = await createUser(formValues);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario creado correctamente", "success");
                     await fetchUsers();
@@ -133,11 +130,10 @@ const DashboardUser = () => {
 
     const handleCreateUserData = async () => {
         await AddModifyUserDataCommponent({
-            token,
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
-                const result = await createUserData(formValues, token);
+                const result = await createUserData(formValues);
                 if (result.success) {
                     Swal.fire("Éxito", "Datos de usuario creados correctamente", "success");
                     await fetchUsers();
@@ -239,7 +235,6 @@ const DashboardUser = () => {
                 <TableUserAccountComponent
                     users={userAccounts}
                     currentUser={currentUser}
-                    token={token}
                     search={selectedUser}
                     selectedDepartment={selectedDepartment}
                     setSearch={setSelectedUser}
@@ -251,7 +246,6 @@ const DashboardUser = () => {
                 <TableUserDataComponent
                     users={userData}
                     currentUser={user}
-                    token={token}
                     search={selectedUser}
                     selectedDepartment={selectedDepartment}
                     setSearch={setSelectedUser}

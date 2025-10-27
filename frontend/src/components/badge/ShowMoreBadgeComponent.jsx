@@ -23,7 +23,7 @@ const ShowMoreDepartmentBadgeComponent = ({
 
     const handleShowMore = () => {
         Swal.fire({
-            title: objType === "subdepartamento" ? `<strong>Departamentos de ${user.username}</strong>` : `<strong>Subdepartamentos de ${user.name}</strong>`,
+            title: objType === "subdepartamento" ? `<strong>Departamentos de ${user.name}</strong>` : `<strong>Subdepartamentos de ${user.name}</strong>`,
             html: `<div id="departments-container"></div>`,
             didOpen: () => {
                 const container = document.getElementById('departments-container');

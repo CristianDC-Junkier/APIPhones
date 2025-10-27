@@ -13,14 +13,11 @@
 
 /**
  * Solicitud para obtener un listado con todos los logs
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getLogs = async (token) => {
+export const getLogs = async () => {
     try {
-        const res = await api.get('/logs', {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/logs', {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -30,14 +27,11 @@ export const getLogs = async (token) => {
 /**
  * Solicitud para obtener el contenido de un log
  * @param {Object} log - Log del que se quiere obtener la información
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getLog = async (log,token) => {
+export const getLog = async (log) => {
     try {
-        const res = await api.get(`/logs/${encodeURIComponent(log)}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/logs/${encodeURIComponent(log)}`, {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -47,16 +41,14 @@ export const getLog = async (log,token) => {
 /**
  * Solicitud para descargar un log
  * @param {Object} log - Log que se quiere descargar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const downloadLog = async (log,token) => {
+export const downloadLog = async (log) => {
     try {
         const res = await api.get(
             `/logs/${encodeURIComponent(log)}/download`,
             {
                 responseType: 'blob',
-                headers: { Authorization: `Bearer ${token}` }
             }
         );
 
@@ -77,14 +69,11 @@ export const downloadLog = async (log,token) => {
 
 /**
  * Solicitud para obtener las métricas del sistema
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getSystemMetrics = async (token) => {
+export const getSystemMetrics = async () => {
     try {
-        const res = await api.get('/system',{
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/system',{});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

@@ -38,7 +38,7 @@ const UserAccount = sequelize.define("UserAccount", {
     usertype: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: "WORKER",
+        defaultValue: "USER",
     },
     forcePwdChange: {
         type: DataTypes.BOOLEAN,

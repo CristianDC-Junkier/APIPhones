@@ -2,7 +2,7 @@
 const router = express.Router();
 
 const UserAccountController = require("../controllers/UserAccountController");
-const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Auth");
+const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Auth");
 
 /**
  * - GET    /list               → Listar todos los datos de usuario usuario logueado.
@@ -26,16 +26,16 @@ const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Au
  */
 
 router.get("/list", isAuthenticated, UserAccountController.listUsers);
-router.get("/list-department", isAuthenticated, notWorker, UserAccountController.listUsersByDepartment);
-router.get("/:id", notWorker, UserAccountController.getOne);
+router.get("/list-department", adminOnly, isAuthenticated, UserAccountController.listUsersByDepartment);
+router.get("/:id", adminOnly, UserAccountController.getOne);
 
 router.put("/profile-update", isAuthenticated, UserAccountController.updateMyAccount);
 router.delete("/profile-del", isAuthenticated, UserAccountController.deleteMyAccount);
 router.patch("/profile-PWD", isAuthenticated, UserAccountController.forcedPasswordChange);
 
-router.post("/", notWorker, UserAccountController.create);
-router.put("/:id", notWorker, canModifyUser, UserAccountController.update);
-router.patch("/:id/forcepwd", notWorker, canModifyUser, UserAccountController.forcePasswordChange);
-router.delete("/:id", notWorker, canModifyUser, UserAccountController.delete);
+router.post("/", adminOnly, UserAccountController.create);
+router.put("/:id", adminOnly, canModifyUser, UserAccountController.update);
+router.patch("/:id/forcepwd", adminOnly, canModifyUser, UserAccountController.forcePasswordChange);
+router.delete("/:id", adminOnly, canModifyUser, UserAccountController.delete);
 
 module.exports = router;

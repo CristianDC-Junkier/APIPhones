@@ -2,7 +2,7 @@
 const router = express.Router();
 
 const UserDataController = require("../controllers/UserDataController");
-const { notWorker, isAuthenticated, canModifyUser } = require("../middlewares/Auth");
+const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Auth");
 
 /**
  * Rutas para la gestión de UserData.
@@ -32,9 +32,9 @@ router.get("/worker-department", isAuthenticated, UserDataController.workerListB
 
 router.get("/profile", isAuthenticated, UserDataController.getProfile);
 
-router.post("/", notWorker, UserDataController.create);
-router.put("/:id", notWorker, canModifyUser, UserDataController.update);
-router.delete("/:id", notWorker, UserDataController.delete);
+router.post("/", adminOnly, UserDataController.create);
+router.put("/:id", adminOnly, canModifyUser, UserDataController.update);
+router.delete("/:id", adminOnly, UserDataController.delete);
 
 
 

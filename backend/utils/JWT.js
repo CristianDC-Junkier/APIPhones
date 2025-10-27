@@ -1,74 +1,65 @@
 ﻿const jwt = require("jsonwebtoken");
 const { RefreshToken } = require("../models/Relations");
+const { v4: uuidv4 } = require("uuid");
 
-
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET_ACS = process.env.JWT_SECRET_ACS;
+const JWT_SECRET_RFH = process.env.JWT_SECRET_RFH;
 
 /**
- * Genera un token JWT.
- * 
- * @param {Object} payload - Datos a incluir en el token.
- * @param {string|number} [expiresIn="1h"] - Tiempo de expiración.
- * @returns {string} Token JWT firmado.
- */
-async function generateToken(payload) {
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
-    if (payload.remember) {
-        await RefreshToken.create({ token, userId: payload.id })
-    };
-    return token;
+* Genera un accessToken JWT
+* @param {Object} payload - Datos del usuario {id, username, usertype}
+* @param {string|number} [expiresIn='15m']
+* @returns {string} accessToken
+*/
+function generateAccessToken(payload, expiresIn = '10s') {
+    return jwt.sign(payload, JWT_SECRET_ACS, { expiresIn });
 }
 
 /**
- * Verifica un token JWT y retorna su contenido.
- * 
- * @param {string} token - Token JWT a verificar.
- * @returns {Object} Payload del token.
- * @throws {Error} Si el token es inválido o expiró.
- */
-async function verifyToken(token) {
-    try {
-        return jwt.verify(token, JWT_SECRET);
-    } catch (err) {
-        if (err.name === "TokenExpiredError") {
-            // Si expiró, buscamos el refresh token en BD
-            const refresh = await RefreshToken.findOne({ where: { token } });
-            if (!refresh) {
-                throw new Error("Token expirado y no existe refresh token");
-            }
+* Genera un refreshToken JWT con UUID y lo guarda en DB
+* @param {number} userId 
+* @param {boolean} remember 
+* @returns {Promise<{ token: string, uuid: string }>} refreshToken + uuid
+*/
+async function generateRefreshToken(userId, remember = false) {
+    const uuid = uuidv4();
+    const expiresIn = remember ? '7d' : '1h';
 
-            // Comprobar si el refresh token está caducado
-            const now = new Date();
-            if (refresh.expireDate && refresh.expireDate < now) {
-                await RefreshToken.destroy({ where: { id: refresh.id } });
-                throw new Error("Refresh token caducado");
-            } else {
-                token = jwt.sign(jwt.decode(token), JWT_SECRET, { expiresIn: '1h' });
-                await RefreshToken.update(
-                    { token: token },
-                    { where: { id: refresh.id } });
-                return jwt.verify(token, JWT_SECRET);
-            }
-        } else {
-            throw err;
-        }
-    }
+    // Guardar en DB
+    const expireDate = remember
+        ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        : new Date(Date.now() + 60 * 60 * 1000);
+
+    await RefreshToken.create({ uuid, userId, expireDate });
+
+    return jwt.sign({ userId, uuid, remember }, JWT_SECRET_RFH, { expiresIn });
 }
 
 /**
- * Retorna el contenido de un token JWT.
- * 
- * @param {string} token - Token JWT a decodificar.
- * @returns {Object} Payload del token.
- * @throws {Error} Si el token es inválido.
- */
-async function decodeToken(token) {
-    try {
-        return jwt.decode(token, JWT_SECRET);
-    } catch (err) {
-        throw err;
-    }
-
+* Verifica un token de acceso 
+* @param {string} token 
+* @returns {Object} payload
+* @throws Error si inválido o expirado
+*/
+function verifyToken(token, type = 'access') {
+    const secret = type === 'access' ? JWT_SECRET_ACS : JWT_SECRET_RFH;
+    return jwt.verify(token, secret);
 }
 
-module.exports = { generateToken, verifyToken, decodeToken };
+
+/**
+* Decodifica cualquier token sin validar
+* @param {string} token 
+* @param {'access'|'refresh'} type 
+*/
+function decodeToken(token, type = 'access') {
+    const secret = type === 'access' ? JWT_SECRET_ACS : JWT_SECRET_RFH;
+    return jwt.decode(token, secret);
+}
+
+module.exports = {
+    generateAccessToken,
+    generateRefreshToken,
+    verifyToken,
+    decodeToken
+};

@@ -13,17 +13,6 @@ UserAccount.beforeUpdate((user, options) => {
     }
 });
 
-/**
- * Hook: después de actualizar un UserAccount.
- * 
- * - Destruir todos los refresh tokens asociados al usuario modificado
- */
-UserAccount.afterUpdate(async (user, options) => {
-    await RefreshToken.destroy({
-        where: { userId: user.id }
-    });
-});
-
 
 /**
  * Función auxiliar para actualizar el registro único de UpdateModel.
@@ -105,45 +94,6 @@ UserData.beforeValidate((userData) => {
     }
 });
 
-/**
-* Hook: beforeUpdate
-*
-* - Este hook se ejecuta **antes de actualizar un RefreshToken**.
-* - Si `expireDate` no está definido, se asigna automáticamente
-*   una nueva fecha de expiración con +7 días desde el momento actual.
-*
-*/
-RefreshToken.beforeUpdate((token, options) => {
-    if (!token.expireDate) {
-        token.expireDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // +7 días
-    }
-});
-
-// --- Hook: sincronizar departmentId de UserAccount → UserData ---
-UserAccount.afterUpdate(async (user, options) => {
-    if (user.changed("departmentId")) {
-        const userData = await UserData.findOne({ where: { userAccountId: user.id } });
-        if (userData && userData.departmentId !== user.departmentId) {
-            await userData.update(
-                { departmentId: user.departmentId },
-                { hooks: false }
-            );
-        }
-    }
-});
-
-// --- Hook: sincronizar departmentId de UserData → UserAccount ---
-UserData.afterUpdate(async (userData, options) => {
-    if (userData.changed("departmentId") && userData.userAccountId) {
-        const userAccount = await UserAccount.findByPk(userData.userAccountId);
-        if (userAccount && userAccount.departmentId !== userData.departmentId) {
-            await userAccount.update(
-                { departmentId: userData.departmentId },
-                { hooks: false } 
-            );
-        }
-    }
-});
 
 
 

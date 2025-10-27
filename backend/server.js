@@ -1,4 +1,5 @@
 ﻿const express = require("express");
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const LoggerController = require("./controllers/LoggerController");
 const path = require("path");
@@ -14,7 +15,11 @@ const { initDatabase } = require("./config/dbInit");
 
 const app = express();
 
-app.use(cors());
+app.use(cookieParser());
+app.use(cors({
+    origin: 'http://localhost:61938/',
+    credentials: true
+}));
 app.use(express.json());
 
 // --------------------------------

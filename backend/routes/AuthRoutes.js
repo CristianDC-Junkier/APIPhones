@@ -8,17 +8,20 @@ const { isAuthenticated } = require("../middlewares/Auth");
  * Rutas para gestión de usuarios.
  *
  * Endpoints:
- * - POST   /login                  → Iniciar sesión y obtener token JWT.
- * - GET    /logout                 → Cierra sesión y elimina el RefreshToken Asociado.
- * - GET    /date                   → Devuelve la fecha del listin.
- * - GET    /version                   → Devuelve la versión del usuario.
+ * - POST   /login      → Iniciar sesión y obtener token JWT.
+ * - GET    /logout     → Cierra sesión.
+ * 
+ * - GET    /date       → Devuelve la fecha del listin.
+ * - GET    /version    → Devuelve la versión del usuario.
+ * 
+ * - GET    /refresh    → Recoger y renovar el refreshtoken (Usuarios Autentificados).
  */
 
 router.post("/login", AuthController.login);
-router.get("/logout", isAuthenticated, AuthController.logout);
+router.get("/logout", AuthController.logout);
 
 router.get("/date", AuthController.getDate);
-router.get("/version", isAuthenticated, AuthController.getVersion);
 
+router.get("/refresh", AuthController.refreshToken);
 
 module.exports = router;

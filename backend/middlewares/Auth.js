@@ -1,120 +1,64 @@
 ﻿const LoggerController = require("../controllers/LoggerController");
-const { verifyToken } = require("../utils/JWT");
-const { UserAccount, UserData } = require("../models/Relations");
+const { verifyToken, decodeToken } = require("../utils/JWT");
+const { UserAccount } = require("../models/Relations");
 
 /**
- * Middleware que restringe el acceso únicamente a usuarios con rol de administrador.
- * 
- * Verifica el token JWT en la cabecera `Authorization`:
- *  - Si no existe o es inválido → responde con 401 (no autorizado).
- *  - Si el usuario no tiene rol `ADMIN` o `SUPERADMIN` → responde con 401 (sin permisos).
- *  - Si el token es válido y el rol es correcto → añade los datos del usuario a `req.user`
- *    y continúa con el siguiente middleware/controlador.
- * 
- * @param {Object} req - Objeto de petición de Express, con cabecera Authorization.
- * @param {Object} res - Objeto de respuesta de Express.
- * @param {Function} next - Función para pasar al siguiente middleware.
+ * Función auxiliar para validar accessToken del header Authorization
+ */
+async function getTokenPayload(req, res) {
+    const authHeader = req.headers?.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({ error: "Token requerido" });
+        return null;
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    try {
+        const payload = await verifyToken(token, "access");
+        if (!payload || !payload.id) {
+            res.status(401).json({ error: "Token inválido" });
+            return null;
+        }
+        return payload;
+    } catch (err) {
+        payload = decodeToken(token);
+        if (payload && payload.id) {
+            LoggerController.warn(`Token inválido: ${err.message} para el usuario con id ${payload.id}`);
+        }
+        res.status(401).json({ error: "Token inválido o expirado" });
+        return null;
+    }
+}
+
+/**
+ * Middleware: Solo administradores
  */
 async function adminOnly(req, res, next) {
-    try {
-        const authHeader = req.headers["authorization"];
-        if (!authHeader) return res.status(401).json({ success: false, message: "Token requerido" });
+    const payload = await getTokenPayload(req, res);
+    if (!payload) return;
 
-        const token = authHeader.split(" ")[1];
-        if (!token) {
-            return res.status(401).json({ success: false, message: "Token requerido" });
-        }
-
-        const payload = await verifyToken(token);
-        if (!payload || !payload.usertype) {
-            return res.status(401).json({ success: false, message: "Token inválido" });
-        }
-
-        if (payload.usertype !== "ADMIN" && payload.usertype !== "SUPERADMIN") {
-            LoggerController.error('Token inválido del usuario: ' + payload.username);
-            return res.status(401).json({ success: false, message: "No tienes permisos" });
-        }
-
-        req.user = payload;
-        next();
-    } catch (err) {
-        LoggerController.warn('Token inválido: ' + err.message);
-        return res.status(401).json({ error: "Token inválido" });
+    if (payload.usertype !== "ADMIN" && payload.usertype !== "SUPERADMIN") {
+        LoggerController.error(`Acceso denegado: usuario no administrador (${payload.username} - ID ${payload.id})`);
+        return res.status(403).json({ error: "No tienes permisos" });
     }
+
+    req.user = payload;
+    next();
 }
 
-/**
- * Middleware que restringe el acceso a usuarios que no sean 'WORKER'.
- * 
- * Verifica el token JWT en la cabecera `Authorization`:
- *  - Si no existe o es inválido → responde con 401 (no autorizado).
- *  - Si el usuario tiene rol 'WORKER' → responde con 401 (sin permisos).
- *  - Si el token es válido y el rol es correcto → añade los datos del usuario a `req.user`
- *    y continúa con el siguiente middleware/controlador.
- * 
- * @param {Object} req - Objeto de petición de Express, con cabecera Authorization.
- * @param {Object} res - Objeto de respuesta de Express.
- * @param {Function} next - Función para pasar al siguiente middleware.
- */
-async function notWorker(req, res, next) {
-    try {
-        const authHeader = req.headers["authorization"];
-        if (!authHeader) {
-            return res.status(401).json({ error: "Token requerido" });
-        }
-
-        const token = authHeader.split(" ")[1];
-        if (!token) {
-            return res.status(401).json({ error: "Token requerido" });
-        }
-
-        const payload = await verifyToken(token);
-        if (!payload || !payload.usertype) {
-            return res.status(401).json({ error: "Token inválido" });
-        }
-
-        if (payload.usertype === "USER") {
-            LoggerController.warn(`Acceso denegado para usuario: ${payload.username}`);
-            return res.status(401).json({ error: "No tienes permisos" });
-        }
-
-        req.user = payload;
-        next();
-    } catch (err) {
-        LoggerController.warn(`Token inválido: ${err.message}`);
-        return res.status(401).json({ error: "Token inválido" });
-    }
-}
 
 /**
- * Middleware que verifica si un usuario está logueado.
- * 
- * Verifica el token JWT en la cabecera `Authorization`:
- *  - Si no existe o es inválido → responde con 401 (no autorizado).
- *  - Si el token es válido → añade los datos del usuario a `req.user` y continúa.
- * 
- * @param {Object} req - Objeto de petición de Express, con cabecera Authorization.
- * @param {Object} res - Objeto de respuesta de Express.
- * @param {Function} next - Función para pasar al siguiente middleware.
+ * Middleware: Solo usuarios autenticado.
  */
 async function isAuthenticated(req, res, next) {
-    try {
-        const authHeader = req.headers["authorization"];
-        if (!authHeader) return res.status(401).json({ error: "Token requerido" });
+    const payload = await getTokenPayload(req, res);
+    console.log(payload);
+    if (!payload) return; // ya respondió con 401
 
-        const token = authHeader.split(" ")[1];
-        if (!token) return res.status(401).json({ error: "Token requerido" });
-
-        const payload = await verifyToken(token);
-        if (!payload || !payload.id) {
-            return res.status(401).json({ error: "Token inválido" });
-        }
-        req.user = payload;
-        next();
-    } catch (err) {
-        LoggerController.warn(`Token inválido: ${err.message}`);
-        return res.status(401).json({ error: "Token inválido" });
-    }
+    req.user = payload;
+    next();
 }
 
 /**
@@ -169,4 +113,4 @@ async function canModifyUser(req, res, next) {
 }
 
 
-module.exports = { adminOnly, notWorker, isAuthenticated, canModifyUser };
+module.exports = { adminOnly, isAuthenticated, canModifyUser };

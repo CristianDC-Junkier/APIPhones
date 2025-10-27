@@ -1,8 +1,11 @@
 ﻿import React from "react";
 import { Container, Row, Col } from "reactstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
 import BackButton from '../../components/utils/BackButtonComponent';
 
+/**
+ * Página encargada de mostrar la política de cookies
+ * @returns {JSX.Element} Componente de React con la política de cookies
+ */
 const Cookies = () => {
     return (
         <Container fluid className="my-4 position-relative" style={{ paddingLeft: 0, paddingRight: 0 }}>
@@ -15,10 +18,10 @@ const Cookies = () => {
             <Row className="justify-content-center">
                 <Col md="10">
                     <h1 className="mb-3 text-center mt-4">
-                        <strong>Política de Cookies</strong> - <strong>Listín Telefónico</strong>
+                        <strong>Política de Cookies</strong>
                     </h1>
                     <p className="mb-3">
-                        A través de esta plataforma del <strong>Listín Telefónico</strong> no se recogen datos de carácter personal
+                        A través de esta plataforma del <strong>Listín telefónico</strong> no se recogen datos de carácter personal
                         de los usuarios sin su conocimiento ni se ceden a terceros.
                     </p>
                 </Col>
@@ -44,8 +47,8 @@ const Cookies = () => {
                     </p>
                     <p className="mb-1">
                         Únicamente se emplean <strong>cookies propias de sesión</strong> con finalidad <strong>técnica</strong>, es decir,
-                        aquellas que permiten la correcta <strong>navegación</strong> dentro del <strong>Listín Telefónico</strong> y el acceso a las
-                        <strong>funcionalidades disponibles</strong> según el perfil del usuario autorizado.
+                        aquellas que permiten la correcta <strong>navegación</strong> dentro del <strong>Listín telefónico</strong> y el acceso a las
+                        <strong> funcionalidades disponibles </strong> según el perfil del usuario autorizado.
                     </p>
                 </Col>
 
@@ -57,7 +60,7 @@ const Cookies = () => {
                     </p>
                     <p className="mb-1">
                         Al acceder a dichos recursos, el usuario puede decidir si acepta sus <strong>condiciones</strong>.
-                        De manera general, si utiliza <strong>internet</strong> desde su navegador, puede aceptar o rechazar <strong>cookies de terceros</strong>
+                        De manera general, si utiliza <strong>internet</strong> desde su navegador, puede aceptar o rechazar <strong>cookies de terceros </strong>
                         mediante las <strong>opciones de configuración</strong> del mismo.
                     </p>
                 </Col>

@@ -11,8 +11,6 @@ let updateUserState = null;
  * en el componente raíz (App) o en el provider del contexto de usuario.
  * 
  * @param {Function} updateFunc - Función que actualiza el estado global del usuario.
- * @example
- * setUpdateUserState(setUser); // desde React o tu store global
  */
 export const setUpdateUserState = (updateFunc) => {
     updateUserState = updateFunc;
@@ -22,8 +20,5 @@ export const setUpdateUserState = (updateFunc) => {
  * Obtiene la función actualmente registrada para actualizar el usuario.
  * 
  * @returns {Function|null} - Función registrada o null si no existe.
- * @example
- * const update = getUpdateUserState();
- * if (update) update(newUserData);
  */
 export const getUpdateUserState = () => updateUserState;

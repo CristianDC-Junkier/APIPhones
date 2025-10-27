@@ -3,22 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import HomeButtonComponent from '../components/utils/HomeButtonComponent';
 import LogoutButton from '../components/utils/LogoutComponent';
 import { useAuth } from '../hooks/useAuth';
-import {
-    Container,
-    Row,
-    Col,
-} from 'reactstrap';
-import {
-    faUserAlt,
-    faBriefcase,
-    faAddressBook,
-    faUsers,
-    faScroll,
-} from '@fortawesome/free-solid-svg-icons';
+import { Container, Row, Col } from 'reactstrap';
+import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll } from '@fortawesome/free-solid-svg-icons';
 
 /**
  * Página que muestra las acciones disponibles al usuario.
- * Solo disponible para administradores o superadministradores.
  */
 const Home = () => {
     const [loadingLogout, setLoadingLogout] = useState(false);

@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { Container, Row, Col } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import BackButton from '../../components/utils/BackButtonComponent';
+import BackButtonComponent from '../../components/utils/BackButtonComponent';
 
 const Compromise = () => {
     return (
@@ -9,7 +9,7 @@ const Compromise = () => {
 
             {/* Botón de Back fijo arriba a la izquierda */}
             <div style={{ position: 'fixed', top: 0, left: 0, zIndex: 1000 }}>
-                <BackButton back="/home" />
+                <BackButtonComponent back="/home" />
             </div>
 
             <Row className="justify-content-center">

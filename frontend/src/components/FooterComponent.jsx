@@ -1,17 +1,21 @@
 ﻿import React from "react";
-import { useLocation } from "react-router-dom"; // Necesario para detectar la página actual
-import "bootstrap/dist/css/bootstrap.min.css";
+import { useLocation } from "react-router-dom";
 import logo from "../assets/ayto_almonte_notext.png";
-import "../styles/FooterComponent.css"; // Archivo CSS con efectos
+import "../styles/FooterComponent.css";
+import CookieBannerComponent from "./utils/BannerCookiesComponent";
 
+/**
+ * Componente encargado de hacer el footer de la página web
+ */
 const FooterComponent = () => {
-    const location = useLocation(); // Detecta la URL actual
+    const location = useLocation();
 
     // Función para saber si un enlace es el activo
     const isActive = (path) => location.pathname === path;
 
     return (
         <footer className="bg-dark text-white py-2 mt-auto">
+            <CookieBannerComponent />
             <div className="container-fluid d-flex flex-column flex-md-row align-items-center justify-content-between px-3">
 
                 {/* Izquierda: Logo */}

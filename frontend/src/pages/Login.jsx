@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Container, Label, Row, Col, Card, CardBody, Form, FormGroup, Button, Input } from "reactstrap";
 import Swal from 'sweetalert2';
 import { createRoot } from 'react-dom/client';
-import { useAuth } from '../hooks/useAuth';
 
-import BackButton from '../components/utils/BackButtonComponent';
-import CaptchaSlider from '../components/utils/CaptchaSliderComponent';
+import { useAuth } from '../hooks/useAuth';
+import BackButtonComponent from '../components/utils/BackButtonComponent';
+import CaptchaSliderComponent from '../components/utils/CaptchaSliderComponent';
 import '../styles/Global.css';
 import '../styles/auth/Login.css';
 
@@ -30,7 +30,7 @@ const Login = () => {
             let completed = false;
 
             reactRoot.render(
-                <CaptchaSlider
+                <CaptchaSliderComponent
                     onSuccess={() => {
                         completed = true;
                         resolve(true);
@@ -67,13 +67,18 @@ const Login = () => {
             // Mostrar captcha obligatorio
             //await showCaptcha();                                                                          //SOLO DURANTE DESARROLLO
 
+            // Comprobamos si el usuario aceptó cookies
+            const cookiesAccepted = localStorage.getItem("cookiesAccepted") === "true";
+
+            // Si no ha aceptado cookies, forzamos remember a false
+            const finalRemember = cookiesAccepted ? remember : false;
+
             // Hacer login
-            const response = await login({ username, password, remember });
+            const response = await login({ username, password, finalRemember });
 
             if (response.success) {
                 //const user = response.data.user;
                 navigate('/home');
-
             } else {
                 Swal.fire('Error', response.error || 'Login fallido', 'error');
             }
@@ -86,7 +91,7 @@ const Login = () => {
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
             {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
-                <BackButton back="/public" />
+                <BackButtonComponent back="/public" />
             </div>
 
             {/* Row que ocupa todo el contenedor y centra verticalmente */}
@@ -96,6 +101,7 @@ const Login = () => {
                         <CardBody className="p-0">
                             <h3 className="text-center mb-4 fw-bold mt-4">Inicio de Sesión</h3>
                             <Form onSubmit={handleSubmit} className="px-4">
+                                {/* Campo de entrada del nombre de usuario */}
                                 <FormGroup className="mb-2">
                                     <Label className="fw-semibold">Usuario</Label>
                                     <Input
@@ -107,7 +113,7 @@ const Login = () => {
                                         className="border-0 border-bottom border-dark rounded-0 bg-white px-3 py-2"
                                     />
                                 </FormGroup>
-
+                                {/* Campo de entrada de la contraseña */}
                                 <FormGroup className="mb-4">
                                     <Label className="fw-semibold">Contraseña</Label>
                                     <Input
@@ -122,6 +128,7 @@ const Login = () => {
 
                                 <Row className="align-items-center mb-4 px-1">
                                     <Col xs="7" className="d-flex align-items-center">
+                                        {/* Chack para activar el recorda usuario */}
                                         <FormGroup check className="mb-0">
                                             <Input
                                                 type="checkbox"
@@ -135,7 +142,7 @@ const Login = () => {
                                         </FormGroup>
                                     </Col>
                                 </Row>
-
+                                {/* Botón para hacer el login */}
                                 <Button color="dark" type="submit" className="w-100 fw-bold mb-3 py-2">
                                     Entrar
                                 </Button>

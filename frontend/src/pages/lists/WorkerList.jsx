@@ -2,14 +2,16 @@
 import { Col, Button, Spinner, Input, Row } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import "bootstrap/dist/css/bootstrap.min.css";
-import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
-import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import Swal from "sweetalert2";
+
+
 import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
 import { getWorkerDataList } from "../../services/UserService";
 import { getDepartmentsList } from "../../services/DepartmentService";
+
+import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
+import BackButtonComponent from "../../components/utils/BackButtonComponent";
 
 //import { generateMockUsers } from "./generate";
 

@@ -1,6 +1,5 @@
 ﻿import React from "react";
 import { Table } from "reactstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 const DepartamentoComponent = ({
     departmentName,

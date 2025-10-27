@@ -1,24 +1,35 @@
-﻿/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-refresh/only-export-components */
-
+﻿/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { login, logout, getDate, refreshAccessToken } from '../services/AuthService';
 import { setUpdateUserState } from '../utils/AuthInterceptorHelper';
 import SpinnerComponent from '../components/utils/SpinnerComponent';
 
-import Swal from "sweetalert2";
-
 export const AuthContext = createContext();
 
-const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
+/**
+ * Contexto de autenticación global.
+ * @typedef {Object} AuthContextType
+ * @property {Object|null} user - Usuario actualmente autenticado.
+ * @property {number} version - Versión actual del usuario.
+ * @property {boolean} loading - Indica si se está restaurando la sesión.
+ * @property {Function} login - Inicia sesión con credenciales.
+ * @property {Function} logout - Cierra la sesión.
+ * @property {Function} date - Obtiene la fecha del listín.
+ * @property {Function} update - Actualiza los datos del usuario globalmente.
+ */
 
 /**
- * Proveedor de autenticación.
+ * Proveedor de autenticación con gestión automática de sesión y refresh token.
+ * Inyecta en el interceptor global la función `contextUpdate` para mantener sincronizado
+ * el estado del usuario ante actualizaciones (por ejemplo, error 409 del backend).
+ *
+ * @param {{ children: React.ReactNode }} props
+ * @returns {JSX.Element}
  */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null); // Usuario actual
+    const [version, setVersion] = useState(1); // Versión del usuario
     const [loading, setLoading] = useState(true); // Estado de carga inicial
-    const [version, setVersion] = useState(0); // Versión del usuario
 
     /**
      * Actualiza el usuario y su versión, función que será inyectada en el interceptor.
@@ -27,7 +38,7 @@ export const AuthProvider = ({ children }) => {
      */
     const contextUpdate = useCallback((newUser) => {
         setUser(newUser);
-        setVersion(newUser.version || 0);
+        setVersion(newUser.version || 1);
     }, []);
 
     /**
@@ -41,7 +52,8 @@ export const AuthProvider = ({ children }) => {
         };
     }, [contextUpdate]);
 
-    /** * Restaurar sesión al cargar la app usando cookie HttpOnly
+    /** 
+     *  Restaurar sesión al cargar la app usando cookie HttpOnly
      */
     useEffect(() => {
         const restoreSession = async () => {
@@ -64,7 +76,7 @@ export const AuthProvider = ({ children }) => {
     }, [contextUpdate]); // contextUpdate es estable gracias a useCallback.
 
     /**
-     * Login
+     * Inicio de sesión
      * @param {Object} credentials - { username, password, remember }
      */
     const contextLogin = async (credentials) => {
@@ -79,7 +91,7 @@ export const AuthProvider = ({ children }) => {
                     usertype: result.data.user.usertype,
                     department: result.data.user.departmentId || null,
                     forcePwdChange: result.data.user.forcePwdChange || false,
-                    version: result.data.user.version || 0, // version desde backend
+                    version: result.data.user.version || 1, 
                 };
                 setUser(userLog);
                 setVersion(userLog.version);
@@ -98,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     /**
-     * Logout
+     * Desconectar usuario
      */
     const contextLogout = async () => {
         try {
@@ -109,7 +121,9 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    /** Obtener fecha del listín */
+    /** 
+     * Obtener fecha del listín 
+     */
     const contextDate = async () => {
         const result = await getDate();
         if (result.success) return result.data.date;
@@ -125,7 +139,7 @@ export const AuthProvider = ({ children }) => {
                 date: contextDate,
                 login: contextLogin,
                 logout: contextLogout,
-                update: contextUpdate, // Exponer también la función para uso interno si es necesario
+                update: contextUpdate, 
             }}
         >
             {/* Mostrar un spinner de carga si es necesario antes de renderizar children */}

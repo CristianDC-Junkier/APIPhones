@@ -4,14 +4,12 @@ import Swal from 'sweetalert2';
 
 import { getLogs, getLog, downloadLog, getSystemMetrics } from '../../services/SystemService';
 
-import BackButton from '../../components/utils/BackButtonComponent';
+import BackButtonComponent from '../../components/utils/BackButtonComponent';
 import LogListComponent from '../../components/system/LogListComponent';
 import LogViewerComponent from '../../components/system/LogViewerComponent';
-import Spinner from '../../components/utils/SpinnerComponent';
+import SpinnerComponent from '../../components/utils/SpinnerComponent';
 
-/**
- * Página encarga de mostrar los logs y las estdísticas del servidor
- */
+
 
 /**
  * Función que da formato a una cantidad de tiempo recibida
@@ -26,6 +24,9 @@ function formatUptime(totalSeconds) {
     return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
+/**
+ * Página encarga de mostrar los logs y las estadísticas del servidor
+ */
 export default function DashboardSystem() {
     const [logs, setLogs] = useState([]);
     const [selectedLog, setSelectedLog] = useState(null);
@@ -44,9 +45,7 @@ export default function DashboardSystem() {
             setLoading(true);
             try {
                 const res = await getLogs();
-                if (res.success) setLogs(res.data.logs);
-            } catch (err) {
-                console.error(err);
+                if (res.success) setLogs(res.data);
             } finally {
                 setLoading(false);
             }
@@ -57,7 +56,6 @@ export default function DashboardSystem() {
     //Función encargada de obtener la información del estado del servidor
     useEffect(() => {
         const fetchMetrics = async () => {
-            try {
                 const res = await getSystemMetrics();
                 if (res.success) {
                     setCpuUsage(res.data.CpuUsagePercent);
@@ -65,9 +63,6 @@ export default function DashboardSystem() {
                     setThreadsCount(res.data.ThreadsCount);
                     setUptimeSeconds(res.data.UptimeSeconds);
                 }
-            } catch (err) {
-                console.error(err);
-            }
         };
 
         fetchMetrics();
@@ -107,14 +102,14 @@ export default function DashboardSystem() {
         });
     };
 
-    if (loading) return <Spinner />;
+    if (loading) return <SpinnerComponent />;
 
     return (
         <Container className="mt-4 d-flex flex-column" style={{ minHeight: '70vh' }}>
             <h3 className="text-center mb-4">Estadísticas del Servidor</h3>
 
             <div className="position-absolute top-0 start-0">
-                <BackButton back="/home" />
+                <BackButtonComponent back="/home" />
             </div>
 
             {/* Métricas */}

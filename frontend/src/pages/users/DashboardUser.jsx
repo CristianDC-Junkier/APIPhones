@@ -7,13 +7,16 @@ import { useAuth } from "../../hooks/useAuth";
 import { getDepartmentsList } from "../../services/DepartmentService";
 import { getUsersList, getWorkerDataList, createUser, createUserData, getProfile } from "../../services/UserService";
 
-import BackButton from "../../components/utils/BackButtonComponent";
-import Spinner from '../../components/utils/SpinnerComponent';
+import BackButtonComponent from "../../components/utils/BackButtonComponent";
+import SpinnerComponent from '../../components/utils/SpinnerComponent';
 import TableUserAccountComponent from "../../components/user/TableUserAccountComponent";
 import TableUserDataComponent from "../../components/user/TableUserDataComponent";
 import AddModifyUserCommponent from "../../components/user/AddModifyUserComponent";
 import AddModifyUserDataCommponent from "../../components/user/AddModifyUserDataComponent";
 
+/**
+* Página encargada de mostrar la tabla de usuario y las acciones asociadas a la gestión de los mismos
+*/
 const DashboardUser = () => {
     const { user: currentUser, logout } = useAuth();
     const navigate = useNavigate();
@@ -144,13 +147,13 @@ const DashboardUser = () => {
         });
     };
 
-    if (loading) return <Spinner />;
+    if (loading) return <SpinnerComponent />;
 
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
             {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
-                <BackButton back="/home" />
+                <BackButtonComponent back="/home" />
             </div>
 
             {/* Botón Crear Usuario */}

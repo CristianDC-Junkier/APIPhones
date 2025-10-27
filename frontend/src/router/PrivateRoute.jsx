@@ -1,7 +1,7 @@
 ﻿import React, { useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import Spinner from '../components/utils/SpinnerComponent';
+import SpinnerComponent from '../components/utils/SpinnerComponent';
 import PWDChangeComponent from '../components/user/PWDChangeComponent';
 
 /**
@@ -25,13 +25,13 @@ const PrivateRoute = ({ children }) => {
         }
     }, [loading, user, navigate]);
 
-    if (loading) return <Spinner />;
+    if (loading) return <SpinnerComponent />;
 
     return (
         <>
             {/* Prompt para cambio de contraseña si es necesario */}
             {user?.forcePwdChange && <PWDChangeComponent user={user} token={token} />}
-            {user ? children : <Spinner />}
+            {user ? children : <SpinnerComponent />}
         </>
     );
 

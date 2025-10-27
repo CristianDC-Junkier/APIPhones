@@ -3,8 +3,8 @@ import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
 import { modifyUser, deleteUser, markPWDCUser } from "../../services/UserService";
-import CaptchaSlider from '../utils/CaptchaSliderComponent';
-import AddModifyUser from "./AddModifyUserComponent";
+import CaptchaSliderComponent from '../utils/CaptchaSliderComponent';
+import AddModifyUserComponent from "./AddModifyUserComponent";
 import PaginationComponent from "../PaginationComponent";
 import PWDAskComponent from "./PWDAskComponent";
 
@@ -36,7 +36,7 @@ const TableUserAccountComponent = ({
         let completed = false;
 
         reactRoot.render(
-            <CaptchaSlider onSuccess={() => {
+            <CaptchaSliderComponent onSuccess={() => {
                 completed = true;
                 Swal.close();
                 resolve(true);
@@ -59,7 +59,7 @@ const TableUserAccountComponent = ({
     });
 
     const handleModify = async (userItem) => {
-        await AddModifyUser({
+        await AddModifyUserComponent({
             userItem,
             currentUser,
             action: "modify",

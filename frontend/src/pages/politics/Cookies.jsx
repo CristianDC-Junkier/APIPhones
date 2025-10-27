@@ -1,6 +1,6 @@
 ﻿import React from "react";
 import { Container, Row, Col } from "reactstrap";
-import BackButton from '../../components/utils/BackButtonComponent';
+import BackButtonComponent from '../../components/utils/BackButtonComponent';
 
 /**
  * Página encargada de mostrar la política de cookies
@@ -12,7 +12,7 @@ const Cookies = () => {
 
             {/* Botón de Back completamente a la izquierda arriba */}
             <div style={{ position: 'fixed', top: 0, left: 0, zIndex: 1000 }}>
-                <BackButton back="/home" />
+                <BackButtonComponent back="/home" />
             </div>
 
             <Row className="justify-content-center">

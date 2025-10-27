@@ -4,13 +4,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from 'react-router-dom';
 import { faFilePdf, faUserCircle, faHome } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
-import "bootstrap/dist/css/bootstrap.min.css";
 
-import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
 import { exportPDF } from "./ExportList";
 import { useAuth } from '../../hooks/UseAuth';
 import { getPublicList } from "../../services/UserService";
 import { getDepartmentsList } from "../../services/DepartmentService";
+
+import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
 
 const PublicList = () => {
     const listRef = useRef();

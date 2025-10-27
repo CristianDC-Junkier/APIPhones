@@ -3,15 +3,12 @@ import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
 import CaptchaSlider from '../utils/CaptchaSliderComponent';
-import AddModifyDepartmentComponent from "./AddModifyDepartmentComponent";
 import { modifyDepartment, deleteDepartment } from "../../services/DepartmentService";
-import Pagination from "../../components/PaginationComponent";
 
-import AddBadgeComponent from "../../components/badge/AddBadgeComponent";
+import AddModifyDepartmentComponent from "./AddModifyDepartmentComponent";
+import PaginationComponent from "../../components/PaginationComponent";
 import BadgeComponent from "../../components/badge/BadgeComponent";
-import RemovableBadgeComponent from "../../components/badge/RemovableBadgeComponent";
 import ShowMoreBadgeComponent from "../../components/badge/ShowMoreBadgeComponent";
-
 
 
 /**
@@ -181,7 +178,7 @@ const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPag
 
             <div className="mt-auto" style={{ minHeight: '40px' }}>
                 {totalPages > 1 ? (
-                    <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                    <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                 ) : (
                     <div style={{ height: '40px' }}></div>
                 )}

@@ -1,7 +1,7 @@
 ﻿import React, { useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import Spinner from '../components/utils/SpinnerComponent';
+import SpinnerComponent from '../components/utils/SpinnerComponent';
 import PWDChangeComponent from '../components/user/PWDChangeComponent';
 
 /**
@@ -30,13 +30,13 @@ const RoleRoute = ({ allowedRoles, children }) => {
         return () => clearTimeout(timer);
     }, [loading, user, navigate, allowedRoles]);
 
-    if (loading) return <Spinner />;
+    if (loading) return <SpinnerComponent />;
     if (!user || !allowedRoles.includes(user.usertype)) return null;
     return (
         <>
             {/* Prompt para cambio de contraseña si es necesario */}
             {user?.forcePwdChange && <PWDChangeComponent user={user} token={token} />}
-            {user ? children : <Spinner />}
+            {user ? children : <SpinnerComponent />}
         </>
     );
 };

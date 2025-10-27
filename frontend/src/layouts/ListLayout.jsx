@@ -25,7 +25,7 @@ const imageBackground = {
  * - Renderiza el contenido interno a través de <Outlet /> de React Router.
  * - Mantiene flexibilidad para que el contenido interno se ajuste al tamaño disponible.
  */
-const ExternalLayout = () => (
+const ListLayout = () => (
     <div style={imageBackground}>
         {/* Contenedor principal para el contenido */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -38,4 +38,4 @@ const ExternalLayout = () => (
     </div>
 );
 
-export default ExternalLayout;
+export default ListLayout;

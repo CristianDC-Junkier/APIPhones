@@ -5,8 +5,8 @@ import Swal from "sweetalert2";
 import { useAuth } from "../../hooks/useAuth";
 import { getDepartmentsList, getSubDepartmentsList, createDepartment, createSubDepartment } from "../../services/DepartmentService";
 
-import BackButton from "../../components/utils/BackButtonComponent";
-import Spinner from "../../components/utils/SpinnerComponent";
+import BackButtonComponent from "../../components/utils/BackButtonComponent";
+import SpinnerComponent from "../../components/utils/SpinnerComponent";
 
 import TableDepartmentComponent from "../../components/department/TableDepartmentComponent";
 import TableSubDepartmentComponent from "../../components/department/TableSubDepartmentComponent";
@@ -125,13 +125,13 @@ const DashboardDepartment = () => {
     };
 
 
-    if (loading) return <Spinner />;
+    if (loading) return <SpinnerComponent />;
 
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
             {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
-                <BackButton back="/home" />
+                <BackButtonComponent back="/home" />
             </div>
 
             {/* Botón Crear Departamento/Subdepartamento */}

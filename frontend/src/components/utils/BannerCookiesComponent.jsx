@@ -1,8 +1,10 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Button, Container, Row, Col } from "reactstrap";
-import "bootstrap/dist/css/bootstrap.min.css";
-import logo from "../../assets/ayto_almonte_notext.png"; 
+import logo from "../../assets/ayto_almonte_notext.png";
 
+/**
+ * Componente de aviso de Cookies
+ */
 
 const CookieBanner = () => {
     const [visible, setVisible] = useState(false);
@@ -50,10 +52,10 @@ const CookieBanner = () => {
 
                     {/* Texto */}
                     <Col>
-                        <p className="mb-0" style={{ fontSize: "14px"}}>
+                        <p className="mb-0" style={{ fontSize: "14px" }}>
                             🍪 Usamos cookies únicamente para mejorar tu experiencia:
                             <strong> recordar tu cuenta de usuario</strong> y asegurar
-                            <strong> el correcto funcionamiento de la página</strong>.   
+                            <strong> el correcto funcionamiento de la página</strong>.
                         </p>
                         <p className="mb-0" style={{ fontSize: "14px" }}>
                             Al hacer clic en "Aceptar", usted consiente el uso de cookies

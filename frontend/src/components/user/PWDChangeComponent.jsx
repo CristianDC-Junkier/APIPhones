@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from "react";
+﻿import { useEffect } from "react";
 import Swal from "sweetalert2";
 import { changePasswordPWD } from "../../services/UserService";
 import { useAuth } from "../../hooks/useAuth";

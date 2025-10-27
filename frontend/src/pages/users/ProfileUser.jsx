@@ -8,10 +8,10 @@ import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt
 import { useAuth } from "../../hooks/useAuth";
 import { deleteProfileAcc, getProfile, modifyProfileAcc, getWorkerDataList } from "../../services/UserService";
 
-import BackButton from "../../components/utils/BackButtonComponent";
+import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import ModifyUserAccountComponent from '../../components/user/ModifyUserAccountComponent';
-import Spinner from '../../components/utils/SpinnerComponent';
-import Pagination from "../../components/PaginationComponent";
+import SpinnerComponent from '../../components/utils/SpinnerComponent';
+import PaginationComponent from "../../components/PaginationComponent";
 
 
 const ProfileUser = () => {
@@ -66,7 +66,7 @@ const ProfileUser = () => {
         fetchProfile();
     }, [logout, navigate, version]);
 
-    if (loading) return <Spinner />;
+    if (loading) return <SpinnerComponent />;
 
     const totalPages = Math.ceil(users.length / rowsPerPage);
     const currentUsers = users.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -133,7 +133,7 @@ const ProfileUser = () => {
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
             {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
-                <BackButton back="/home" />
+                <BackButtonComponent back="/home" />
             </div>
 
             {/* Contenedor para centrar verticalmente */}
@@ -215,7 +215,7 @@ const ProfileUser = () => {
                                     </div>
                                     <div className="mt-3" style={{ minHeight: '40px' }}>
                                         {totalPages > 1 ? (
-                                            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                            <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                                         ) : (
                                             <div style={{ height: '40px' }}></div>
                                         )}

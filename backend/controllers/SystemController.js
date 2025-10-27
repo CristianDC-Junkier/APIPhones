@@ -1,10 +1,10 @@
 ﻿const fs = require("fs");
 const path = require("path");
 const os = require("os");
-const LoggerController = require('./LoggerController'); 
 
+const LoggerController = require('./LoggerController');
 
-const logBasePath = path.join(__dirname, '../logs'); 
+const logBasePath = path.join(__dirname, '../logs');
 
 
 /**
@@ -34,40 +34,35 @@ const SystemController = {
                 .map((dirent) => dirent.name)
                 .sort((a, b) => b.localeCompare(a));
 
-            res.json({ logs });
+            res.json(logs);
         } catch (error) {
-            LoggerController.error('Error en el acceso a los archivo de logs: ' + error.message);
-            res.status(500).json({error: error.message});
+            LoggerController.error('Error recogiendo los logs por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            res.status(500).json({ error: "No se pudo leer el archivo log" });
         }
     },
 
     /**
     * Obtener contenido de un archivo log específico
     * 
-    * @param {Object} req Objeto de petición Express
+    * @param {Object} req Objeto de petición Express con { params: { log } }
     * @param {Object} res Objeto de respuesta Express
-    * @param {string} req.params.log Nombre del archivo de log
-    * @returns {string} Contenido del log en texto plano
+    * @returns {string} Contenido del log en texto plano o un mensaje de error.
     */
     getLog: (req, res) => {
         try {
             const { log } = req.params;
             const logPath = path.resolve(logBasePath, log);
 
-
             if (!fs.existsSync(logPath)) {
                 return res.status(404).json({ error: "Archivo log no encontrado" });
             }
-            try {
-                const content = fs.readFileSync(logPath, "utf-8");
-                res.type("text/plain").send(content);
-            } catch (err) {
-                LoggerController.error('Error al leer el archivo log: ' + err.message);
-                res.status(500).json({ error: "No se pudo leer el archivo log" });
-            }
+            const content = fs.readFileSync(logPath, "utf-8");
+            res.type("text/plain").send(content);
 
         } catch (error) {
-            LoggerController.error('Error al abrir archivo de log: ' + error.message);
+            LoggerController.error('Error al leer el archivo de log ' + log + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
             res.status(500).json({ error: error.message });
         }
     },
@@ -75,9 +70,9 @@ const SystemController = {
     /**
      * Descargar un archivo de log
      * 
-     * @param {Object} req Objeto de petición Express
+     * @param {Object} req Objeto de petición Express con { params: { log } }
      * @param {Object} res Objeto de respuesta Express
-     * @param {string} req.params.log Nombre del archivo de log
+     * @returns {void} Envía el archivo como descarga (`res.download`) o un mensaje de error.
      */
     downloadLog: (req, res) => {
         try {
@@ -88,14 +83,11 @@ const SystemController = {
                 return res.status(404).json({ error: "Archivo log no encontrado" });
             }
 
-            try {
-                res.download(logPath, log);
-            } catch (err) {
-                LoggerController.error('Error al descargar el archivo log: ' + err.message);
-                res.status(500).json({ error: "No se pudo descargar el archivo log" });
-            }
+            res.download(logPath, log);
+
         } catch (error) {
-            LoggerController.error('Error al descargar el archivo log: ' + error.message);
+            LoggerController.error('Error al descargar el archivo de log ' + log + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
             res.status(500).json({ error: error.message });
         }
     },
@@ -105,11 +97,12 @@ const SystemController = {
      * 
      * @param {Object} req Objeto de petición Express
      * @param {Object} res Objeto de respuesta Express
-     * @returns {Object} Métricas del sistema:
+     * @returns {JSON} Métricas del sistema:
      *  - CpuUsagePercent {number} Porcentaje de uso de CPU
      *  - MemoryUsedMB {number} Memoria usada en MB
      *  - ThreadsCount {number} Número de hilos de CPU
      *  - UptimeSeconds {number} Tiempo de actividad del proceso en segundos
+     * o un mensaje de error.
      */
     getSystemMetrics: async (req, res) => {
         try {
@@ -117,7 +110,7 @@ const SystemController = {
             const uptimeSeconds = Math.floor(process.uptime());
             const threadsCount = os.cpus().length;
 
-            const cpuUsagePercent = await getCpuUsagePercent(100); 
+            const cpuUsagePercent = await getCpuUsagePercent(100);
 
             res.json({
                 CpuUsagePercent: cpuUsagePercent,
@@ -126,7 +119,8 @@ const SystemController = {
                 UptimeSeconds: uptimeSeconds
             });
         } catch (error) {
-            LoggerController.error('Error al obtener las métricas del sistema: ' + err.message);
+            LoggerController.error('Error al obtener las métricas del sistema por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
             res.status(500).json({ error: error.message });
         }
     },

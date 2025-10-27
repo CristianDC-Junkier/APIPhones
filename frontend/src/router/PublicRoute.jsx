@@ -1,7 +1,7 @@
 ﻿import React, { useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import Spinner from '../components/utils/SpinnerComponent';
+import SpinnerComponent from '../components/utils/SpinnerComponent';
 
 /**
  * Componente de ruta pública.
@@ -23,16 +23,14 @@ const PublicRoute = ({ children }) => {
 
     useEffect(() => {
         if (!loading && user) {
-                if (user.usertype === 'ADMIN' || user.usertype === 'SUPERADMIN' || user.usertype === 'USER') {
-                    navigate('/home');
-                } else {
-                    navigate('/login');
-                }
+            navigate('/home');
+        } else {
+            navigate('/login');
         }
     }, [loading, user, navigate]);
 
-    if (loading) return <Spinner />;
-    return !user ? children : <Spinner />;
+if (loading) return <SpinnerComponent />;
+return !user ? children : <SpinnerComponent />;
 };
 
 export default PublicRoute;

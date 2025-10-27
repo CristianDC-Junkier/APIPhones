@@ -45,7 +45,7 @@ const AddModifySubdepartmentComponent = async ({ departments, subdepartment, act
         html,
         focusConfirm: false,
         width: '600px',
-        innerHeight: '400px',
+        //innerHeight: '400px',
         showCancelButton: true,
         cancelButtonText: "Cancelar",
         confirmButtonText: action === "create" ? "Crear" : "Aceptar",

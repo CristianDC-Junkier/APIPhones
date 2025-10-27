@@ -13,8 +13,10 @@ import { getUpdateUserState } from '../utils/AuthInterceptorHelper';
  *  - Gestionar la actualización de la información del usuario en caso de conflicto
  */
 
+const BASE_URL = "/listin-telefonico"
+
 const api = axios.create({
-    baseURL: '/listin-telefonico/api',
+    baseURL: `${BASE_URL}/api`,
     withCredentials: true,
 });
 
@@ -127,7 +129,7 @@ api.interceptors.response.use(
                         allowEscapeKey: false,
                     });
 
-                    window.location.href = "/listin-telefonico/login";
+                    window.location.href = `${BASE_URL}/login`;
                     return Promise.reject(error);
                 }
             } catch (err) {

@@ -17,7 +17,7 @@
  */
 export const getLogs = async () => {
     try {
-        const res = await api.get('/logs', {});
+        const res = await api.get('/logs');
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -31,7 +31,7 @@ export const getLogs = async () => {
  */
 export const getLog = async (log) => {
     try {
-        const res = await api.get(`/logs/${encodeURIComponent(log)}`, {});
+        const res = await api.get(`/logs/${encodeURIComponent(log)}`);
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -73,7 +73,7 @@ export const downloadLog = async (log) => {
  */
 export const getSystemMetrics = async () => {
     try {
-        const res = await api.get('/system',{});
+        const res = await api.get('/system');
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

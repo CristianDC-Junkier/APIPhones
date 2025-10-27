@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
-import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
 
 import { useAuth } from "../../hooks/useAuth";
 import { deleteProfileAcc, getProfile, modifyProfileAcc, getWorkerDataList } from "../../services/UserService";
@@ -189,7 +189,7 @@ const ProfileUser = () => {
                                         <h4 className="mb-4 text-success d-flex align-items-center">
                                             <FaBuilding className="me-2" /> Datos Personales
                                             <Button color="warning" className="rounded-pill px-4 position-absolute top-1 end-0 me-4" onClick={() => alert(us.name)}>
-                                                <FaEdit className="me-2" /> Mandar Ticket
+                                                <FaTicketAlt className="me-2" /> Mandar Ticket
                                             </Button>
                                         </h4>
                                         <Row className="mb-2">

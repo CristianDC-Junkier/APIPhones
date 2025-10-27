@@ -17,6 +17,8 @@
  *  - Eliminar un subdepartamento
  */
 
+//#region Recoger departamentos y subdepartamentos
+
 /**
  * Solicitud para obtener la lista de todos los departamentos existentes
  * @param {String} token - Token del usuario conectado para comprobar autorización
@@ -76,6 +78,9 @@ export const getDepartmentById = async (token, id) => {
     }
 };
 
+//#endregion
+
+//#region Operaciones CRUD departamentos y subdepartamentos
 /**
  * Solicitud para crear un departamento
  * @param {Object} departmentData - Datos del departamento a crear { name }
@@ -177,3 +182,4 @@ export const deleteSubDepartment = async (subDepartmentId, token) => {
         return { success: false, error: error.response?.data?.error };
     }
 };
+//#endregion

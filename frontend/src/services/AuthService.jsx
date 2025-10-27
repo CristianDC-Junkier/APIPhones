@@ -1,7 +1,9 @@
 ﻿import api from './AxiosService';
 
 /**
- * Servicio encargado de hacer las solicitudes al servidor de inicio y cierre de sesión
+ * Servicio de autenticación
+ * Maneja el login, logout y refresco de tokens
+ * También recoge la fecha del listín
  */
 
 // Token en memoria
@@ -28,7 +30,7 @@ export const clearAccessToken = () => {
 
 /**
  * Solicitud de inicio de sesión
- * @param {Object} credentials - El usuario y contraseña de quien realiza la solicitud
+ * @param {Object} credentials - El usuario, contraseña y si quiere recordar de quien realiza la solicitud 
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
 export const login = async (credentials) => {
@@ -63,23 +65,9 @@ export const logout = async () => {
     }
 };
 
-
-/**
- * Solicitud de la fecha del listin
- * @returns {JSON} - Devuelve la información recibida de la llamada
- */
-export const getDate = async () => {
-    try {
-        const response = await api.get('/auth/date');
-        return { success: true, data: response.data };
-    } catch (error) {
-        return { success: false, error: error.response?.data?.error };
-    }
-};
-
-
 /**
  * Llamada al backend para refrescar el accessToken usando la cookie refreshToken
+ * @returns {JSON} - Devuelve la información recibida de la llamada
  */
 export const refreshAccessToken = async () => {
     try {
@@ -93,5 +81,18 @@ export const refreshAccessToken = async () => {
             success: false,
             error: error.response?.data?.error || 'Error al recargar Token',
         };
+    }
+};
+
+/**
+ * Solicitud de la fecha del listin
+ * @returns {JSON} - Devuelve la información recibida de la llamada
+ */
+export const getDate = async () => {
+    try {
+        const response = await api.get('/auth/date');
+        return { success: true, data: response.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
     }
 };

@@ -9,10 +9,14 @@
  *  - Crear un usuario
  *  - Modificar un usuario
  *  - Eliminar un usuario
- * 
+ *  - Forzar cambio de contraseña a un usuario
+ *  - Cambiar la contraseña de un usuario marcado para cambio de contraseña
+ *  - Obtener la información del perfil conectado
+ *  - Modificar la información del perfil conectado
+ *  - Eliminar la cuenta del perfil conectado
  */
 
-//#region Get Lists Functions
+//#region Recoger listas de usuarios
 
 /**
  * Solicitud para obtener la lista de todos los usuario existentes sin detalles
@@ -72,7 +76,7 @@ export const getUsersList = async (token, department = null) => {
 
 //#endregion
 
-//#region Generic User Action
+//#region Operaciones CRUD de usuarios
 /**
  * Solicitud de creación de un nuevo usuario
  * @param {Object} user - la información del usuario que se quiere crear
@@ -178,7 +182,7 @@ export const deleteUserData = async (userId, token, version) => {
 
 //#endregion
 
-//#region Forced Password Change Actions
+//#region Operaciones de cambios de contraseña
 /**
  * Solicitud para marcar a un usuario para forzar un cambio de contraseña
  * @param {Object} userId - el ID del usuario que se quiere va a marcar
@@ -217,7 +221,7 @@ export const changePasswordPWD = async (newPassword, token) => {
 
 //#endregion
 
-//#region Profile Actions
+//#region Acciones sobre el perfil conectado
 /**
  * Solicitud para obtener la información del usuario conectado
  * @param {String} token - Token del usuario conectado para comprobar si tiene autorización

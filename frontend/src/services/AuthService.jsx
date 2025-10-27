@@ -33,7 +33,7 @@ export const clearAccessToken = () => {
  */
 export const login = async (credentials) => {
     try {
-        const response = await api.post('/login', credentials);
+        const response = await api.post('/auth/login', credentials);
 
         // Guardar el accessToken recibido
         if (response.data?.accessToken) {
@@ -53,7 +53,7 @@ export const login = async (credentials) => {
  */
 export const logout = async () => {
     try {
-        const response = await api.get('/logout');
+        const response = await api.get('/auth/logout');
         clearAccessToken();
 
         return { success: true, data: response.data };
@@ -70,7 +70,7 @@ export const logout = async () => {
  */
 export const getDate = async () => {
     try {
-        const response = await api.get('/date');
+        const response = await api.get('/auth/date');
         return { success: true, data: response.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

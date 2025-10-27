@@ -32,8 +32,8 @@ const UserAccountRoutes = require('./routes/UserAccountRoutes');
 const DepartmentRoutes = require('./routes/DepartmentRoutes');
 const SubDepartmentRoutes = require('./routes/SubDepartmentRoutes');
 
-app.use(`${basePath}/api`, AuthRoutes);
 app.use(`${basePath}/api`, SystemRoutes);
+app.use(`${basePath}/api/auth`, AuthRoutes);
 app.use(`${basePath}/api/data`, UserDataRoutes);
 app.use(`${basePath}/api/acc`, UserAccountRoutes);
 app.use(`${basePath}/api/department`, DepartmentRoutes);

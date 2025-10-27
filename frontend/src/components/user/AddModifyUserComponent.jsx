@@ -10,13 +10,12 @@ import { getDepartmentsList, getSubDepartmentsList } from "../../services/Depart
  * - Todos los usuarios tienen opción vacía en subdepartamento al crear nuevo usuario.
  * 
  * @param {Object} props
- * @param {string} props.token - Token de autenticación del usuario actual.
  * @param {Object} [props.userItem] - Usuario a modificar (si action === "modify").
  * @param {Object} props.currentUser - Usuario que está realizando la acción.
  * @param {string} props.action - "create" o "modify".
  * @param {Function} props.onConfirm - Callback que se ejecuta al confirmar los datos, recibe { userAccount, userData, userAccountId? }.
  */
-const AddModifyUserComponent = async ({ token, userItem, currentUser, action, onConfirm }) => {
+const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm }) => {
 
     // Tipos de usuario disponibles según permisos del usuario actual
     const types = [{ label: "Usuario", value: "USER" }];
@@ -32,8 +31,8 @@ const AddModifyUserComponent = async ({ token, userItem, currentUser, action, on
     let subdepartments = [];
 
     const [deptResp, subResp] = await Promise.all([
-        getDepartmentsList(token),
-        getSubDepartmentsList(token)
+        getDepartmentsList(toen),
+        getSubDepartmentsList()
     ]);
 
     if (deptResp.success) {

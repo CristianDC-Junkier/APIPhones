@@ -22,13 +22,12 @@ const ProfileUser = () => {
     const [rowsPerPage, setRowsPerPage] = useState(1);
 
     const navigate = useNavigate();
-    const { token, version, logout, update, user } = useAuth();
+    const { version, logout, update, user } = useAuth();
 
     const fetchProfile = async () => {
-        if (!token) return;
         setLoading(true);
         try {
-            const response = await getProfile(token, version);
+            const response = await getProfile(version);
             if (response.success) {
                 setProfile(response.data);
             } else if (response.error === "Token inválido") {
@@ -45,9 +44,9 @@ const ProfileUser = () => {
     };
 
     const fetchData = async () => {
-        if (!token || user.usertype !== "USER") return;
+        if (user.usertype !== "USER") return;
         try {
-            const response = await getWorkerDataList(token, user.department);
+            const response = await getWorkerDataList(user.department);
             if (response.success) {
                 setUsers(response.data.users);
             } else if (response.error === "Token inválido") {
@@ -65,7 +64,7 @@ const ProfileUser = () => {
     useEffect(() => {
         fetchData();
         fetchProfile();
-    }, [logout, navigate, token, version]);
+    }, [logout, navigate, version]);
 
     if (loading) return <Spinner />;
 
@@ -76,10 +75,9 @@ const ProfileUser = () => {
     const handleModify = async () => {
         try {
             await ModifyUserAccountComponent({
-                token,
                 profile,
                 onConfirm: async (formValues) => {
-                    const result = await modifyProfileAcc(formValues, token, version);
+                    const result = await modifyProfileAcc(formValues, version);
                     if (result.success) {
                         Swal.fire("Éxito", "Datos de la cuenta modificados correctamente", "success");
                         update(result.data.user, result.data.token);
@@ -108,7 +106,7 @@ const ProfileUser = () => {
             });
 
             if (swal.isConfirmed) {
-                const response = await deleteProfileAcc(token, version);
+                const response = await deleteProfileAcc(version);
                 if (response.success) {
                     Swal.fire("Éxito", "Cuenta eliminada correctamente. Cerrando sesión", "success");
                     logout();

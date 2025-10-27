@@ -9,18 +9,17 @@ import { getDepartmentsList } from "../../services/DepartmentService";
  * - Para otros usuarios, se añade opción vacía "-- Seleccionar --" y todos los Departamentos.
  * 
  * @param {Object} props
- * @param {string} props.token - Token de autenticación del usuario actual.
  * @param {Object} [props.profile] - Usuario que está realizando la acción.
  * @param {Function} props.onConfirm - Callback que se ejecuta al confirmar los datos, recibe { userAccount, userAccountId? }.
  */
-const ModifyUserAccountComponent = async ({ token, profile, onConfirm }) => {
+const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
     const isAdmin = ["ADMIN", "SUPERADMIN"].includes(profile?.usertype);
     const isWorker = profile?.usertype === "USER";
 
     let departments = [];
     if (!isWorker) {
         // Para ADMIN y SUPERADMIN, obtenemos todos los departamentos
-        const deptResp = await getDepartmentsList(token);
+        const deptResp = await getDepartmentsList();
         departments = deptResp.data.departments || [];
         departments.unshift({ id: null, name: "-- Seleccionar --" });
     }

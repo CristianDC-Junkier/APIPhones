@@ -16,8 +16,7 @@ const TableUserAccountComponent = ({
     currentPage,
     setCurrentPage,
     currentUser,
-    refreshData,
-    token
+    refreshData
 }) => {
 
     const filteredUsers = useMemo(() => {
@@ -61,12 +60,11 @@ const TableUserAccountComponent = ({
 
     const handleModify = async (userItem) => {
         await AddModifyUser({
-            token,
             userItem,
             currentUser,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyUser(userItem.id, formValues, token);
+                const result = await modifyUser(userItem.id, formValues);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
                     await refreshData();
@@ -80,7 +78,7 @@ const TableUserAccountComponent = ({
 
     const handleDelete = async (userItem) => {
         await showCaptcha();
-        const result = await deleteUser(userItem.id, token, userItem.version);
+        const result = await deleteUser(userItem.id, userItem.version);
 
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
@@ -108,7 +106,7 @@ const TableUserAccountComponent = ({
             const password = await PWDAskComponent({ userItem });
             if (!password) return;
 
-            const result = await markPWDCUser(userItem.id, { password }, token, userItem.version);
+            const result = await markPWDCUser(userItem.id, { password }, userItem.version);
             if (result.success) {
                 await Swal.fire({
                     icon: 'success',

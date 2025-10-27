@@ -4,7 +4,7 @@ import { changePasswordPWD } from "../../services/UserService";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
-const PWDChangeComponent = ({ user, token }) => {
+const PWDChangeComponent = ({ user }) => {
     const { update, logout } = useAuth();
     const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ const PWDChangeComponent = ({ user, token }) => {
             });
 
             if (password) {
-                const res = await changePasswordPWD({ newPassword: password }, token);
+                const res = await changePasswordPWD({ newPassword: password });
 
                 if (res.success) {
                     update({ ...user, forcePwdChange: false });
@@ -71,7 +71,7 @@ const PWDChangeComponent = ({ user, token }) => {
         };
 
         askPassword();
-    }, [user, token, update, logout, navigate]);
+    }, [user, update, logout, navigate]);
 
     return null; // No renderiza nada
 };

@@ -54,7 +54,7 @@ async function adminOnly(req, res, next) {
  */
 async function isAuthenticated(req, res, next) {
     const payload = await getTokenPayload(req, res);
-    console.log(payload);
+    //console.log(payload);
     if (!payload) return; // ya respondió con 401
 
     req.user = payload;

@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input
 import Swal from "sweetalert2";
 
 import { useAuth } from "../../hooks/useAuth";
-import { getDepartmentsList, getDepartmentById, getSubDepartmentsList, createDepartment, createSubDepartment } from "../../services/DepartmentService";
+import { getDepartmentsList, getSubDepartmentsList, createDepartment, createSubDepartment } from "../../services/DepartmentService";
 
 import BackButton from "../../components/utils/BackButtonComponent";
 import Spinner from "../../components/utils/SpinnerComponent";
@@ -49,15 +49,14 @@ const DashboardDepartment = () => {
 
     /** Carga inicial de datos */
     const fetchDepartments = async () => {
-        if (!token) return;
         setLoading(true);
         try {
             let deptResp, subResp;
 
             // admin / superadmin
             [deptResp, subResp] = await Promise.all([
-                getDepartmentsList(token),
-                getSubDepartmentsList(token)
+                getDepartmentsList(),
+                getSubDepartmentsList()
             ]);
             if (deptResp.success) {
                 const depts = deptResp.data.departments ?? [];
@@ -85,18 +84,17 @@ const DashboardDepartment = () => {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { fetchDepartments(); }, [token, currentUser, rowsPerPage]);
+    useEffect(() => { fetchDepartments(); }, [currentUser, rowsPerPage]);
 
 
 
     /** Crear departamento */
     const handleCreateDepartment = async () => {
         await AddModifyDepartmentComponent({
-            token,
             currentUser,
             action: "create",
             onConfirm: async (formValues) => {
-                const result = await createDepartment(formValues, token);
+                const result = await createDepartment(formValues);
                 if (result.success) {
                     Swal.fire("Éxito", "Departamento creado correctamente", "success");
                     await fetchDepartments();
@@ -110,12 +108,11 @@ const DashboardDepartment = () => {
     /** Crear subdepartamento */
     const handleCreateSubdepartment = async () => {
         await AddModifySubdepartmentComponent({
-            token,
             currentUser,
             action: "create",
             departments,
             onConfirm: async (formValues) => {
-                const result = await createSubDepartment(formValues, token);
+                const result = await createSubDepartment(formValues);
                 if (result.success) {
                     Swal.fire("Éxito", "Subdepartamento creado correctamente", "success");
 
@@ -222,7 +219,6 @@ const DashboardDepartment = () => {
             {/* Tabla de departamentos */}
             {currentView === "departments" && (
                 <TableDepartmentComponent
-                    token={token}
                     currentUser={currentUser}
                     departments={departments ?? []}
                     search={search}
@@ -236,7 +232,6 @@ const DashboardDepartment = () => {
             {/* Tabla de subdepartamentos */}
             {currentView === "subdepartments" && (
                 <TableSubDepartmentComponent
-                    token={token}
                     departments={departments ?? []}
                     subdepartments={subdepartments ?? []}
                     selectedDepartment={selectedDepartment}

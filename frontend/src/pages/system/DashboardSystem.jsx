@@ -3,7 +3,6 @@ import { Container, Row, Col, Card, CardBody, CardTitle, CardText } from 'reacts
 import Swal from 'sweetalert2';
 
 import { getLogs, getLog, downloadLog, getSystemMetrics } from '../../services/SystemService';
-import { useAuth } from "../../hooks/useAuth";
 
 import BackButton from '../../components/utils/BackButtonComponent';
 import LogListComponent from '../../components/system/LogListComponent';
@@ -32,7 +31,6 @@ export default function DashboardSystem() {
     const [selectedLog, setSelectedLog] = useState(null);
     const [logContent, setLogContent] = useState('Selecciona un archivo para ver su contenido');
 
-    const { token } = useAuth();
     const [loading, setLoading] = useState(false);
 
     const [cpuUsage, setCpuUsage] = useState(null);
@@ -43,10 +41,9 @@ export default function DashboardSystem() {
     //Función encargada de obtener la información para la tabla
     useEffect(() => {
         const fetchLogs = async () => {
-            if (!token) return;
             setLoading(true);
             try {
-                const res = await getLogs(token);
+                const res = await getLogs();
                 if (res.success) setLogs(res.data.logs);
             } catch (err) {
                 console.error(err);
@@ -55,14 +52,13 @@ export default function DashboardSystem() {
             }
         };
         fetchLogs();
-    }, [token]);
+    }, []);
 
     //Función encargada de obtener la información del estado del servidor
     useEffect(() => {
         const fetchMetrics = async () => {
-            if (!token) return;
             try {
-                const res = await getSystemMetrics(token);
+                const res = await getSystemMetrics();
                 if (res.success) {
                     setCpuUsage(res.data.CpuUsagePercent);
                     setMemoryUsed(res.data.MemoryUsedMB);
@@ -77,12 +73,12 @@ export default function DashboardSystem() {
         fetchMetrics();
         const interval = setInterval(fetchMetrics, 1000);
         return () => clearInterval(interval);
-    }, [token]);
+    }, []);
 
     //Función encargada de mostrar la información del log seleccionado
     const handleSelectLog = async (log) => {
         setSelectedLog(log);
-        const res = await getLog(log, token);
+        const res = await getLog(log);
         if (res.success) {
             setLogContent(res.data);
         } else {
@@ -92,7 +88,7 @@ export default function DashboardSystem() {
 
     //Función encargada de gestionar la descarga del log seleccionado
     const handleDownloadLog = (log) => {
-        downloadLog(log, token).then(({ success, error }) => {
+        downloadLog(log).then(({ success, error }) => {
             if (!success) {
                 Swal.fire({
                     icon: 'error',

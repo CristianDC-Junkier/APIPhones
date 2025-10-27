@@ -29,19 +29,16 @@ export const getPublicList = async () => {
 
 /**
  * Solicitud para obtener la lista de todos los usuario existentes con detalles
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @param {String|null} [department=null] - Departamento por el que filtrar (opcional)
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getWorkerDataList = async (token, department = null) => {
+export const getWorkerDataList = async (department = null) => {
     try {
         const endpoint = department
             ? `/data/worker-department`
             : '/data/worker';
 
-        const res = await api.get(endpoint, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(endpoint, {});
 
         return { success: true, data: res.data };
     } catch (error) {
@@ -51,19 +48,16 @@ export const getWorkerDataList = async (token, department = null) => {
 
 /**
  * Solicitud para obtener la lista de todos los usuario existentes con detalles y sus cuentas de usuario
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @param {String|null} [department=null] - Departamento por el que filtrar (opcional)
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getUsersList = async (token, department = null) => {
+export const getUsersList = async (department = null) => {
     try {
         const endpoint = department
             ? `/acc/list-department`
             : '/acc/list';
 
-        const res = await api.get(endpoint, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(endpoint, {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -76,14 +70,11 @@ export const getUsersList = async (token, department = null) => {
 /**
  * Solicitud de creación de un nuevo usuario
  * @param {Object} user - la información del usuario que se quiere crear
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const createUser = async (user, token) => {
+export const createUser = async (user) => {
     try {
-        const res = await api.post('/acc/', user, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.post('/acc/', user, {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -92,14 +83,11 @@ export const createUser = async (user, token) => {
 /**
  * Solicitud de creación de nuevos datos de usuario
  * @param {Object} userdata - la información de datos de usuario que se quiere crear
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const createUserData = async (userdata, token) => {
+export const createUserData = async (userdata) => {
     try {
-        const res = await api.post('/data/', userdata, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.post('/data/', userdata, {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -108,15 +96,13 @@ export const createUserData = async (userdata, token) => {
 
 /**
  * Solicitud de modificación de un usuario existente
+ * @param {String} id - ID del usuario a modificar
  * @param {Object} user - la información del usuario que se quiere modificar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const modifyUser = async (id, user, token) => {
+export const modifyUser = async (id, user) => {
     try {
-        const res = await api.put(`/acc/${id}`, user, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.put(`/acc/${id}`, user, {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -126,14 +112,11 @@ export const modifyUser = async (id, user, token) => {
 /**
  * Solicitud de modificación de la información de usuario existente
  * @param {Object} user - la información del usuario que se quiere modificar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const modifyUserData = async (id, user, token) => {
+export const modifyUserData = async (id, user) => {
     try {
-        const res = await api.put(`/data/${id}`, user, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await api.put(`/data/${id}`, user, {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -143,14 +126,13 @@ export const modifyUserData = async (id, user, token) => {
 /**
  * Solicitud de eliminación de un usuario
  * @param {Object} userId - el ID del usuario que se quiere eliminar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @param {String} version - versión del usuario a eliminar
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const deleteUser = async (userId, token, version) => {
+export const deleteUser = async (userId, version) => {
     try {
         const res = await api.delete(`/acc/${userId}`, {
             params: { version },
-            headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {
@@ -161,14 +143,13 @@ export const deleteUser = async (userId, token, version) => {
 /**
  * Solicitud de eliminación de un usuario
  * @param {Object} userId - el ID del usuario que se quiere eliminar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @param {String} version - versión del usuario a eliminar
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const deleteUserData = async (userId, token, version) => {
+export const deleteUserData = async (userId, version) => {
     try {
         const res = await api.delete(`/data/${userId}`, {
             params: { version },
-            headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {
@@ -183,14 +164,13 @@ export const deleteUserData = async (userId, token, version) => {
  * Solicitud para marcar a un usuario para forzar un cambio de contraseña
  * @param {Object} userId - el ID del usuario que se quiere va a marcar
  * @param {Object} password - la constraseña temporal establecida por el usuario que realizó la marcación 
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ *  * @param {String} version - versión del usuario a marcar
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const markPWDCUser = async (userId, password, token, version) => {
+export const markPWDCUser = async (userId, password, version) => {
     try {
         const res = await api.patch(`/acc/${userId}/forcepwd`,  password , {
             params: { version },
-            headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {
@@ -201,14 +181,11 @@ export const markPWDCUser = async (userId, password, token, version) => {
 /**
  * Solicitud de cambio de contraseña para un usuario que ha sido marcado para cambio de contraseña
  * @param {String} newPassword - Nueva contraseña para el usuario marcado para el cambio de contraseña
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const changePasswordPWD = async (newPassword, token) => {
+export const changePasswordPWD = async (newPassword) => {
     try {
-        const res = await api.patch(`acc/profile-PWD`, newPassword, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.patch(`acc/profile-PWD`, newPassword, {});
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
@@ -220,14 +197,13 @@ export const changePasswordPWD = async (newPassword, token) => {
 //#region Profile Actions
 /**
  * Solicitud para obtener la información del usuario conectado
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @param {String} version - versión del usuario asociado al perfil
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getProfile = async (token, version) => {
+export const getProfile = async (version) => {
     try {
         const res = await api.get('/data/profile', {
             params: { version },
-            headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {
@@ -236,16 +212,14 @@ export const getProfile = async (token, version) => {
 };
 
 /**
- * Solicitud de eliminación de un usuario
- * @param {Object} userId - el ID del usuario que se quiere eliminar
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * Solicitud de eliminación de un perfil
+ * @param {String} version - versión del usuario asociado al perfil a eliminar
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const deleteProfileAcc = async (token, version) => {
+export const deleteProfileAcc = async (version) => {
     try {
         const res = await api.delete(`/acc/profile-del`, {
             params: { version },
-            headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {
@@ -257,14 +231,13 @@ export const deleteProfileAcc = async (token, version) => {
  * Solicitud de cambio de infromación de la cuenta del perfil conectado
  * 
  * @param {String} useraccount - Nueva información de inicio de sesion para el perfil concetado
- * @param {String} token - Token del usuario conectado para comprobar si tiene autorización
+ * @param {String} version - versión del usuario asociado al perfil a modificar
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const modifyProfileAcc = async (useraccount, token, version) => {
+export const modifyProfileAcc = async (useraccount, version) => {
     try {
         const res = await api.put(`/acc/profile-update`, useraccount, {
             params: { version },
-            headers: { Authorization: `Bearer ${token}` }
         });
         return { success: true, data: res.data };
     } catch (error) {

@@ -14,9 +14,7 @@ const TableUserDataComponent = ({
     rowsPerPage,
     currentPage,
     setCurrentPage,
-    currentUser,
-    refreshData,
-    token
+    refreshData
 }) => {
 
     const filteredUsers = useMemo(() => {
@@ -60,11 +58,10 @@ const TableUserDataComponent = ({
 
     const handleModify = async (userItem) => {
         await AddModifyUserDataCommponent({
-            token,
             userItem,
             action: "modify",
             onConfirm: async (formValues) => {
-                const result = await modifyUserData(userItem.id, formValues.userData, token);
+                const result = await modifyUserData(userItem.id, formValues.userData);
                 if (result.success) {
                     Swal.fire("Éxito", "Usuario modificado correctamente", "success");
                 } else {
@@ -79,7 +76,7 @@ const TableUserDataComponent = ({
         try { await showCaptcha(); }
         catch { Swal.fire('Atención', 'Captcha no completado', 'warning'); return; }
         let result;
-        result = await deleteUserData(userItem.id, token, userItem.version);
+        result = await deleteUserData(userItem.id, userItem.version);
         if (result.success) {
             Swal.fire('Éxito', 'Datos de usuario eliminados correctamente', 'success');
         } else {

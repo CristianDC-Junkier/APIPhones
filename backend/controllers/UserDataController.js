@@ -85,15 +85,16 @@ class UserDataController {
     */
     static async workerListByDepartment(req, res) {
         try {
-            const requesterDepartmentId = req.user.departmentId;
+            const requesterId = req.user.id;
+            const depID = req.params.depID;
             
-            if (!requesterDepartmentId) {
+            if (!depID) {
                 return res.status(400).json({ error: "El usuario no tiene departamento asignado" });
             }
 
             const allData = await UserData.findAll({
                 where: {
-                    departmentId: requesterDepartmentId
+                    departmentId: depID
                 },
                 include: [
                     { model: Department, as: "department" },
@@ -117,7 +118,7 @@ class UserDataController {
 
             return res.json({ users: formatted });
         } catch (error) {
-            LoggerController.error('Error recogiendo la lista de trabajadores por el departamento con id ' + req.user.departmentId + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error recogiendo la lista de trabajadores por el departamento con id ' + req.params.depID + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }

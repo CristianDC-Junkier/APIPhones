@@ -3,14 +3,17 @@ const sequelize = require("../config/db");
 const { encrypt, decrypt } = require("../utils/Crypto");
 
 /**
- * Modelo Sequelize para departamentos.
+ * Modelo Sequelize para tickets.
  * Todos los campos tipo STRING se guardan cifrados para proteger datos sensibles.
  * 
  * Campos:
  * - id   → Identificador único autoincremental.
- * - name → Nombre del departamento (cifrado).
+ * - topic → Nombre del departamento (cifrado).
+ * - text → 
+ * - read →
+ * - 
  */
-const Department = sequelize.define("Department", {
+const Ticket = sequelize.define("Ticket", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -29,4 +32,4 @@ const Department = sequelize.define("Department", {
 });
 
 
-module.exports = Department;
+module.exports = Ticket;

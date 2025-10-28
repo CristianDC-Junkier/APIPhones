@@ -36,10 +36,11 @@ export const getPublicList = async () => {
  * @param {String|null} [department=null] - Departamento por el que filtrar (opcional)
  * @returns {JSON} - Devuelve la información recibida de la llamada
  */
-export const getWorkerDataList = async (department = null) => {
+export const getWorkerDataList = async (departmentId = null) => {
+    console.log(departmentId);
     try {
-        const endpoint = department
-            ? `/data/worker-department`
+        const endpoint = departmentId
+            ? `/data/worker-department/${departmentId}`
             : '/data/worker';
 
         const res = await api.get(endpoint, {});

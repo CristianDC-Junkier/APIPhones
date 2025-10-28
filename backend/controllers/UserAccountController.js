@@ -247,13 +247,15 @@ class UserAccountController {
             if (["ADMIN", "SUPERADMIN"].includes(req.user.usertype)) {
                 targetUser.usertype = userAccount.usertype;
             }
-
+            console.log(userAccount.password);
             //Comprobar si se a escrito una nueva contraseña
-            if (userAccount.password && userAccount.password !== "") {
-                targetUser.password = userAccount.password;
-                targetUser.forcePwdChange = false;
-            } else {
-                return res.status(400).json({ error: "Debe introducir una contraseña válida" });
+            if (userAccount.password) {
+                if (userAccount.password !== "") {
+                    targetUser.password = userAccount.password;
+                    targetUser.forcePwdChange = false;
+                } else {
+                    return res.status(400).json({ error: "Debe introducir una contraseña válida" });
+                }
             }
 
             await targetUser.save();

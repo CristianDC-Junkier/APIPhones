@@ -30,9 +30,6 @@ const ProfileUser = () => {
             const response = await getProfile(version);
             if (response.success) {
                 setProfile(response.data);
-            } else if (response.error === "Token inválido") {
-                Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                    .then(() => { logout(); navigate('/login'); });
             } else {
                 Swal.fire('Error', response.error || 'No se pudo cargar el perfil', 'error');
             }
@@ -46,12 +43,10 @@ const ProfileUser = () => {
     const fetchData = async () => {
         if (user.usertype !== "USER") return;
         try {
+            console.log(user.department);
             const response = await getWorkerDataList(user.department);
             if (response.success) {
                 setUsers(response.data.users);
-            } else if (response.error === "Token inválido") {
-                Swal.fire('Error', 'El tiempo de acceso caducó, reinicie sesión', 'error')
-                    .then(() => { logout(); navigate('/login'); });
             } else {
                 Swal.fire('Error', response.error || 'No se pudo cargar los datos', 'error');
             }

@@ -71,15 +71,15 @@ class UserDataController {
     static async workerListByDepartment(req, res) {
         try {
             const requesterId = req.user.id;
-            const requesterDepartmentId = req.user.departmentId;
+            const depID = req.params.depID;
             
-            if (!requesterDepartmentId) {
+            if (!depID) {
                 return res.status(400).json({ error: "El usuario no tiene departamento asignado" });
             }
 
             const allData = await UserData.findAll({
                 where: {
-                    departmentId: requesterDepartmentId
+                    departmentId: depID
                 },
                 include: [
                     { model: Department, as: "department" },

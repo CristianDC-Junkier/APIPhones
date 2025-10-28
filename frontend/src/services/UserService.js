@@ -43,7 +43,6 @@ export const getWorkerDataList = async (departmentId = null) => {
             : '/data/worker';
 
         const res = await api.get(endpoint, {});
-
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

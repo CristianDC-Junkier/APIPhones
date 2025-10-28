@@ -27,7 +27,7 @@ const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Au
 
 router.get("/", UserDataController.publicList);
 router.get("/worker", isAuthenticated, UserDataController.workerList);
-router.get("/worker-department/:depID", isAuthenticated, UserDataController.workerListByDepartment);
+router.get("/worker-department", isAuthenticated, UserDataController.workerListByDepartment);
 
 router.get("/profile", isAuthenticated, UserDataController.getProfile);
 

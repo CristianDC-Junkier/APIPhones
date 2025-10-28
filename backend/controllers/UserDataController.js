@@ -158,7 +158,7 @@ class UserDataController {
                 show,
             });
 
-            LoggerController.info('Datosd de usuario con id ' + userdata.id + ' creado correctamente por el usuario con id ' + req.user.id);
+            LoggerController.info('Datos de usuario con id ' + userdata.id + ' creado correctamente por el usuario con id ' + req.user.id);
             return res.json({ user: userdata });
 
         } catch (error) {

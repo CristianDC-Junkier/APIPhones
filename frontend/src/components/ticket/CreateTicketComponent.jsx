@@ -1,5 +1,4 @@
 ﻿import Swal from "sweetalert2";
-import { getDepartmentsList, getSubDepartmentsList } from "../../services/DepartmentService";
 
 /**
  * Componente que permite crear o modificar un usuario mediante un modal de SweetAlert2.
@@ -34,6 +33,7 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
     const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
+    const textareaStyle = 'flex:1; height:120px; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
     const stepHtml = `
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -44,7 +44,7 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
         </div>
         <div style="${rowStyle} margin-top: 5vh">
             <label style="${labelStyle}">Mensaje <span style="color:red">*</span></label>
-            <textarea id="swal-text" style="${inputStyle}" placeholder="Detalle el problema aquí"></textarea>
+            <textarea id="swal-text" style="${textareaStyle}" placeholder="Detalle el problema aquí"></textarea>
         </div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;
@@ -64,7 +64,7 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
             if (!topic) { Swal.showValidationMessage("Debe elegir un asunto"); return false; }
             if (!text) { Swal.showValidationMessage("Detalle cual es el motivo del ticket"); return false; }
 
-            return { topic, text };
+            return { topic, information: text, idAffectedData: dataItem.id };
         }
     });
 

@@ -31,7 +31,7 @@ const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm
     let subdepartments = [];
 
     const [deptResp, subResp] = await Promise.all([
-        getDepartmentsList(toen),
+        getDepartmentsList(),
         getSubDepartmentsList()
     ]);
 

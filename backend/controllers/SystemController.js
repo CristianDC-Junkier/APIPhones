@@ -34,11 +34,11 @@ const SystemController = {
                 .map((dirent) => dirent.name)
                 .sort((a, b) => b.localeCompare(a));
 
-            res.json(logs);
+            return res.json(logs);
         } catch (error) {
             LoggerController.error('Error recogiendo los logs por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
-            res.status(500).json({ error: "No se pudo leer el archivo log" });
+            return res.status(500).json({ error: "No se pudo leer el archivo log" });
         }
     },
 
@@ -58,12 +58,12 @@ const SystemController = {
                 return res.status(404).json({ error: "Archivo log no encontrado" });
             }
             const content = fs.readFileSync(logPath, "utf-8");
-            res.type("text/plain").send(content);
+            return res.type("text/plain").send(content);
 
         } catch (error) {
             LoggerController.error('Error al leer el archivo de log ' + log + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
-            res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message });
         }
     },
 
@@ -83,12 +83,12 @@ const SystemController = {
                 return res.status(404).json({ error: "Archivo log no encontrado" });
             }
 
-            res.download(logPath, log);
+            return res.download(logPath, log);
 
         } catch (error) {
             LoggerController.error('Error al descargar el archivo de log ' + log + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
-            res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message });
         }
     },
 
@@ -112,7 +112,7 @@ const SystemController = {
 
             const cpuUsagePercent = await getCpuUsagePercent(100);
 
-            res.json({
+            return res.json({
                 CpuUsagePercent: cpuUsagePercent,
                 MemoryUsedMB: memoryUsedMB,
                 ThreadsCount: threadsCount,
@@ -121,7 +121,7 @@ const SystemController = {
         } catch (error) {
             LoggerController.error('Error al obtener las métricas del sistema por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
-            res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message });
         }
     },
 };

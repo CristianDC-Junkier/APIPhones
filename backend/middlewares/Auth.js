@@ -33,6 +33,17 @@ async function getTokenPayload(req, res) {
 }
 
 /**
+ * Middleware: Solo usuarios autenticado.
+ */
+async function isAuthenticated(req, res, next) {
+    const payload = await getTokenPayload(req, res);
+    if (!payload) return; // ya respondió con 401
+
+    req.user = payload;
+    return next();
+}
+
+/**
  * Middleware: Solo administradores
  */
 async function adminOnly(req, res, next) {
@@ -45,20 +56,7 @@ async function adminOnly(req, res, next) {
     }
 
     req.user = payload;
-    next();
-}
-
-
-/**
- * Middleware: Solo usuarios autenticado.
- */
-async function isAuthenticated(req, res, next) {
-    const payload = await getTokenPayload(req, res);
-    //console.log(payload);
-    if (!payload) return; // ya respondió con 401
-
-    req.user = payload;
-    next();
+    return next();
 }
 
 /**
@@ -75,7 +73,11 @@ async function canModifyUser(req, res, next) {
         const targetUserId = req.params.id;   // Usuario sobre el que se opera
         const requesterId = req.user.id;      // Usuario que hace la petición
 
-        // Buscar usuario objetivo
+        // solo el SUPERADMIN por defecto (ID 1) puede modificar/eliminarse a sí mismo
+        if (targetUserId === 1 && requesterId !== 1) {
+            return res.status(403).json({ error: "No puedes modificar/eliminar al SUPERADMIN por defecto" });
+        }
+
         const targetUser = await UserAccount.findByPk(targetUserId);
         if (!targetUser) return res.status(404).json({ error: "Usuario no encontrado" });
 
@@ -83,13 +85,9 @@ async function canModifyUser(req, res, next) {
         if (targetUser.usertype === "SUPERADMIN" && req.method === "DELETE") {
             return res.status(403).json({ error: "No puedes eliminar al SUPERADMIN" });
         }
-        // Buscar usuario que hace la petición
+
         const requester = await UserAccount.findByPk(requesterId);
 
-        if (targetUserId === 1 && requesterId !== 1) {
-            return res.status(403).json({ error: "No puedes modificar/eliminar al SUPERADMIN por defecto" });
-        }
-        
         if (!requester) return res.status(403).json({ error: "Usuario que hace la petición no encontrado" });
 
         // Validación de permisos
@@ -105,7 +103,7 @@ async function canModifyUser(req, res, next) {
             return next();
         }
 
-        next();
+        return next();
     } catch (error) {
         LoggerController.error("Error en autorización de usuario: " + error.message);
         res.status(500).json({ error: error.message });

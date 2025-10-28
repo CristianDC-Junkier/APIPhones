@@ -22,6 +22,7 @@ const CookieBanner = () => {
     };
 
     if (!visible) return null;
+    if (document.querySelector(".cookie-banner")) return null;
 
     return (
         <div

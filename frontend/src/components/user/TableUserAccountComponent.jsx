@@ -160,15 +160,17 @@ const TableUserAccountComponent = ({
                                 canModify = currentUser.usertype === "SUPERADMIN";
                                 break;
                             case "ADMIN":
+                                canPWDC = currentUser.usertype !== "USER";
+                                canModify = currentUser.usertype !== "USER";
+                                canDelete = currentUser.usertype !== "USER";
+                                break;
                             case "USER":
                                 canModify = currentUser.usertype !== "USER";
                                 canDelete = currentUser.usertype !== "USER";
-                                canPWDC = currentUser.usertype !== "USER";
                                 break;
                             default:
                                 break;
                         }
-
                         return (
                             <tr key={idx} >
                                 <td className="text-center"> {userItem.id}</td>

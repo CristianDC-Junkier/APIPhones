@@ -3,6 +3,7 @@ const LoggerController = require('./LoggerController');
 
 class DepartmentController {
 
+
     /**
      * Listar todos los departamentos
      * 
@@ -23,28 +24,11 @@ class DepartmentController {
                 attributes: ["id", "name"]
             });
 
-            res.json({ departments });
+            return res.json({ departments });
         } catch (error) {
-            LoggerController.error("Error listando departamentos: " + error.message);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-     * Obtener un departamento por ID
-     * 
-     * @param {Object} req - req.params.id es el ID del departamento
-     * @param {Object} res
-     * @returns {JSON} - Datos del departamento o error si no existe
-     */
-    static async getById(req, res) {
-        try {
-            const department = await Department.findOne({ where: { id: req.params.id } });
-            if (!department) return res.status(404).json({ error: 'Departamento no encontrado' });
-            res.json({ department });
-        } catch (error) {
-            LoggerController.error('Error obteniendo departamento: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error recogiendo los departamentos por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -62,7 +46,8 @@ class DepartmentController {
 
             res.status(201).json({ id: department.id });
         } catch (error) {
-            LoggerController.error('Error creando departamento: ' + error.message);
+            LoggerController.error('Error en la creación del departamento por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
             res.status(500).json({ error: error.message });
         }
     }
@@ -86,7 +71,8 @@ class DepartmentController {
 
             res.json({ id: department.id });
         } catch (error) {
-            LoggerController.error('Error actualizando departamento: ' + error.message);
+            LoggerController.error('Error en la modificación del departamento por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
             res.status(500).json({ error: error.message });
         }
     }
@@ -106,7 +92,8 @@ class DepartmentController {
             LoggerController.info(`Departamento ${deleted.name} eliminado`);
             res.json({ id: req.params.id });
         } catch (error) {
-            LoggerController.error('Error eliminando departamento: ' + error.message);
+            LoggerController.error('Error en la eliminación del departamento por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
             res.status(500).json({ error: error.message });
         }
     }

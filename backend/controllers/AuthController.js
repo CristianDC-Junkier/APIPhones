@@ -3,7 +3,6 @@
 const LoggerController = require("../controllers/LoggerController");
 const { generateAccessToken, generateRefreshToken, verifyToken } = require("../utils/JWT");
 
-const BASE_PATH = "/listin-telefonico";
 /**
  * Controlador de autenticación y gestión de usuarios.
  * 
@@ -60,11 +59,13 @@ class AuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "Strict",
-                path: `${BASE_PATH}/api/auth`,
+                path: "/listin-telefonico/api/auth",
                 maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000,
             });
 
-            res.json({
+            LoggerController.info(`Sesión iniciada por ${user.username} (id: ${user.id})`);
+
+            return res.json({
                 accessToken,
                 user: {
                     id: user.id,
@@ -77,9 +78,8 @@ class AuthController {
                 }
             });
 
-            LoggerController.info('Sesión iniciada por ' + user.username);
         } catch (error) {
-            LoggerController.error('Error en el login: ' + error.message);
+            LoggerController.error(`Error login - ${error.message}`);
             res.status(500).json({ error: error.message });
         }
     }
@@ -104,7 +104,7 @@ class AuthController {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                     sameSite: "Strict",
-                    path: `${BASE_PATH}/api/auth`
+                    path: "/listin-telefonico/api/auth"
                 });
                 return res.status(400).json({ error: "Sesión inválida" });
             }
@@ -114,14 +114,14 @@ class AuthController {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "Strict",
-                path: `${BASE_PATH}/api/auth`
+                path: "/listin-telefonico/api/auth"
             });
 
-            LoggerController.info(`Logout exitoso usuario ${payload.userId}`);
+            LoggerController.info(`Logout exitoso usuario con id ${payload.userId}`);
             return res.json({ message: "Logout exitoso" });
         } catch (error) {
-            LoggerController.error("Error en el logout: " + error.message);
-            res.status(500).json({ error: "Error al cerrar sesión" });
+            LoggerController.error(`Error logout - ${error.message}`);
+            return res.status(500).json({ error: "Error al cerrar sesión" });
         }
     }
 
@@ -144,8 +144,8 @@ class AuthController {
             return res.json({ date });
 
         } catch (error) {
-            LoggerController.error("Error recuperando la fecha del listín: " + error.message);
-            res.status(500).json({ error: "Error recuperando la fecha del listín" });
+            LoggerController.error("Error recuperando la fecha del listín - " + error.message);
+            return res.status(500).json({ error: "Error recuperando la fecha del listín" });
         }
     }
 
@@ -195,7 +195,7 @@ class AuthController {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                     sameSite: "Strict",
-                    path: `${BASE_PATH}/api/auth`,
+                    path: "/listin-telefonico/api/auth",
                     maxAge: payload.remember ? 7 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000,
                 });
             }
@@ -208,10 +208,8 @@ class AuthController {
                     username: user.username,
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
-                    departmentId: user.departmentId,
-                    show: user.show,
                     version: user.version,
-                }
+                },
             });
 
         } catch (error) {

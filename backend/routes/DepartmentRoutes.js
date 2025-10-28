@@ -7,7 +7,6 @@ const { isAuthenticated } = require("../middlewares/Auth");
  * Rutas para la gestión de departamentos
  * 
  * - GET    /               → Obtener todos los departamentos
- * - GET    /:id            → Obtener un departamento por ID
  * - POST   /               → Crear un nuevo departamento
  * - PUT    /:id            → Actualizar un departamento existente
  * - DELETE /:id            → Eliminar un departamento
@@ -16,7 +15,6 @@ const { isAuthenticated } = require("../middlewares/Auth");
  * - `isAuthenticated` → Permite acceso a usuarios logeados.
  */
 router.get('/', DepartmentController.list);
-router.get('/:id', isAuthenticated, DepartmentController.getById);
 router.post('/', isAuthenticated, DepartmentController.create);
 router.put('/:id', isAuthenticated, DepartmentController.update);
 router.delete('/:id', isAuthenticated, DepartmentController.delete);

@@ -7,7 +7,6 @@ const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Au
 /**
  * - GET    /list               → Listar todos los datos de usuario usuario logueado.
  * - GET    /list-department    → Listar todos los datos de usuario del mismo departamento que el usuario que hace la petición (solo notWorker: departamento o superior).
- * - GET    /:id                → Obtener los datos de usuario por ID (solo notWorker: departamento o superior). 
  * 
  * - PUT    /profile-update     → Modificar el perfil del usuario logueado.
  * - DELETE /profile-del        → Elimina el perfil del usuario logueado.
@@ -27,7 +26,6 @@ const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Au
 
 router.get("/list", isAuthenticated, UserAccountController.listUsers);
 router.get("/list-department", adminOnly, isAuthenticated, UserAccountController.listUsersByDepartment);
-router.get("/:id", adminOnly, UserAccountController.getOne);
 
 router.put("/profile-update", isAuthenticated, UserAccountController.updateMyAccount);
 router.delete("/profile-del", isAuthenticated, UserAccountController.deleteMyAccount);

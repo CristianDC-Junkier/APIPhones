@@ -8,7 +8,6 @@ const { isAuthenticated } = require("../middlewares/Auth");
  * 
  * - GET    /              → Obtener todos los subdepartamentos
  * - GET    /father/:id    → Obtener todos los subdepartamentos de un departamento
- * - GET    /:id           → Obtener un subdepartamento por ID
  * - POST   /              → Crear un nuevo subdepartamento
  * - PUT    /:id           → Actualizar un subdepartamento existente
  * - DELETE /:id           → Eliminar un subdepartamento

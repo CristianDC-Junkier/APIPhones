@@ -4,8 +4,20 @@ const LoggerController = require("../controllers/LoggerController");
 const { Op } = require("sequelize");
 
 
+/**
+ * Controlador para la gestión de UserData.
+ * 
+ * Proporciona métodos estáticos para:
+ * - Listar UserData para usuarios no autenticados
+ * - Listar UserData para usuarios autenticados
+ * - Crear nuevos UserData
+ * - Actualizar UserData existentes
+ * - Eliminar UserData
+ * - Obtener perfil del usuario autenticado
+ */
 class UserDataController {
 
+    //#region Métodos recuperación de datos de usuarios (trabajadores)
     /**
     * Listar UserData para el usuario no autenticado (solo extensión y departamento).
     */
@@ -25,10 +37,11 @@ class UserDataController {
                 subdepartmentName: user.subdepartment?.name || null
             }));
 
-            res.json({ users: formatted });
+            return res.json({ users: formatted });
         } catch (error) {
-            LoggerController.error(`Error obteniendo la lista pública: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error recogiendo la lista pública por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -58,19 +71,20 @@ class UserDataController {
             })
             );
 
-            res.json({ users: formatted });
+            return res.json({ users: formatted });
         } catch (error) {
-            LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error recogiendo la lista de trabajadores por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
     /**
-    * Listar todos los UserData para el usuario autenticado, con todos los datos.
+    * Listar todos los UserData para el usuario autenticado, con todos los datos
+    * por un departamento específico (el del usuario autenticado).
     */
     static async workerListByDepartment(req, res) {
         try {
-            const requesterId = req.user.id;
             const requesterDepartmentId = req.user.departmentId;
             
             if (!requesterDepartmentId) {
@@ -101,13 +115,16 @@ class UserDataController {
             })
             );
 
-            res.json({ users: formatted });
+            return res.json({ users: formatted });
         } catch (error) {
-            LoggerController.error(`Error obteniendo la lista de usuarios: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error recogiendo la lista de trabajadores por el departamento con id ' + req.user.departmentId + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
+    //#endregion
 
+    //#region Metódos CRUD de datos de usuarios (trabajadores)
     /**
     * Permite crear un UserData sin usuario asignado.
     *
@@ -146,12 +163,13 @@ class UserDataController {
                 show,
             });
 
-            LoggerController.info(`UserData creado por el usuario ${user.username} con id ${id}`);
-            res.status(201).json({ user: userdata });
+            LoggerController.info('Datosd de usuario con id ' + userdata.id + ' creado correctamente por el usuario con id ' + req.user.id);
+            return res.json({ user: userdata });
 
         } catch (error) {
-            LoggerController.error(`Error creando UserData para el usuario: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error creando datos de usuario por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(400).json({ error: error.message });
         }
     }
 
@@ -167,7 +185,6 @@ class UserDataController {
     */
     static async update(req, res) {
         try {
-            const currentUserId = req.user.id;
             const { id, name, extension, number, email, userId, departmentId, subdepartmentId, show, version } = req.body;
 
             // Recuperar UserData a modificar
@@ -218,7 +235,9 @@ class UserDataController {
 
             await userdata.save();
 
-            res.json({
+            LoggerController.info('Datos de usuario con id ' + user.id + ' actualizado correctamente por el usuario con id ' + req.user.id);
+
+            return res.json({
                 user: {
                     id: userdata.id,
                     name: userdata.name,
@@ -232,14 +251,13 @@ class UserDataController {
                 }
             });
 
-            LoggerController.info(`Usuario ${currentUserId} actualizó UserData ${userdata.id}`);
 
         } catch (error) {
-            LoggerController.error(`Error actualizando UserData: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error modificando al usuario con id ' + user.id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
-
 
     /**
     * Permite al usuario autenticado eliminar datos asociados.
@@ -259,14 +277,17 @@ class UserDataController {
 
             await data.destroy();
 
-            LoggerController.info(`Datos de Usuario ${userDataId} eliminado correctamente`);
-            res.json({ success: true, message: "Datos eliminados correctamente" });
+            LoggerController.info('Datos de usuario con id ' + user.id + ' eliminado por el usuario con id ' + req.user.id);
+            return res.json({ id });
 
         } catch (error) {
-            LoggerController.error(`Error eliminando datos de usuario ${req.user.id}: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error eliminando los datos de usuario con id ' + id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
+
+    //#endregion
 
     /**
     * Recupera los datos completos del usuario usando solo el token.
@@ -276,8 +297,8 @@ class UserDataController {
     */
     static async getProfile(req, res) {
         try {
-            const { version } = req.query;
 
+            const { version } = req.query;
             const user = await UserAccount.findByPk(req.user.id, {
                 include: [
                     {
@@ -292,10 +313,9 @@ class UserDataController {
             });
 
             if (user.version != version) return res.status(409).json({ error: "Su perfil ha sido modificado anteriormente" });
-
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
-            res.json({
+            return res.json({
                 id: user.id,
                 username: user.username,
                 usertype: user.usertype,
@@ -309,8 +329,9 @@ class UserDataController {
             });
 
         } catch (error) {
+            LoggerController.error('Error recuperando el perfil del usuario con id ' + id);
             LoggerController.error(`Error obteniendo perfil: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            return res.status(500).json({ error: error.message });
         }
     }
 }

@@ -31,10 +31,11 @@ class SubDepartmentController {
                 departmentName: sd.department.name ?? null,
             }));
 
-            res.json({ subdepartments: result });
+            return res.json({ subdepartments: result });
         } catch (error) {
-            LoggerController.error('Error listando subdepartamentos: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error listando los subdepartamentos por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -49,28 +50,11 @@ class SubDepartmentController {
         try {
             const subdepartments = await SubDepartment.findAll({ where: { departmentId: req.params.id } });
             if (!subdepartments) return res.status(404).json({ error: 'Subdepartamentos no encontrado' });
-            res.json({ subdepartments });
+            return res.json({ subdepartments });
         } catch (error) {
-            LoggerController.error('Error obteniendo subdepartamento: ' + error.message);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    /**
-     * Obtener un subdepartamento por ID
-     * 
-     * @param {Object} req - req.params.id es el ID del subdepartamento
-     * @param {Object} res
-     * @returns {JSON} - Datos del subdepartamento o error si no existe
-     */
-    static async getById(req, res) {
-        try {
-            const subdepartment = await SubDepartment.findOne({ where: { id: req.params.id } });
-            if (!subdepartment) return res.status(404).json({ error: 'Subdepartamento no encontrado' });
-            res.json({ subdepartment });
-        } catch (error) {
-            LoggerController.error('Error obteniendo subdepartamento: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error listando los subdepartamentos del departamento con id' + req.params.id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -85,10 +69,11 @@ class SubDepartmentController {
         try {
             const subdepartment = await SubDepartment.create(req.body);
             LoggerController.info(`Subdepartamento ${subdepartment.name} creado`);
-            res.status(201).json({ id: subdepartment.id });
+            return res.status(201).json({ id: subdepartment.id });
         } catch (error) {
-            LoggerController.error('Error creando subdepartamento: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error en la creación del subdepartamento por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -111,10 +96,11 @@ class SubDepartmentController {
 
             LoggerController.info(`Subdepartamento ${subdepartment.name} actualizado`);
 
-            res.json({ id: subdepartment.id });
+            return res.json({ id: subdepartment.id });
         } catch (error) {
-            LoggerController.error('Error actualizando subdepartamento: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error en la modificación del subdepartamento con id ' + id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -137,10 +123,11 @@ class SubDepartmentController {
 
             LoggerController.info(`Subdepartamento ${subdepartment.name} eliminado`);
 
-            res.json({ id: req.params.id });
+            return res.json({ id: req.params.id });
         } catch (error) {
-            LoggerController.error('Error eliminando subdepartamento: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error en la eliminación del subdepartamento con id ' + id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 

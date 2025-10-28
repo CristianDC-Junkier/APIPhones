@@ -1,4 +1,4 @@
-﻿const { UserAccount, UserData, Department, SubDepartment } = require("../models/Relations");
+﻿const { UserAccount, Department, SubDepartment } = require("../models/Relations");
 
 const LoggerController = require("./LoggerController");
 const { generateToken } = require("../utils/JWT");
@@ -13,9 +13,14 @@ const { Op } = require("sequelize");
  *  - Crear un usuario
  *  - Modificar un usuario
  *  - Eliminar un usuario
+ *  - Actualizar propia cuenta de usuario
+ *  - Eliminar propia cuenta de usuario
+ *  - Forzar cambio de contraseña de otro usuario
+ *  - Cambiar contraseña propia tras ser marcado
  */
 class UserAccountController {
 
+    //#region Métodos recuperación de usuarios
     /**
     * Listar todos los usuarios con su UserData y relaciones.
     * 
@@ -52,12 +57,12 @@ class UserAccountController {
                 version: user.version,
             }));
 
-            res.json({ users: formatted });
+            return res.json({ users: formatted });
 
         } catch (error) {
-            const requesterId = req.user?.id;
-            LoggerController.error(`Error obteniendo la lista de todos los usuarios: ${error.message} por el usuario: ${requesterId}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error recogiendo los usuarios por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -70,7 +75,6 @@ class UserAccountController {
     */
     static async listUsersByDepartment(req, res) {
         try {
-            const requesterId = req.user.id;
             const requesterDepartmentId = req.user.departmentId;
 
             if (!requesterDepartmentId) {
@@ -110,68 +114,22 @@ class UserAccountController {
                 
             }));
 
-            res.json({ users: formatted });
+            return res.json({ users: formatted });
 
         } catch (error) {
-            const requesterId = req.user?.id;
-            LoggerController.error(`Error obteniendo la lista por departamento: ${error.message} por el usuario: ${requesterId}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error recogiendo los usuarios de el departamento' + req.user.departmentId + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
+    //#endregion
 
+    //#region Métodos CRUD de usuarios
     /**
-    * Recupera los datos completos de un usuario por su ID.
-    * 
-    * @param {Object} req - req.params.id es el ID del usuario a consultar
-    * @param {Object} res
-    */
-    static async getOne(req, res) {
-        try {
-            const { id } = req.params;
-            const user = await UserAccount.findByPk(id, {
-                include: [
-                    {
-                        model: Department,
-                        as: "department",
-                        include: [
-                            {
-                                model: SubDepartment,
-                                as: "subdepartment",
-                                attributes: ["id", "name"]
-                            }
-                        ],
-                        attributes: ["id", "name"]
-                    }
-                ]
-            });
-
-            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-
-            res.json({
-                id: user.id,
-                username: user.username,
-                usertype: user.usertype,
-                forcePwdChange: user.forcePwdChange,
-                departmentId: user.departmentId,
-                departmentName: user.department?.name || null,
-                version: user.version,
-                
-            });
-
-        } catch (error) {
-            LoggerController.error(`Error obteniendo usuario: ${error.message}`);
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-
-    /**
-    * Crea un nuevo usuario junto con su UserData asociado.
+    * Crea una nueva cuenta de usuario.
     * 
     * @param {Object} req - { body: 
-    * { userAccount: { username, password, usertype, departmentId }, 
-    *   userData: { name, extension, number, email, departmentId, subdepartmentId } 
-    * } }
+    * { userAccount: { username, password, usertype, departmentId } } }
     * @param {Object} res
     */
     static async create(req, res) {
@@ -201,11 +159,12 @@ class UserAccountController {
                 departmentId: userAccount.departmentId
             });
 
-            LoggerController.info('Nuevo usuario trabajador ' + user.username + ' creado correctamente');
-            res.json({ id: user.id });
+            LoggerController.info('Usuario con id ' + user.id + ' creado correctamente por el usuario con id ' + req.user.id);
+            return res.json({ id: user.id });
         } catch (error) {
-            LoggerController.error('Error en la creación de usuario: ' + error.message);
-            res.status(400).json({ error: error.message });
+            LoggerController.error('Error creando un usuario por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(400).json({ error: error.message });
         }
     }
 
@@ -258,11 +217,12 @@ class UserAccountController {
 
             await targetUser.save();
 
-            LoggerController.info(`Usuario ${targetUser.username} actualizado por ${req.user.username}`);
-            res.json({ id: targetUserId });
+            LoggerController.info('Usuario con id ' + user.id + ' actualizado correctamente por el usuario con id ' + req.user.id);
+            return res.json({ id: targetUserId });
         } catch (error) {
-            LoggerController.error('Error en modificar la cuenta de usuario: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error modificando al usuario con id ' + user.id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -287,11 +247,12 @@ class UserAccountController {
             user.password = password;
             await user.save();
 
-            LoggerController.info(`Usuario ${user.username} marcado para cambio de contraseña por ${req.user.username}`);
+            LoggerController.info('Usuario con id ' + user.id + ' marcado para cambio de contraseña por el usuario con id ' + req.user.id);
             res.json({ id });
         } catch (error) {
-            LoggerController.error('Error en forzar cambio de contraseña: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error forzando la recuperación de contraseña del un usuario con id ' + id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -313,14 +274,17 @@ class UserAccountController {
 
            await user.destroy();
 
-            LoggerController.info(`Usuario: ${user.username} eliminado por ${req.user.username}`);
-            res.json({ id });
+            LoggerController.info('Usuario con id ' + user.id + ' eliminado por el usuario con id ' + req.user.id);
+            return res.json({ id });
         } catch (error) {
-            LoggerController.error('Error en la eliminación de usuario: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error eliminando un usuario con id ' + id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
+    //#endregion
 
+    //#region Métodos de gestión de la propia cuenta
     /**
     * Permite al usuario autenticado modificar su propia cuenta.
     * 
@@ -472,6 +436,7 @@ class UserAccountController {
             res.status(500).json({ error: error.message });
         }
     }
+    //#endregion
 
 }
 

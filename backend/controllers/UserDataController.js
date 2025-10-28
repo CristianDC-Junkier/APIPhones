@@ -25,7 +25,7 @@ class UserDataController {
         try {
             const allData = await UserData.findAll({
                 include: ["department", "subdepartment"],
-                where: { departmentId: { [Op.ne]: null }, show : true }
+                where: { departmentId: { [Op.ne]: null }, show: true }
             });
 
             const formatted = allData.map(user => ({
@@ -126,7 +126,7 @@ class UserDataController {
 
     //#region Metódos CRUD de datos de usuarios (trabajadores)
     /**
-    * Permite crear un UserData sin usuario asignado.
+    * Permite crear un UserData.
     *
     * @param {Object} req - { body: { name, extension, number, email, departmentId, subdepartmentId } }
     * @param {Object} res
@@ -137,11 +137,6 @@ class UserDataController {
             const { name, extension, number, email, departmentId, subdepartmentId, show } = req.body;
 
             const user = await UserAccount.findByPk(id);
-
-            // Validar si el departamento es el tuyo si eres DEPARTMENT
-            if (user.usertype === "DEPARTMENT" && departmentId !== user.departmentId) {
-                return res.status(403).json({ error: "No puedes asignar UserData a un departamento distinto al tuyo" });
-            }
 
             // Validar el subdepartamento
             let subdepartment = null;
@@ -195,42 +190,39 @@ class UserDataController {
 
             if (userdata.version != version) return res.status(403).json({ error: "Los datos de usuario ha sido modificado por otro proceso" });
 
-            // Verificar que el usuario no es DEPARTMENT
-            if (req.user.usertype !== "USER") {
-                // Validar que el departamento y subdepartamento existen si se proporcionan
-                if (departmentId) {
-                    const department = await Department.findByPk(departmentId);
-                    if (!department) {
-                        return res.status(400).json({ error: "Departmento no válido" });
-                    }
-                }
 
-                // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
-                if (!departmentId && subdepartmentId) {
+            // Validar que el departamento y subdepartamento existen si se proporcionan
+            if (departmentId) {
+                const department = await Department.findByPk(departmentId);
+                if (!department) {
                     return res.status(400).json({ error: "Departmento no válido" });
                 }
-
-                // Validar que el subdepartamento pertenece al departamento indicado y que existe
-                if (subdepartmentId) {
-                    const subdepartment = await SubDepartment.findByPk(subdepartmentId);
-                    if (!subdepartment) {
-                        return res.status(400).json({ error: "Subdepartmento no válido" });
-                    }
-                    if (departmentId && subdepartment.departmentId != departmentId) {
-                        return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
-                    }
-                }
-
-                if (departmentId !== undefined) userdata.departmentId = departmentId;
-                if (subdepartmentId !== undefined) userdata.subdepartmentId = subdepartmentId;
             }
+
+            // Validar que si se proporciona subdepartmentId, también se proporciona departmentId
+            if (!departmentId && subdepartmentId) {
+                return res.status(400).json({ error: "Departmento no válido" });
+            }
+
+            // Validar que el subdepartamento pertenece al departamento indicado y que existe
+            if (subdepartmentId) {
+                const subdepartment = await SubDepartment.findByPk(subdepartmentId);
+                if (!subdepartment) {
+                    return res.status(400).json({ error: "Subdepartmento no válido" });
+                }
+                if (departmentId && subdepartment.departmentId != departmentId) {
+                    return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
+                }
+            }
+
+            if (departmentId !== undefined) userdata.departmentId = departmentId;
+            if (subdepartmentId !== undefined) userdata.subdepartmentId = subdepartmentId;
 
             // Actualizar solo campos permitidos
             if (name !== undefined) userdata.name = name;
             if (extension !== undefined) userdata.extension = extension;
             if (number !== undefined) userdata.number = number;
             if (email !== undefined) userdata.email = email;
-            if (userId !== undefined) userdata.userAccountId = userId;
             if (show != undefined) userdata.show = show;
 
             await userdata.save();
@@ -286,6 +278,7 @@ class UserDataController {
             return res.status(500).json({ error: error.message });
         }
     }
+    //#endregion
 
     //#endregion
 
@@ -338,7 +331,7 @@ class UserDataController {
                 version: user.version,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
-                
+
             });
 
         } catch (error) {
@@ -347,6 +340,7 @@ class UserDataController {
             return res.status(500).json({ error: error.message });
         }
     }
+    //#endregion
 }
 
 module.exports = UserDataController;

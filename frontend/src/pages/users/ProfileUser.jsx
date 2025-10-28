@@ -7,9 +7,11 @@ import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt
 
 import { useAuth } from "../../hooks/useAuth";
 import { deleteProfileAcc, getProfile, modifyProfileAcc, getWorkerDataList } from "../../services/UserService";
+import { createNewTicket } from "../../services/TicketService";
 
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import ModifyUserAccountComponent from '../../components/user/ModifyUserAccountComponent';
+import CreateTicketComponent from '../../components/ticket/CreateTicketComponent';
 import SpinnerComponent from '../../components/utils/SpinnerComponent';
 import PaginationComponent from "../../components/PaginationComponent";
 
@@ -56,7 +58,26 @@ const ProfileUser = () => {
 
     const totalPages = (data?.length || 0);
 
-    // Modificar el Usuario
+    //Create Ticket
+    const handleTicket = async (dataItem) => {
+        try {
+            await CreateTicketComponent({
+                dataItem,
+                onConfirm: async (formValues) => {
+                    const result = await createNewTicket(formValues);
+                    if (result.success) {
+                        Swal.fire("Éxito", "Ticket enviado correctamente", "success");
+                    } else {
+                        Swal.fire("Error", result.error || "No se pudo mandar el ticket", "error");
+                    }
+                }
+            })
+        } catch (err) {
+            Swal.fire("Error", err.message || "Error al mandar el ticket", "error");
+        }
+    }
+
+    // Modify profile
     const handleModify = async () => {
         try {
             await ModifyUserAccountComponent({
@@ -181,7 +202,7 @@ const ProfileUser = () => {
                                                     <Button
                                                         color="warning"
                                                         className="rounded-pill px-4 position-absolute top-1 end-0 me-4"
-                                                        onClick={() => alert(us.name)}
+                                                        onClick={() => handleTicket(us)}
                                                     >
                                                         <FaTicketAlt className="me-2" /> Mandar Ticket
                                                     </Button>

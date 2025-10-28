@@ -27,6 +27,7 @@ app.use(express.json());
 // --------------------------------
 const AuthRoutes = require('./routes/AuthRoutes');
 const SystemRoutes = require('./routes/SystemRoutes');
+const TicketRoutes = require('./routes/TicketRoutes');
 const UserDataRoutes = require('./routes/UserDataRoutes');
 const UserAccountRoutes = require('./routes/UserAccountRoutes');
 const DepartmentRoutes = require('./routes/DepartmentRoutes');
@@ -34,6 +35,7 @@ const SubDepartmentRoutes = require('./routes/SubDepartmentRoutes');
 
 app.use(`${basePath}/api`, SystemRoutes);
 app.use(`${basePath}/api/auth`, AuthRoutes);
+app.use(`${basePath}/api/ticket`, TicketRoutes);
 app.use(`${basePath}/api/data`, UserDataRoutes);
 app.use(`${basePath}/api/acc`, UserAccountRoutes);
 app.use(`${basePath}/api/department`, DepartmentRoutes);

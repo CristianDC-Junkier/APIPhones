@@ -20,7 +20,6 @@ const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Au
  *
  * Middleware:
  * - `adminOnly`       → Restringe el acceso a usuarios con roles de administrador.
- * - `notWorker`       → Restringe el acceso a los usuarios con el rol basico de trabajador.
  * - `isAuthenticated` → Permite acceso a usuarios logeados.
  * - `canModifyUser`   → Comprueba si el usuario puede ser modificado o borrado.
  */

@@ -85,16 +85,15 @@ class UserDataController {
     */
     static async workerListByDepartment(req, res) {
         try {
-            const requesterId = req.user.id;
-            const depID = req.params.depID;
+            const departmentId = req.user.department;
             
-            if (!depID) {
+            if (!departmentId) {
                 return res.status(400).json({ error: "El usuario no tiene departamento asignado" });
             }
 
             const allData = await UserData.findAll({
                 where: {
-                    departmentId: depID
+                    departmentId: departmentId
                 },
                 include: [
                     { model: Department, as: "department" },
@@ -116,9 +115,9 @@ class UserDataController {
             })
             );
 
-            return res.json({ users: formatted });
+            return res.json({ datalist: formatted });
         } catch (error) {
-            LoggerController.error('Error recogiendo la lista de trabajadores por el departamento con id ' + req.params.depID + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error recogiendo la lista de trabajadores por el departamento con id ' + req.user.department + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }
@@ -313,7 +312,20 @@ class UserDataController {
                 ]
             });
 
-            if (user.version != version) return res.status(409).json({ error: "Su perfil ha sido modificado anteriormente" });
+            if (user.version != version) {
+                return res.status(409).json({
+                    error: "Su usuario ha sido modificado anteriormente",
+                    latestUser: {
+                        id: user.id,
+                        username: user.username,
+                        usertype: user.usertype,
+                        forcePwdChange: user.forcePwdChange,
+                        department: user.departmentId,
+                        version: user.version,
+                    },
+                });
+            }
+
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
             return res.json({

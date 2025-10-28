@@ -10,14 +10,14 @@ const CookieBanner = () => {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
-        const accepted = localStorage.getItem("cookiesAccepted");
+        const accepted = localStorage.getItem("listin-telefonico/cookiesAccepted");
         if (!accepted) {
             setVisible(true);
         }
-    }, []);
+    }, [visible]);
 
     const handleAccept = () => {
-        localStorage.setItem("cookiesAccepted", "true");
+        localStorage.setItem("listin-telefonico/cookiesAccepted", "true");
         setVisible(false);
     };
 

@@ -17,58 +17,46 @@ import PaginationComponent from "../../components/PaginationComponent";
 const ProfileUser = () => {
     const [profile, setProfile] = useState();
     const [loading, setLoading] = useState(true);
-    const [users, setUsers] = useState([]);
+    const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(1);
-
 
     const navigate = useNavigate();
     const { version, logout, update, user } = useAuth();
 
-    const fetchProfile = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await getProfile(version);
-
-            if (response.success) {
-                setProfile(response.data);
-            } else {
-                Swal.fire('Error', response.error || 'No se pudo cargar el perfil', 'error');
+            // Obtener perfil
+            const profileResponse = await getProfile(version);
+            if (profileResponse.success) {
+                setProfile(profileResponse.data);
             }
-        } catch (err) {
-            Swal.fire('Error', err.message || 'Error al obtener perfil', 'error');
+
+            // Obtener datos solo si el usuario tiene departamento
+            if (user.department) {
+                const dataResponse = await getWorkerDataList(user.department);
+                if (dataResponse.success) {
+                    setData(dataResponse.data.datalist);
+                }
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchData = async () => {
-        if (user.usertype !== "USER") return;
-        try {
-            console.log(user.department);
-            const response = await getWorkerDataList(user.department);
-            if (response.success) {
-                setUsers(response.data.users);
-            } else {
-                Swal.fire('Error', response.error || 'No se pudo cargar los datos', 'error');
-            }
-        } catch (err) {
-            Swal.fire('Error', err.message || 'Error al obtener los datos', 'error');
-        }
-    };
-
-    // Recuperar usuario
+    /**
+     * Recargar perfil cuando cambia la versión del usuario globalmente
+     */
     useEffect(() => {
-        fetchData();
-        fetchProfile();
-    }, [logout, navigate, version]);
+        if (version === null || version === undefined) return;
+        fetchData(version);
+    }, [version]);
 
-    if (loading) return <SpinnerComponent />;
+    if (loading || !profile) return <SpinnerComponent />;
 
-    const totalPages = Math.ceil(users.length / rowsPerPage);
-    const currentUsers = users.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const totalPages = (data?.length || 0);
 
-    // Modify profile
+    // Modificar el Usuario
     const handleModify = async () => {
         try {
             await ModifyUserAccountComponent({
@@ -125,6 +113,7 @@ const ProfileUser = () => {
     };
 
     const isUser = user.usertype === "USER";
+    const haveDepartment = Boolean(user.department);
 
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
@@ -136,6 +125,7 @@ const ProfileUser = () => {
             {/* Contenedor para centrar verticalmente */}
             <div className="d-flex flex-grow-1 align-items-center">
                 <Row className="mb-3 mt-4 justify-content-center g-3 w-100">
+
                     {/* BLOQUE 1: Información de la cuenta */}
                     <Col xs="12" md="5" className="d-flex justify-content-center">
                         <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
@@ -178,49 +168,65 @@ const ProfileUser = () => {
                     </Col>
 
                     {/* BLOQUE 2: userDatas */}
-                    {isUser && <Col xs="12" md="7" className="d-flex justify-content-center">
-                        <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
-                            {currentUsers.map((us, idx) => (
-                                <CardBody key={idx} className="d-flex flex-column justify-content-between p-4">
-                                    <div>
-                                        <h4 className="mb-4 text-success d-flex align-items-center">
-                                            <FaBuilding className="me-2" /> Datos Personales
-                                            <Button color="warning" className="rounded-pill px-4 position-absolute top-1 end-0 me-4" onClick={() => alert(us.name)}>
-                                                <FaTicketAlt className="me-2" /> Mandar Ticket
-                                            </Button>
-                                        </h4>
-                                        <Row className="mb-2">
-                                            <Col md="6"><FaUser className="me-2" /> Nombre:</Col>
-                                            <Col md="6">{us.name || "-"}</Col>
-                                        </Row>
-                                        <Row className="mb-2">
-                                            <Col md="6"><FaEnvelope className="me-2" /> Email:</Col>
-                                            <Col md="6">{us.email || "-"}</Col>
-                                        </Row>
-                                        <Row className="mb-2">
-                                            <Col md="6"><FaPhone className="me-2" /> Teléfono:</Col>
-                                            <Col md="6">{us.number || "-"}</Col>
-                                        </Row>
-                                        <Row className="mb-2">
-                                            <Col md="6"><strong>Extensión:</strong></Col>
-                                            <Col md="6">{us.extension || "-"}</Col>
-                                        </Row>
-                                        <Row className="mb-2">
-                                            <Col md="6"><strong>Subdepartamento:</strong></Col>
-                                            <Col md="6">{us.subdepartmentName || "-"}</Col>
-                                        </Row>
-                                    </div>
-                                    <div className="mt-3" style={{ minHeight: '40px' }}>
-                                        {totalPages > 1 ? (
-                                            <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                                        ) : (
-                                            <div style={{ height: '40px' }}></div>
-                                        )}
-                                    </div>
-                                </CardBody>
-                            ))}
-                        </Card>
-                    </Col>}
+                    {haveDepartment && (
+                        <Col xs="12" md="7" className="d-flex justify-content-center">
+                            <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
+                                {totalPages > 0 ? (
+                                    // Si hay datos, los mostramos
+                                    data.map((us, idx) => (
+                                        <CardBody key={idx} className="d-flex flex-column justify-content-between p-4">
+                                            <div>
+                                                <h4 className="mb-4 text-success d-flex align-items-center position-relative">
+                                                    <FaBuilding className="me-2" /> Datos Personales
+                                                    <Button
+                                                        color="warning"
+                                                        className="rounded-pill px-4 position-absolute top-1 end-0 me-4"
+                                                        onClick={() => alert(us.name)}
+                                                    >
+                                                        <FaTicketAlt className="me-2" /> Mandar Ticket
+                                                    </Button>
+                                                </h4>
+                                                <Row className="mb-2">
+                                                    <Col md="6"><FaUser className="me-2" /> Nombre:</Col>
+                                                    <Col md="6">{us.name || "-"}</Col>
+                                                </Row>
+                                                <Row className="mb-2">
+                                                    <Col md="6"><FaEnvelope className="me-2" /> Email:</Col>
+                                                    <Col md="6">{us.email || "-"}</Col>
+                                                </Row>
+                                                <Row className="mb-2">
+                                                    <Col md="6"><FaPhone className="me-2" /> Teléfono:</Col>
+                                                    <Col md="6">{us.number || "-"}</Col>
+                                                </Row>
+                                                <Row className="mb-2">
+                                                    <Col md="6"><strong>Extensión:</strong></Col>
+                                                    <Col md="6">{us.extension || "-"}</Col>
+                                                </Row>
+                                                <Row className="mb-2">
+                                                    <Col md="6"><strong>Subdepartamento:</strong></Col>
+                                                    <Col md="6">{us.subdepartmentName || "-"}</Col>
+                                                </Row>
+                                            </div>
+                                            <div className="mt-3" style={{ minHeight: '40px' }}>
+                                                {totalPages > 1 ? (
+                                                    <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                                                ) : (
+                                                    <div style={{ height: '40px' }}></div>
+                                                )}
+                                            </div>
+                                        </CardBody>
+                                    ))
+                                ) : (
+                                    // Si no hay datos, mostrar mensaje centrado
+                                    <CardBody className="d-flex justify-content-center align-items-center p-4" style={{ minHeight: '200px' }}>
+                                        <h5 className="text-muted text-center">
+                                            No existe ningún tipo de datos de usuario en el departamento
+                                        </h5>
+                                    </CardBody>
+                                )}
+                            </Card>
+                        </Col>
+                    )}
                 </Row>
             </div>
         </Container>

@@ -14,10 +14,9 @@ import { getDepartmentsList } from "../../services/DepartmentService";
  */
 const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
     const isAdmin = ["ADMIN", "SUPERADMIN"].includes(profile?.usertype);
-    const isWorker = profile?.usertype === "USER";
 
     let departments = [];
-    if (!isWorker) {
+    if (isAdmin) {
         // Para ADMIN y SUPERADMIN, obtenemos todos los departamentos
         const deptResp = await getDepartmentsList();
         departments = deptResp.data.departments || [];
@@ -35,7 +34,7 @@ const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
         ${profile?.usertype === "SUPERADMIN" ? `<option value="SUPERADMIN" selected>Superadmin</option>` : ""}
     `;
 
-    const departmentField = (isWorker || profile?.usertype === "DEPARTMENT")
+    const departmentField = (!isAdmin)
         ? `<input id="swal-department" style="${inputStyle}" placeholder="Departamento" value="${profile?.departmentId || ""}">`
         : `<select id="swal-department" style="${inputStyle}; cursor:pointer;">
       ${departments.map(d => `<option value="${d.id}" ${d.id === profile.departmentId ? "selected" : ""}>${d.name}</option>`).join("")}
@@ -77,9 +76,9 @@ const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
                   </div>`
             : ""}
 
-            ${!isWorker
+            ${isAdmin
             ? `<div style="${rowStyle}">
-                    <label style="${labelStyle}">Departamento <span style="color:red">*</span></label>
+                    <label style="${labelStyle}">Departamento </label>
                     ${departmentField}
                   </div>`
             : ""}
@@ -124,7 +123,7 @@ const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
             if (!username) Swal.showValidationMessage("El nombre de usuario es obligatorio");
             else if (!oldPassword) Swal.showValidationMessage("La contraseña actual es obligatoria");
             else if (!newPassword) Swal.showValidationMessage("La nueva contraseña es obligatoria");
-            if (isAdmin || !isWorker) {
+            if (isAdmin) {
                 const usertype = document.getElementById("swal-usertype")?.value;
                 const departmentIdRaw = document.getElementById("swal-department")?.value;
                 const department = departmentIdRaw === "null" ? null : parseInt(departmentIdRaw, 10);

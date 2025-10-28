@@ -51,7 +51,7 @@ class AuthController {
             }
 
             // Genera tokens usando utilidades centralizadas
-            const accessToken = generateAccessToken({ id: user.id, username: user.username, usertype: user.usertype });
+            const accessToken = generateAccessToken({ id: user.id, username: user.username, usertype: user.usertype, department: user.departmentId });
             const refreshToken = await generateRefreshToken(user.id, remember);
 
             // Envía refreshToken en cookie HTTP-only
@@ -72,8 +72,7 @@ class AuthController {
                     username: user.username,
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
-                    departmentId: user.departmentId,
-                    show: user.show,
+                    department: user.departmentId,
                     version: user.version,
                 }
             });
@@ -184,7 +183,7 @@ class AuthController {
             if (!user) return res.sendStatus(401);
 
             // Genera nuevos tokens
-            const accessToken = generateAccessToken({ id: user.id, username: user.username, usertype: user.usertype });
+            const accessToken = generateAccessToken({ id: user.id, username: user.username, usertype: user.usertype, department: user.departmentId });
 
             if (payload.remember) {
                 await RefreshToken.destroy({ where: { uuid: payload.uuid } });
@@ -208,6 +207,7 @@ class AuthController {
                     username: user.username,
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
+                    department: user.departmentId,
                     version: user.version,
                 },
             });

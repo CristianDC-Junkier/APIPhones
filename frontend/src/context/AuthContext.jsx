@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
                     id: result.data.user.id,
                     username: result.data.user.username,
                     usertype: result.data.user.usertype,
-                    department: result.data.user.departmentId || null,
+                    department: result.data.user.department || null,
                     forcePwdChange: result.data.user.forcePwdChange || false,
                     version: result.data.user.version || 1, 
                 };

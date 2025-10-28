@@ -2,7 +2,6 @@
 const router = express.Router();
 
 const AuthController = require("../controllers/AuthController");
-const { isAuthenticated } = require("../middlewares/Auth");
 
 /**
  * Rutas para gestión de usuarios.

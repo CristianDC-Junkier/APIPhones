@@ -1,7 +1,6 @@
 ﻿const { UserAccount, Department, SubDepartment } = require("../models/Relations");
 
 const LoggerController = require("./LoggerController");
-const { generateToken } = require("../utils/JWT");
 const { Op } = require("sequelize");
 
 
@@ -298,18 +297,31 @@ class UserAccountController {
             const currentUser = req.user;
             const { username, usertype, department, oldPassword, newPassword } = req.body;
             const { version } = req.query;
+            const isAdmin = ["ADMIN", "SUPERADMIN"].includes(currentUser.usertype);
 
             const user = await UserAccount.findByPk(currentUser.id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-            if (user.version != version) return res.status(409).json({ error: "Su usuario ha sido modificado anteriormente" });
+            if (user.version != version) {
+                return res.status(409).json({
+                    error: "Su usuario ha sido modificado anteriormente",
+                    latestUser: {
+                        id: user.id,
+                        username: user.username,
+                        usertype: user.usertype,
+                        forcePwdChange: user.forcePwdChange,
+                        department: user.departmentId,
+                        version: user.version,
+                    },
+                });
+            }
 
             const updates = {};
 
             // --- Contraseña ---
             if (!oldPassword || !newPassword) {
-                return res.status(400).json({ error: "Ambas contraseñas son requeridas para actualizarla" });
+                return res.status(400).json({ error: "Ambas contraseñas son requeridas para actualizar" });
             }
-            if (oldPassword === newPassword) {
+            if (!isAdmin && (oldPassword === newPassword)) {
                 return res.status(400).json({ error: "La contraseña nueva debe ser diferente a la actual" });
             }
             if (user.password !== oldPassword) {
@@ -331,7 +343,7 @@ class UserAccountController {
             updates.username = username;
 
             // --- Department (solo ADMIN/SUPERADMIN) ---
-            if (["ADMIN", "SUPERADMIN"].includes(currentUser.usertype)) {
+            if (isAdmin) {
                 updates.departmentId = department;
             }
 
@@ -351,31 +363,22 @@ class UserAccountController {
             // Aplicar cambios
             await user.update(updates);
 
-            const token = await generateToken({
-                id: user.id,
-                username: user.username,
-                usertype: user.usertype,
-                departmentId: user.departmentId,
-                remember: currentUser.remember || false
-            });
+            LoggerController.info(`Usuario con id ${currentUser.id} actualizó su perfil`);
 
-            res.json({
-                token,
+            return res.json({
                 user: {
                     id: user.id,
                     username: user.username,
                     usertype: user.usertype,
                     forcePwdChange: user.forcePwdChange,
-                    departmentId: user.departmentId,
+                    department: user.departmentId,
                     version: user.version,
                 }
             });
-
-            LoggerController.info(`Usuario ${currentUser.id} actualizó su perfil`);
-
         } catch (error) {
-            LoggerController.error(`Error actualizando perfil: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error modificando su propia cuenta de usuario con id ' + id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -393,7 +396,19 @@ class UserAccountController {
             const user = await UserAccount.findByPk(id);
             if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
-            if (user.version != version) return res.status(409).json({ error: "Su usuario ha sido modificado anteriormente" });
+            if (user.version != version) {
+                return res.status(409).json({
+                    error: "Su usuario ha sido modificado anteriormente",
+                    latestUser: {
+                        id: user.id,
+                        username: user.username,
+                        usertype: user.usertype,
+                        forcePwdChange: user.forcePwdChange,
+                        department: user.departmentId,
+                        version: user.version,
+                    },
+                });
+            }
 
             if (user.usertype === "SUPERADMIN") {
                 return res.status(403).json({ error: "Un SUPERADMIN no puede eliminarse" });
@@ -401,11 +416,12 @@ class UserAccountController {
 
             await user.destroy();
 
-            LoggerController.info(`Usuario ${req.user.username} se elimino a si mismo`);
-            res.json({ id: id });
+            LoggerController.info(`Usuario con id ${id} eliminó su perfil`);
+            return res.json({ id: id });
         } catch (error) {
-            LoggerController.error('Error en la eliminación de usuario: ' + error.message);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error eliminando su propia cuenta del usuario con id ' + id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -431,11 +447,13 @@ class UserAccountController {
             user.forcePwdChange = false;
             await user.save();
 
-            res.json({ id: userId });
             LoggerController.info(`Usuario ${userId} cambió su contraseña`);
+            return res.json({ id: userId });
+
         } catch (error) {
-            LoggerController.error(`Error actualizando contraseña: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error actualizando su propia contraseña del usuario con id ' + id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
     //#endregion

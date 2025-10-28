@@ -17,7 +17,7 @@ const { isAuthenticated } = require("../middlewares/Auth");
  */
 router.get('/', isAuthenticated, SubdepartmentController.listAll);
 router.get('/father/:id', isAuthenticated, SubdepartmentController.getByDepartment);
-router.get('/:id', isAuthenticated, SubdepartmentController.getById);
+
 router.post('/', isAuthenticated, SubdepartmentController.create);
 router.put('/:id', isAuthenticated, SubdepartmentController.update);
 router.delete('/:id', isAuthenticated, SubdepartmentController.delete);

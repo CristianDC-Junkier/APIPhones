@@ -1,8 +1,15 @@
-﻿const { Ticket } = require("../models/Relations")
-
+﻿const { Ticket, UserAccount } = require("../models/Relations");
 const LoggerController = require("../controllers/LoggerController");
-const { Op } = require("sequelize");
 
+/**
+ * TicketController
+ * ----------------
+ * Controlador para la gestión de tickets de incidencias.
+ * Proporciona métodos para:
+ *  - Listar tickets
+ *  - Crear tickets
+ *  - Marcar tickets como leídos, avisados o resueltos
+ */
 class TicketController {
 
     /**
@@ -11,12 +18,19 @@ class TicketController {
     static async ticketList(req, res) {
         try {
             const tickets = await Ticket.findAll();
+
+            // Formateamos el resultado, descifrando topic e information
             const formatted = tickets.map(ticket => ({
                 id: ticket.id,
                 topic: ticket.topic,
-                text: ticket.text,
-                read: ticket.read,
-                solved: ticket.solved
+                information: ticket.information,
+                status: ticket.status,
+                readAt: ticket.readAt,
+                resolvedAt: ticket.resolvedAt,
+                warnedAt: ticket.warnedAt,
+                userRequesterId: ticket.userRequesterId,
+                userResolverId: ticket.userResolverId,
+                idAffectedData: ticket.idAffectedData
             }));
 
             res.json({ tickets: formatted });
@@ -27,66 +41,85 @@ class TicketController {
     }
 
     /**
-    * Permite crear un Ticket.
-    *
-    * @param {Object} req - { body: { topic, text } }
-    * @param {Object} res
-    */
+     * Crear un ticket
+     * @param {Object} req.body - { topic, information, idAffectedData }
+     */
     static async create(req, res) {
         try {
-            const id = req.user.id;
-            const { topic, text } = req.body;
+            const requesterId = req.user.id;
+            const { topic, information, idAffectedData } = req.body;
 
-            const user = await UserAccount.findByPk(id);
-
+            // Creamos el ticket con status inicial OPEN
             const ticket = await Ticket.create({
                 topic,
-                text,
-                read: false,
-                solved: false,
+                information,
+                idAffectedData,
+                userRequesterId: requesterId,
+                status: "OPEN",
+                readAt: null,
+                resolvedAt: null,
+                warnedAt: null
             });
 
-            LoggerController.info(`Ticket creado por el usuario ${user.username} con id ${id}`);
+            // Log general + log de ticket
+            LoggerController.info(`Ticket creado por el usuario ${requesterId}`);
+            LoggerController.ticketAction({
+                ticketId: ticket.id,
+                action: "CREATE",
+                userId: requesterId
+            });
+
             res.status(201).json({ ticket });
         } catch (error) {
-            LoggerController.error(`Error creando Ticket para el usuario ${user.username}: ${error.message}`);
+            LoggerController.error(`Error creando ticket: ${error.message}`);
             res.status(500).json({ error: error.message });
         }
     }
 
     /**
-    * Permite macar o desmarcar un Ticket.
-    *
-    * @param {Object} req - { body: { id, read, solved } }
-    * @param {Object} res
-    */
+     * Marcar un ticket (read, warned, resolved)
+     * @param {Object} req.body - { id, read, warned, resolved }
+     */
     static async markAs(req, res) {
         try {
-            const { id, read, solved } = req.body;
+            const { id, read, warned, resolved } = req.body;
+            const userId = req.user.id;
 
             const ticket = await Ticket.findByPk(id);
-            if (!ticket) {
-                return res.status(404).json({ error: "Ticket no encontrado" });
-            }
+            if (!ticket) return res.status(404).json({ error: "Ticket no encontrado" });
 
-            if (solved) {
-                ticket.read = true;
-                ticket.solved = true;
+            // Actualizamos status y fechas
+            if (resolved) {
+                ticket.status = "RESOLVED";
+                ticket.readAt = new Date();
+                ticket.resolvedAt = new Date();
+                ticket.userResolverId = userId;
+            } else if (warned) {
+                ticket.status = "WARNED";
+                ticket.warnedAt = new Date();
             } else if (read) {
-                ticket.read = true;
-                ticket.solved = false;
+                ticket.status = "READ";
+                ticket.readAt = new Date();
             } else {
-                ticket.read = false;
-                ticket.solved = false;
+                ticket.status = "OPEN";
+                ticket.readAt = null;
+                ticket.resolvedAt = null;
+                ticket.warnedAt = null;
             }
 
             await ticket.save();
 
+            // Log de ticket
+            const action = resolved ? "RESOLVE" : warned ? "WARN" : read ? "READ" : "OPEN";
+            LoggerController.ticketAction({
+                ticketId: ticket.id,
+                action,
+                userId
+            });
+
             res.json(ticket);
-
-
         } catch (error) {
-            LoggerController.error(`Error marcando Ticket: ${error.message}`);
+            LoggerController.error(`Error marcando ticket: ${error.message}`);
             res.status(500).json({ error: error.message });
         }
     }

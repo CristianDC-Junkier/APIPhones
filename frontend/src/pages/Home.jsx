@@ -20,14 +20,14 @@ const Home = () => {
         switch (user.usertype) {
             case 'USER': return [
                 { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
-                { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
+                { label: 'Mi perfil', icon: faUserAlt, action: () => navigate('/profile') },
             ];
             default: return [
                 { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
                 { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
                 { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
                 { label: 'Acceder Logs', icon: faScroll, action: () => navigate('/logs') },
-                { label: 'Perfil de Usuario', icon: faUserAlt, action: () => navigate('/profile') },
+                { label: 'Mi perfil', icon: faUserAlt, action: () => navigate('/profile') },
             ]
         }
     })();

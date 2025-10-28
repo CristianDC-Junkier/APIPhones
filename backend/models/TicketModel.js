@@ -3,53 +3,65 @@ const sequelize = require("../config/db");
 const { encrypt, decrypt } = require("../utils/Crypto");
 
 /**
- * Modelo Sequelize para tickets.
+ * Modelo Sequelize para Tickets de incidencias.
  * Todos los campos tipo STRING se guardan cifrados para proteger datos sensibles.
  * 
  * Campos:
- * - id     → Identificador único autoincremental.
- * - topic  → Asunto del ticket (cifrado).
- * - text   → Texto del ticket (cifrado).
- * - read   → Booleano que indica si el ticket ha sido leido
- * - solved → Booleano que indica si el ticket ha sido resuelto
+ * - id               → Identificador único.
+ * - topic            → Asunto del ticket (cifrado).
+ * - information      → Texto detallado (cifrado).
+ * - status           → Estado del ticket (OPEN, READ, WARNED, RESOLVED).
+ * - readAt           → Fecha de lectura (null = no leído).
+ * - resolvedAt       → Fecha de resolución (null = no resuelto).
+ * - warnedAt         → Fecha de aviso (null = sin aviso).
+ * 
+ * Relaciones:
+ * - belongsTo UserAccount (2 veces):
+ *   + userRequesterId  → Usuario que crea el ticket.
+ *   + userResolverId   → Usuario que lo resolvió.
+ * - belongsTo UserData:
+ *   + idAffectedData   → Datos de usuario afectados.
  */
-const Ticket = sequelize.define("Ticket", {
+const TicketModel = sequelize.define("Ticket", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
     },
+    idAffectedData: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    userRequesterId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    userResolverId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+    },
     topic: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: false,
         set(value) { this.setDataValue("topic", encrypt(value)); },
         get() {
             const val = this.getDataValue("topic");
             return val ? decrypt(val) : null;
         },
     },
-    text: {
-        type: DataTypes.STRING,
+    information: {
+        type: DataTypes.TEXT,
         allowNull: false,
-        unique: false,
-        set(value) { this.setDataValue("text", encrypt(value)); },
+        set(value) { this.setDataValue("information", encrypt(value)); },
         get() {
-            const val = this.getDataValue("text");
+            const val = this.getDataValue("information");
             return val ? decrypt(val) : null;
         },
     },
-    read: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-    },
-    solved: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-    },
+    readAt: DataTypes.DATE,
+    resolvedAt: DataTypes.DATE,
+    warnedAt: DataTypes.DATE,
 });
 
 
-module.exports = Ticket;
+module.exports = TicketModel;

@@ -1,4 +1,4 @@
-﻿const { UserAccount, UserData, UpdateModel, RefreshToken } = require("./Relations");
+﻿const { UserAccount, UserData, UpdateModel } = require("./Relations");
 
 /**
  * Hook: antes de actualizar un UserAccount.

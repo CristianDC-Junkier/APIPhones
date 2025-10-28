@@ -1,22 +1,23 @@
 ﻿const sequelize = require("../config/db");
 
 // Importar modelos
-const UserAccount = require("./AuthModel");
-const UserData = require("./UserDataModel");
-const Department = require("./DepartmentModel");
-const SubDepartment = require("./SubDepartmentModel");
-const RefreshToken = require("./RefreshTokenModel");
+const UserAccountModel = require("./AuthModel");
+const UserDataModel = require("./UserDataModel");
+const DepartmentModel = require("./DepartmentModel");
+const SubDepartmentModel = require("./SubDepartmentModel");
+const RefreshTokenModel = require("./RefreshTokenModel");
 const UpdateModel = require("./UpdateModel");
+const TicketModel = require("./TicketModel");
 
 // ----------- DEFINIR RELACIONES -----------
 
-
+//#region Departamentos
 // Relacion Department 1 ↔ 0..* UserData
-Department.hasMany(UserData, {
+DepartmentModel.hasMany(UserDataModel, {
     foreignKey: "departmentId",
     as: "users"
 });
-UserData.belongsTo(Department, {
+UserDataModel.belongsTo(DepartmentModel, {
     foreignKey: "departmentId",
     as: "department",
     onDelete: "CASCADE",
@@ -24,11 +25,11 @@ UserData.belongsTo(Department, {
 });
 
 // Relacion Department 1 ↔ 0..* SubDepartment
-Department.hasMany(SubDepartment, {
+DepartmentModel.hasMany(SubDepartmentModel, {
     foreignKey: "departmentId",
     as: "subdepartment"
 });
-SubDepartment.belongsTo(Department, {
+SubDepartmentModel.belongsTo(DepartmentModel, {
     foreignKey: "departmentId",
     as: "department",
     onDelete: "CASCADE",
@@ -36,50 +37,92 @@ SubDepartment.belongsTo(Department, {
 });
 
 // Relaciones Department 1 ↔ 0..* UserAccount
-Department.hasMany(UserAccount, {
+DepartmentModel.hasMany(UserAccountModel, {
     foreignKey: "departmentId",
     as: "account"
 });
-UserAccount.belongsTo(Department, {
+UserAccountModel.belongsTo(DepartmentModel, {
     foreignKey: "departmentId",
     as: "department",
     onDelete: "SET NULL",
     onUpdate: "CASCADE"
 });
 
+//#endregion
+
 // Relaciones SubDepartment 1 ↔ 0..* UserData
-SubDepartment.hasMany(UserData, {
+SubDepartmentModel.hasMany(UserDataModel, {
     foreignKey: "subdepartmentId",
     as: "users"
 });
-UserData.belongsTo(SubDepartment, {
+UserDataModel.belongsTo(SubDepartmentModel, {
     foreignKey: "subdepartmentId",
     as: "subdepartment",
     onDelete: "SET NULL",
     onUpdate: "CASCADE"
 });
 
+//#region UserAccount 
 // Relaciones UserAccount 1 ↔ 0..* RefreshToken
-UserAccount.hasMany(RefreshToken, {
+UserAccountModel.hasMany(RefreshTokenModel, {
     foreignKey: "userId",
     as: "refreshTokens"
 });
-RefreshToken.belongsTo(UserAccount, {
+RefreshTokenModel.belongsTo(UserAccountModel, {
     foreignKey: "userId",
     as: "user",
     onDelete: "CASCADE",
     onUpdate: "CASCADE"
 });
 
+// Relaciones UserAccount 1 ↔ 0..* Ticket (como requester)
+UserAccountModel.hasMany(TicketModel, {
+    foreignKey: "userRequesterId",
+    as: "ticketsRequested",
+    constraints: false,
+});
+TicketModel.belongsTo(UserAccountModel, {
+    foreignKey: "userRequesterId",
+    as: "requester",
+    constraints: false,
+});
+
+// Relaciones UserAccount 1 ↔ 0..* Ticket (como resolver)
+UserAccountModel.hasMany(TicketModel, {
+    foreignKey: "userResolverId",
+    as: "ticketsResolved",
+    constraints: false,
+});
+TicketModel.belongsTo(UserAccountModel, {
+    foreignKey: "userResolverId",
+    as: "resolver",
+    constraints: false,
+});
+
+//#endregion
+
+// Relaciones UserData 1 ↔ 0..* Ticket (como datos afectados)
+UserDataModel.hasMany(TicketModel, {
+    foreignKey: "idAffectedData",
+    as: "ticketsAffected",
+    constraints: false,
+});
+TicketModel.belongsTo(UserDataModel, {
+    foreignKey: "idAffectedData",
+    as: "affectedData",
+    constraints: false,
+});
+
 // ----------- EXPORTAR MODELOS -----------
 module.exports = {
     sequelize,
-    UserAccount,
-    UserData,
-    Department,
-    SubDepartment,
-    RefreshToken,
-    UpdateModel
+    UserAccount: UserAccountModel,
+    UserData: UserDataModel,
+    Department: DepartmentModel,
+    SubDepartment: SubDepartmentModel,
+    RefreshToken: RefreshTokenModel,
+    Ticket: TicketModel,
+    UpdateModel,
 };
 
 // ----------- REGISTRAR HOOKS -----------

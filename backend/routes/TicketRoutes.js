@@ -17,3 +17,5 @@ const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Au
 router.get("/", isAuthenticated, TicketController.ticketList);
 router.post("/", isAuthenticated, TicketController.create);
 router.patch("/mark", isAuthenticated, TicketController.markAs);
+
+module.exports = router;

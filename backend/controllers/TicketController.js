@@ -41,6 +41,23 @@ class TicketController {
     }
 
     /**
+     * Cuenta todos los ticket que no estén resueltos
+     */
+
+    static async getUnresolvedTickets(req, res) {
+        try {
+            const count = await Ticket.count({
+                where: { status: "OPEN" }
+            })
+
+            res.json(count);
+        } catch (error) {
+            LoggerController.error("Error contando los tickets " + error.message)
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
      * Crear un ticket
      * @param {Object} req.body - { topic, information, idAffectedData }
      */
@@ -123,6 +140,7 @@ class TicketController {
             res.status(500).json({ error: error.message });
         }
     }
+
 }
 
 module.exports = TicketController;

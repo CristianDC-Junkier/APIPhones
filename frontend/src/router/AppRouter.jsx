@@ -19,6 +19,7 @@ import AccessDeniedPage from '../pages/AccessDenied';
 import DashBoardUserPage from '../pages/users/DashboardUser';
 import DashboardSystemPage from '../pages/system/DashboardSystem';
 import DashboardDepartmentPage from '../pages/department/DashboardDepartment';
+import DashboardTicketPage from '../pages/tickets/DashboardTicket'
 
 import ProfileUserPage from '../pages/users/ProfileUser';
 
@@ -53,7 +54,7 @@ const AppRouter = () => {
                 <Route path="/users" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashBoardUserPage /></RoleRoute>} />
                 <Route path="/departments" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardDepartmentPage /></RoleRoute>} />
                 <Route path="/logs" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardSystemPage /></RoleRoute>} />
-                
+                <Route path="/tickets" element={<RoleRoute allowedRoles={['ADMIN', 'SUPERADMIN']}><DashboardTicketPage /></RoleRoute>} />
 
                 <Route path="*" element={<NotFoundPage />} />
             </Route>

@@ -2,6 +2,7 @@
 const sequelize = require("../config/db");
 const { encrypt, decrypt } = require("../utils/Crypto");
 
+
 /**
  * Modelo Sequelize para Tickets de incidencias.
  * Todos los campos tipo STRING se guardan cifrados para proteger datos sensibles.
@@ -39,6 +40,11 @@ const TicketModel = sequelize.define("Ticket", {
     userResolverId: {
         type: DataTypes.INTEGER,
         allowNull: true,
+    },
+    status: {
+        type: DataTypes.ENUM("OPEN", "READ", "WARNED", "RESOLVED"),
+        allowNull: false,
+        defaultValue: "OPEN",
     },
     topic: {
         type: DataTypes.STRING,

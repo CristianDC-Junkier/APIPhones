@@ -20,7 +20,7 @@ import AddModifySubdepartmentComponent from "../../components/department/AddModi
  * DEPARTMENT: solo ve subdepartamentos de su departamento.
  */
 const DashboardDepartment = () => {
-    const { user: currentUser, token } = useAuth();
+    const { user: currentUser } = useAuth();
 
     const [loading, setLoading] = useState(true);
     const [departments, setDepartments] = useState([]);

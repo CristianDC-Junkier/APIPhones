@@ -4,7 +4,7 @@ import HomeButtonComponent from '../components/utils/HomeButtonComponent';
 import LogoutButton from '../components/utils/LogoutComponent';
 import { useAuth } from '../hooks/useAuth';
 import { Container, Row, Col } from 'reactstrap';
-import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll, faInfo } from '@fortawesome/free-solid-svg-icons';
+import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll, faStickyNote } from '@fortawesome/free-solid-svg-icons';
 
 /**
  * Página que muestra las acciones disponibles al usuario.
@@ -26,7 +26,7 @@ const Home = () => {
                 { label: 'Continuar al listin', icon: faAddressBook, action: () => navigate('/workers') },
                 { label: 'Gestión de Usuarios', icon: faUsers, action: () => navigate('/users') },
                 { label: 'Gestión de Departamentos', icon: faBriefcase, action: () => navigate('/departments') },
-                { label: 'Gestión de Tickets', icon: faInfo, action: () => navigate('/tickets') },
+                { label: 'Gestión de Tickets', icon: faStickyNote, action: () => navigate('/tickets') },
                 { label: 'Acceder a Logs', icon: faScroll, action: () => navigate('/logs') },
                 { label: 'Mi perfil', icon: faUserAlt, action: () => navigate('/profile') },
             ]

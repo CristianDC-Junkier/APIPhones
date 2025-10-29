@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
-import { Container, Row, Col, ButtonGroup, Button } from "reactstrap";
+import { Container, Row, Col, Card, CardBody, CardTitle, CardText } from "reactstrap";
 import Swal from "sweetalert2";
 
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
@@ -7,7 +7,7 @@ import SpinnerComponent from "../../components/utils/SpinnerComponent";
 import TicketListComponent from "../../components/ticket/TicketListComponent";
 import TicketViewerComponent from "../../components/ticket/TicketViewerComponent"
 
-import { getTicketList, getTicket } from "../../services/TicketService";
+import { getTicketList } from "../../services/TicketService";
 
 /**
  * Página encargada de mostrar la bandeja de tickets
@@ -15,10 +15,12 @@ import { getTicketList, getTicket } from "../../services/TicketService";
  */
 export default function DashboardTickets() {
     const [tickets, setTickets] = useState([]);
+    const [ticketsResolved, setTicketsResolved] = useState([]);
+    const [ticketsUnresolved, setTicketsUnresolved] = useState([]);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [ticketContent, setTicketContent] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [filter, setFilter] = useState("all"); // all | unresolved | resolved
+    const [currentView, setCurrentView] = useState("tickets"); // all | unresolved | resolved
 
     // 🔄 Cargar tickets desde el backend
     useEffect(() => {
@@ -26,7 +28,11 @@ export default function DashboardTickets() {
             setLoading(true);
             try {
                 const res = await getTicketList();
-                if (res.success) setTickets(res.data);
+                if (res.success) {
+                    setTickets(res.data);
+                    setTicketsResolved(tickets.filter((t) => { t.status === "RESOLVED" || t.status === "WARNED" }));
+                    setTicketsUnresolved(tickets.filter((t) => { t.status !== "RESOLVED" || t.status !== "WARNED" }));
+                }
                 else
                     Swal.fire("Error", "No se pudieron obtener los tickets.", "error");
             } finally {
@@ -35,7 +41,7 @@ export default function DashboardTickets() {
         };
 
         fetchTickets();
-    }, []);
+    }, [tickets]);
 
     // 📩 Seleccionar ticket
     const handleSelectTicket = (id) => {
@@ -52,49 +58,66 @@ export default function DashboardTickets() {
     };
 
     // 🧮 Filtrado
-    const filteredTickets = tickets.filter((t) => {
-        if (filter === "resolved") return t.status === "RESOLVED" || t.status === "WARNED";
-        if (filter === "unresolved") return t.status !== "RESOLVED" || t.status !== "WARNED";
-        return true;
-    });
+    const filteredTickets =
+        currentView === "resolved"
+            ? ticketsResolved
+            : currentView === "unresolved"
+                ? ticketsUnresolved
+                : tickets;
 
     if (loading) return <SpinnerComponent />;
 
     return (
         <Container className="mt-4 d-flex flex-column" style={{ minHeight: "70vh" }}>
-            <h3 className="text-center mb-4">Gestión de Tickets</h3>
 
+            {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />
             </div>
 
-            {/* 🔍 Filtros */}
-            <Row className="mb-3 justify-content-center">
-                <Col xs="12" md="6" className="text-center">
-                    <ButtonGroup>
-                        <Button
-                            color={filter === "all" ? "primary" : "secondary"}
-                            onClick={() => setFilter("all")}
-                        >
-                            Todos
-                        </Button>
-                        <Button
-                            color={filter === "unresolved" ? "primary" : "secondary"}
-                            onClick={() => setFilter("unresolved")}
-                        >
-                            No resueltos
-                        </Button>
-                        <Button
-                            color={filter === "resolved" ? "primary" : "secondary"}
-                            onClick={() => setFilter("resolved")}
-                        >
-                            Resueltos
-                        </Button>
-                    </ButtonGroup>
+
+            {/* Tarjetas para cambiar de vista solo para ADMIN/SUPERADMIN */}
+            <Row className="mb-3 mt-4 justify-content-center g-3">
+                <Col xs={6} sm={6} md={4} l={3} xl={3}>
+                    <Card
+                        className={`shadow-lg mb-2 border-2 ${currentView === "tickets" ? "border-primary" : ""}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setCurrentView("tickets")}
+                    >
+                        <CardBody className="text-center pt-3">
+                            <CardTitle tag="h6">Todos</CardTitle>
+                            <CardText className="fs-4 fw-bold">{tickets.length}</CardText>
+                        </CardBody>
+                    </Card>
+                </Col>
+                <Col xs={6} sm={6} md={4} l={3} xl={3}>
+                    <Card
+                        className={`shadow-lg mb-2 border-2 ${currentView === "unresolved" ? "border-primary" : ""}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setCurrentView("unresolved")}
+                    >
+                        <CardBody className="text-center pt-3">
+                            <CardTitle tag="h6">No Resueltos</CardTitle>
+                            <CardText className="fs-4 fw-bold">{ticketsUnresolved.length}</CardText>
+                        </CardBody>
+                    </Card>
+                </Col>
+                <Col xs={6} sm={6} md={4} l={3} xl={3}>
+                    <Card
+                        className={`shadow-lg mb-2 border-2 ${currentView === "resolved" ? "border-primary" : ""}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setCurrentView("resolved")}
+                    >
+                        <CardBody className="text-center pt-3">
+                            <CardTitle tag="h6">Resueltos</CardTitle>
+                            <CardText className="fs-4 fw-bold">{ticketsResolved.length}</CardText>
+                        </CardBody>
+                    </Card>
                 </Col>
             </Row>
 
-            {/* 🖥️ Escritorio */}
+
+            {/* Escritorio */}
             <Row
                 className="d-none d-lg-flex flex-grow-1"
                 style={{
@@ -132,7 +155,7 @@ export default function DashboardTickets() {
                 </Col>
             </Row>
 
-            {/* 📱 Móvil */}
+            {/* Móvil */}
             <Row className="d-flex d-lg-none flex-column">
                 <Col
                     xs="12"

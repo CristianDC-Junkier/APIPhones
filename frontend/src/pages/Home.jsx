@@ -1,8 +1,9 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HomeButtonComponent from '../components/utils/HomeButtonComponent';
 import LogoutButton from '../components/utils/LogoutComponent';
 import { useAuth } from '../hooks/useAuth';
+import { getCount } from '../services/TicketService';
 import { Container, Row, Col } from 'reactstrap';
 import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll, faStickyNote } from '@fortawesome/free-solid-svg-icons';
 
@@ -11,7 +12,7 @@ import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll, faStickyNote 
  */
 const Home = () => {
     const [loadingLogout, setLoadingLogout] = useState(false);
-
+    const [count, setCount] = useState(0);
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
@@ -32,6 +33,17 @@ const Home = () => {
             ]
         }
     })();
+
+    useEffect(() => {
+        const getUnresolved = async () => {
+            const response = await getCount();
+            if (response.success) {
+                console.log(response.data);
+                setCount(response.data);
+            }
+        };
+        getUnresolved();
+    }, []);
 
     //Función que gestiona el cierre de sesión
     const handleLogout = async () => {

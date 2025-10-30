@@ -29,7 +29,7 @@ export default function DashboardTickets() {
             try {
                 const res = await getTicketList();
                 if (res.success) {
-                    setTickets(res.data);
+                    setTickets(res.data.tickets);
                     setTicketsResolved(tickets.filter((t) => { t.status === "RESOLVED" || t.status === "WARNED" }));
                     setTicketsUnresolved(tickets.filter((t) => { t.status !== "RESOLVED" || t.status !== "WARNED" }));
                 }
@@ -41,7 +41,7 @@ export default function DashboardTickets() {
         };
 
         fetchTickets();
-    }, [tickets]);
+    }, []);
 
     // 📩 Seleccionar ticket
     const handleSelectTicket = (id) => {
@@ -116,26 +116,9 @@ export default function DashboardTickets() {
                 </Col>
             </Row>
 
-
-            {/* Escritorio */}
-            <Row
-                className="d-none d-lg-flex flex-grow-1"
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    flex: 1,
-                    height: "auto",
-                    overflow: "hidden",
-                }}
-            >
-                <Col
-                    lg="4"
-                    style={{
-                        height: "calc(65vh)",
-                        overflowY: "auto",
-                        paddingRight: "0.5rem",
-                    }}
-                >
+            {/* 🖥️ Escritorio */}
+            <Row className="d-none d-lg-flex flex-grow-1" style={{ display: "flex", flexDirection: "row", flex: 1, height: "auto", overflow: "hidden", }}>
+                <Col lg="4" style={{height: "calc(65vh)", overflowY: "auto", paddingRight: "0.5rem",}}>
                     <TicketListComponent
                         tickets={filteredTickets}
                         selectedTicket={selectedTicket}
@@ -143,42 +126,20 @@ export default function DashboardTickets() {
                     />
                 </Col>
 
-                <Col
-                    lg="8"
-                    style={{
-                        height: "calc(65vh)",
-                        overflowY: "auto",
-                        paddingLeft: "1rem",
-                    }}
-                >
+                <Col lg="8" style={{ height: "calc(65vh)", overflowY: "auto", paddingLeft: "1rem", }}>
                     <TicketViewerComponent ticket={ticketContent} />
                 </Col>
             </Row>
 
             {/* Móvil */}
             <Row className="d-flex d-lg-none flex-column">
-                <Col
-                    xs="12"
-                    style={{
-                        marginBottom: "0.5rem",
-                        maxHeight: "50vh",
-                        overflowY: "auto",
-                    }}
-                >
+                <Col xs="12" style={{marginBottom: "0.5rem", maxHeight: "50vh", overflowY: "auto", }}>
                     <TicketViewerComponent ticket={ticketContent} />
                 </Col>
                 <Col xs="12">
                     <hr />
                 </Col>
-                <Col
-                    xs="12"
-                    style={{
-                        paddingTop: "0.5rem",
-                        marginBottom: "1rem",
-                        maxHeight: "50vh",
-                        overflowY: "auto",
-                    }}
-                >
+                <Col xs="12" style={{paddingTop: "0.5rem", marginBottom: "1rem", maxHeight: "50vh", overflowY: "auto",}}>
                     <TicketListComponent
                         tickets={filteredTickets}
                         selectedTicket={selectedTicket}

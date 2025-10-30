@@ -64,6 +64,7 @@ const TicketModel = sequelize.define("Ticket", {
             return val ? decrypt(val) : null;
         },
     },
+    createdAt: DataTypes.DATE,
     readAt: DataTypes.DATE,
     resolvedAt: DataTypes.DATE,
     warnedAt: DataTypes.DATE,

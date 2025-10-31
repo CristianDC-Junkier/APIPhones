@@ -31,7 +31,7 @@ export default function DashboardSystem() {
     const [logs, setLogs] = useState([]);
     const [selectedLog, setSelectedLog] = useState(null);
     const [isTicketLog, setIsTicketLog] = useState(false);
-    const [logContent, setLogContent] = useState('Selecciona un archivo para ver su contenido');
+    const [logContent, setLogContent] = useState('');
 
     const [loading, setLoading] = useState(false);
 
@@ -73,6 +73,7 @@ export default function DashboardSystem() {
 
     //Función encargada de mostrar la información del log seleccionado
     const handleSelectLog = async (log, isTLog) => {
+        setLogContent('');
         setSelectedLog(log);
         setIsTicketLog(isTLog);
         const res = await getLog(log);
@@ -117,10 +118,10 @@ export default function DashboardSystem() {
             {/* Métricas */}
             <Row className="mb-2 mt-4 text-center g-2">
                 {[
-                    { label: "CPU Usage (%)", value: cpuUsage, type: "warning" },
+                    { label: "Uso de la CPU (%)", value: cpuUsage, type: "warning" },
                     { label: "Memoria Usada (MB)", value: memoryUsed, type: "warning" },
-                    { label: "Threads Activos", value: threadsCount, type: "info" },
-                    { label: "Uptime", value: uptimeSeconds !== null ? formatUptime(uptimeSeconds) : null, type: "primary" }
+                    { label: "Hilos Activos", value: threadsCount, type: "info" },
+                    { label: "Tiempo de Actividad", value: uptimeSeconds !== null ? formatUptime(uptimeSeconds) : null, type: "primary" }
                 ].map((metric, idx) => (
                     <Col key={idx} xs={6} md={6} lg={3}>
                         <Card className={`border-${metric.type} shadow-sm`}>
@@ -130,13 +131,13 @@ export default function DashboardSystem() {
                                     {metric.value !== null && metric.value !== undefined
                                         ? (() => {
                                             switch (metric.label) {
-                                                case "CPU Usage (%)":
-                                                    return `${metric.value.toFixed(2)}%`;
+                                                case "Uso de la CPU (%)":
+                                                    return `${metric.value.toFixed(2)} %`;
                                                 case "Memoria Usada (MB)":
                                                     return `${metric.value.toFixed(2)} MB`;
-                                                case "Threads Activos":
+                                                case "Hilos Activos":
                                                     return metric.value;
-                                                case "Uptime":
+                                                case "Tiempo de Actividad":
                                                     return metric.value; 
                                                 default:
                                                     return metric.value;

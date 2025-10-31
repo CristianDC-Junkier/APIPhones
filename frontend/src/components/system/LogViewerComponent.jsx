@@ -20,7 +20,7 @@ export default function LogViewerComponent({ content = '', isTicketLog = false }
         return (
             <Card className="d-flex flex-column flex-grow-1" style={{ height: '100%' }}>
                 <CardBody className="d-flex justify-content-center align-items-center" style={{ height: '100%' }}>
-                    <span style={{ color: '#6c757d' }}>No hay contenido para mostrar</span>
+                    <span style={{ color: '#6c757d' }}>Selecciona un archivo para ver su contenido</span>
                 </CardBody>
             </Card>
         );

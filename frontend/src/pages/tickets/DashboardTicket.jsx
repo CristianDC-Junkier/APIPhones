@@ -1,4 +1,5 @@
-﻿import React, { useState, useEffect } from "react";
+﻿/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText } from "reactstrap";
 import Swal from "sweetalert2";
 
@@ -22,7 +23,7 @@ export default function DashboardTickets() {
     const [loading, setLoading] = useState(false);
     const [currentView, setCurrentView] = useState("tickets"); // all | unresolved | resolved
 
-    // 🔄 Cargar tickets desde el backend
+    // Cargar tickets desde el backend
     useEffect(() => {
         fetchTickets();
     }, []);

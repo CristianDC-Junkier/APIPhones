@@ -86,7 +86,7 @@ class UserDataController {
     static async workerListByDepartment(req, res) {
         try {
             const departmentId = req.user.department;
-            
+
             if (!departmentId) {
                 return res.status(400).json({ error: "El usuario no tiene departamento asignado" });
             }
@@ -108,7 +108,7 @@ class UserDataController {
                                 { status: "READ" }
                             ]
                         },
-                        required: false                
+                        required: false
                     }
                 ]
             });
@@ -303,8 +303,8 @@ class UserDataController {
     */
     static async getProfile(req, res) {
         try {
-
             const { version } = req.query;
+
             const user = await UserAccount.findByPk(req.user.id, {
                 include: [
                     {
@@ -314,10 +314,36 @@ class UserDataController {
                             { model: SubDepartment, as: 'subdepartment', attributes: ['id', 'name'] }
                         ],
                         attributes: ['id', 'name']
+                    },
+                    {
+                        model: Ticket,
+                        as: 'ticketsRequested',      // ✅ alias correcto
+                        attributes: ['id', 'status'],
+                        where: { status: 'RESOLVED' }, // solo tickets resueltos
+                        required: false               // permite que user sin tickets también aparezca
                     }
                 ]
             });
 
+            if (!user) {
+                return res.status(404).json({ error: "Usuario no encontrado" });
+            }
+
+            console.log(user.ticketsRequested);
+
+            // Actualizar tickets a WARNED y loguear
+            await Promise.all(
+                user.ticketsRequested.map(async (ticket) => {
+                    await ticket.update({ status: 'WARNED' });
+                    LoggerController.ticketAction({
+                        ticketId: ticket.id,
+                        action: 'WARNED',
+                        userId: user.id
+                    });
+                })
+            );
+
+            // Verificar versión
             if (user.version != version) {
                 return res.status(409).json({
                     error: "Su usuario ha sido modificado anteriormente",
@@ -332,8 +358,6 @@ class UserDataController {
                 });
             }
 
-            if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-
             return res.json({
                 id: user.id,
                 username: user.username,
@@ -344,11 +368,11 @@ class UserDataController {
                 version: user.version,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
-
+                ticketsResolvedCount: user.ticketsRequested.length, // ✅ contador de tickets resueltos
             });
 
         } catch (error) {
-            LoggerController.error('Error recuperando el perfil del usuario con id ' + id);
+            LoggerController.error('Error recuperando el perfil del usuario con id ' + req.user.id);
             LoggerController.error(`Error obteniendo perfil: ${error.message}`);
             return res.status(500).json({ error: error.message });
         }

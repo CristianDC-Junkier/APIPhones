@@ -72,7 +72,7 @@ const SystemController = {
             return res.type("text/plain").send(content);
 
         } catch (error) {
-            LoggerController.error('Error al leer el archivo de log ' + log + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error al leer el archivo de log ' + req.params.log + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }
@@ -88,16 +88,26 @@ const SystemController = {
     downloadLog: (req, res) => {
         try {
             const { log } = req.params;
-            const logPath = path.resolve(logBasePath, log);
+            console.log(log);
 
-            if (!fs.existsSync(logPath)) {
+            const logPath = path.resolve(logBasePath,log);
+            const ticketsLogPath = path.resolve(logBasePath, "tickets", log);
+            let finalPath = null;
+
+            if (fs.existsSync(logPath)) {
+                finalPath = logPath;
+            } else if (fs.existsSync(ticketsLogPath)) {
+                finalPath = ticketsLogPath;
+            }
+            else {
                 return res.status(404).json({ error: "Archivo log no encontrado" });
             }
 
-            return res.download(logPath, log);
+
+            return res.download(finalPath);
 
         } catch (error) {
-            LoggerController.error('Error al descargar el archivo de log ' + log + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error al descargar el archivo de log ' + req.params.log + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }

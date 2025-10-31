@@ -1,12 +1,11 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HomeButtonComponent from '../components/utils/HomeButtonComponent';
-import LogoutButton from '../components/utils/LogoutComponent';
+import { Container, Row, Col, Alert, Badge } from 'reactstrap';
+import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll, faStickyNote } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../hooks/useAuth';
 import { getCount } from '../services/TicketService';
-import { Container, Row, Col } from 'reactstrap';
-import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll, faStickyNote } from '@fortawesome/free-solid-svg-icons';
-
+import HomeButtonComponent from '../components/utils/HomeButtonComponent';
+import LogoutButton from '../components/utils/LogoutComponent';
 /**
  * Página que muestra las acciones disponibles al usuario.
  */
@@ -38,7 +37,6 @@ const Home = () => {
         const getUnresolved = async () => {
             const response = await getCount();
             if (response.success) {
-                console.log(response.data);
                 setCount(response.data);
             }
         };
@@ -63,12 +61,33 @@ const Home = () => {
             style={{ minHeight: '80vh' }}
         >
 
+
+
             {/* Botón de cierre de sesión */}
             <Row className="align-items-center m-0 p-0">
                 <Col className="d-flex justify-content-start">
                     <LogoutButton onClick={handleLogout} loading={loadingLogout} />
                 </Col>
             </Row>
+
+            {/*Información de tickets sin resolver*/}
+            {count > 0 && (
+                <Row className="justify-content-center mb-3">
+                    <Col xs="auto">
+                        <span className=" fs-5 d-flex align-items-center gap-2 fw-bold text-dark">
+                            <span>
+                                {count === 1 ? 'Existe' : 'Existen'}{' '}
+                                <Badge color="danger" pill>
+                                    {count}
+                                </Badge>{' '}
+                                {count === 1 ? 'ticket sin resolver' : 'tickets sin resolver'}
+                            </span>
+                        </span>
+                    </Col>
+                </Row>
+            )}
+
+
 
             {/* Botones con las acciones definidas */}
             <div className="d-flex flex-column justify-content-center align-items-center" style={{ flexGrow: 1 }}>

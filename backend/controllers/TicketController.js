@@ -1,5 +1,6 @@
 ﻿const { Ticket, UserAccount } = require("../models/Relations");
 const LoggerController = require("../controllers/LoggerController");
+const { Op } = require('sequelize');
 
 /**
  * TicketController
@@ -48,7 +49,11 @@ class TicketController {
     static async getUnresolvedTickets(req, res) {
         try {
             const count = await Ticket.count({
-                where: { status: "OPEN" }
+                where: {
+                    status: {
+                        [Op.or]: ['OPEN', 'READ']
+                    }
+                }
             })
 
             res.json(count);

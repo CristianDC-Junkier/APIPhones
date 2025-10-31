@@ -31,11 +31,26 @@ const ProfileUser = () => {
             // Obtener perfil
             const profileResponse = await getProfile(version);
             if (profileResponse.success) {
-                setProfile(profileResponse.data);
+                const profileData = profileResponse.data;
+                setProfile(profileData);
+
+                // Mostrar alerta si hay tickets resueltos
+                const count = profileData.ticketsResolvedCount || 0;
+                if (count > 0) {
+                    Swal.fire({
+                        title: 'Información',
+                        icon: 'info',
+                        text:
+                            count === 1
+                                ? 'Se ha resuelto su ticket'
+                                : `Se han resuelto ${count} tickets`,
+                        confirmButtonText: 'Aceptar',
+                    });
+                }
             }
 
             fetchList();
-            
+
         } finally {
             setLoading(false);
         }

@@ -2,6 +2,8 @@
 import { ListGroup, ListGroupItem, Tooltip, Badge, ButtonGroup, Button, } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faEnvelopeOpen, faSortAmountDown, faSortAmountUp, } from "@fortawesome/free-solid-svg-icons";
+import TicketDropdownMenuComponent from "./TicketDropdownMenuComponent";
+
 
 /**
  * Lista de tickets con apariencia de bandeja de correo.
@@ -15,6 +17,7 @@ export default function TicketListComponent({
     tickets,
     selectedTicket,
     onSelectTicket,
+    updateTickets
 }) {
     const [tooltipOpen, setTooltipOpen] = useState({});
     const [sortOrder, setSortOrder] = useState("desc"); // asc | desc
@@ -113,8 +116,7 @@ export default function TicketListComponent({
                                     transition: "background 0.2s",
                                 }}
                             >
-                                <div
-                                    id={tooltipId}
+                                <div id={tooltipId}
                                     style={{
                                         overflow: "hidden",
                                         textOverflow: "ellipsis",
@@ -154,7 +156,10 @@ export default function TicketListComponent({
                                         {new Date(ticket.createdAt).toLocaleDateString()}
                                     </div>
                                     {!isRead && <Badge color="primary">Nuevo</Badge>}
+                                    
                                 </div>
+                                <TicketDropdownMenuComponent ticketId={ticket.id} updateTickets={updateTickets} />
+
                             </ListGroupItem>
                         );
                     })) : (<p className="p-3 text-muted">No hay tickets disponibles</p>)}

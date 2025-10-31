@@ -22,24 +22,24 @@ export default function DashboardTickets() {
     const [loading, setLoading] = useState(false);
     const [currentView, setCurrentView] = useState("tickets"); // all | unresolved | resolved
 
-    // 🔄 Cargar tickets desde el backend
+    //Cargar tickets desde el backend
     useEffect(() => {
-        fetchTickets();
+        fetchTickets(true);
     }, []);
 
-    const fetchTickets = async () => {
-        setLoading(true);
+    const fetchTickets = async (init = false) => {
+        if (init) setLoading(true);
         try {
             const res = await getTicketList();
             if (res.success) {
                 setTickets(res.data.tickets);
-                setTicketsResolved(tickets.filter((t) => { t.status === "RESOLVED" || t.status === "WARNED" }));
-                setTicketsUnresolved(tickets.filter((t) => { t.status !== "RESOLVED" || t.status !== "WARNED" }));
+                setTicketsResolved(res.data.tickets.filter((t) => t.status === "RESOLVED" || t.status === "WARNED" ));
+                setTicketsUnresolved(res.data.tickets.filter((t) => t.status !== "RESOLVED" && t.status !== "WARNED" ));
             }
-            else
-                Swal.fire("Error", "No se pudieron obtener los tickets.", "error");
-        } finally {
-            setLoading(false);
+            if (init) setLoading(false);
+        } catch (error) {
+            if (init) setLoading(false);
+            Swal.fire("Error", "No se pudieron obtener los tickets. " + error, "error");
         }
     };
 
@@ -48,15 +48,12 @@ export default function DashboardTickets() {
         setSelectedTicket(id);
 
         // Busca el ticket dentro del array local de tickets
-        const ticket = tickets.find((t) => t.id === id);
-        const ticketIdx = tickets.findIndex((t) => t.id === id);
-
+        let ticket = tickets.find((t) => t.id === id);
         if (ticket) {
             if (ticket.status === "OPEN") {
                 const response = await markTicket({ id, read: true, warned: false, resolved: false });
                 if (response.success) {
-                    tickets[ticketIdx].status = "READ";
-                    ticket.status = "READ";
+                    fetchTickets();
                 }
             }
             setTicketContent(ticket);
@@ -131,6 +128,7 @@ export default function DashboardTickets() {
                         tickets={filteredTickets}
                         selectedTicket={selectedTicket}
                         onSelectTicket={handleSelectTicket}
+                        updateTickets={fetchTickets}
                     />
                 </Col>
 
@@ -152,6 +150,7 @@ export default function DashboardTickets() {
                         tickets={filteredTickets}
                         selectedTicket={selectedTicket}
                         onSelectTicket={handleSelectTicket}
+                        updateTickets={fetchTickets}
                     />
                 </Col>
             </Row>

@@ -14,10 +14,7 @@ import AddModifyDepartmentComponent from "../../components/department/AddModifyD
 import AddModifySubdepartmentComponent from "../../components/department/AddModifySubDepartmentComponent";
 
 /**
- * Dashboard de Departamentos y Subdepartamentos
- * 
- * ADMIN / SUPERADMIN: pueden alternar entre departamentos y subdepartamentos.
- * DEPARTMENT: solo ve subdepartamentos de su departamento.
+ * Dashboard de gestion de Departamentos y Subdepartamentos 
  */
 const DashboardDepartment = () => {
     const { user: currentUser } = useAuth();

@@ -1,4 +1,4 @@
-﻿const { UserAccount, UserData, Department, SubDepartment } = require("../models/Relations")
+﻿const { UserAccount, UserData, Department, SubDepartment, Ticket } = require("../models/Relations")
 
 const LoggerController = require("../controllers/LoggerController");
 const { Op } = require("sequelize");
@@ -98,6 +98,18 @@ class UserDataController {
                 include: [
                     { model: Department, as: "department" },
                     { model: SubDepartment, as: "subdepartment" },
+                    {
+                        model: Ticket,
+                        as: "ticketsAffected",
+                        attributes: ["status"],
+                        where: {
+                            [Op.or]: [
+                                { status: "OPEN" },
+                                { status: "READ" }
+                            ]
+                        },
+                        required: false                
+                    }
                 ]
             });
             const formatted = allData.map(user => ({
@@ -111,7 +123,8 @@ class UserDataController {
                 subdepartmentId: user.subdepartmentId,
                 subdepartmentName: user.subdepartment?.name || null,
                 show: user.show,
-                version: user.version
+                version: user.version,
+                ticket: user.ticketsAffected && user.ticketsAffected.length > 0 ? true : false
             })
             );
 

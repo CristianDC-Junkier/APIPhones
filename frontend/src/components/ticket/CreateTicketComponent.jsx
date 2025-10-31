@@ -27,20 +27,25 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
     ];
 
     // HTML para selects y opciones
-    const optionsHtml = topics.map(t => `<option value="${t.value}" ${t.value ? "disable selected" : ""} >${t.label}</option>`).join("");
+    const optionsHtml = topics.map(t => {
+        if (t.value === null) {
+            return `<option value="" selected disabled>${t.label}</option>`;
+        }
+        return `<option value="${t.value}">${t.label}</option>`;
+    }).join("");
 
     // Estilos
     const rowStyle = 'display:flex; align-items:center; margin-bottom:1rem; font-size:1rem;';
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
-    const inputStyle = 'flex:1; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
-    const textareaStyle = 'flex:1; height:120px; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
+    const selectStyle = 'flex:1; width:100%; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
+    const textareaStyle = 'flex:1; width:100%; height:120px; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
 
     const stepHtml = `
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <div>
         <div style="${rowStyle}">
             <label style="${labelStyle}">Asunto<span style="color:red">*</span></label>
-            <select id="swal-topic" style="${inputStyle}">${optionsHtml}</select>
+            <select id="swal-topic" style="${selectStyle}">${optionsHtml}</select>
         </div>
         <div style="${rowStyle} margin-top: 5vh">
             <label style="${labelStyle}">Mensaje <span style="color:red">*</span></label>
@@ -58,9 +63,8 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
         cancelButtonText: "Cancelar",
         confirmButtonText: "Enviar",
         preConfirm: () => {
-            const topic = document.getElementById("swal-topic").label;
+            const topic = document.getElementById("swal-topic").value;
             const text = document.getElementById("swal-text").value.trim();
-            console.log(topic);
             if (!topic) { Swal.showValidationMessage("Debe elegir un asunto"); return false; }
             if (!text) { Swal.showValidationMessage("Detalle cual es el motivo del ticket"); return false; }
 

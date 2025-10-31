@@ -2,5 +2,6 @@
   <ItemGroup>
     <Folder Include="database\" />
     <Folder Include="logs\" />
+    <Folder Include="logs\tickets\" />
   </ItemGroup>
 </Project>

@@ -28,38 +28,40 @@ export default function LogListComponent({ logs, selectedLog, onSelectLog, onDow
     };
 
     return (
-        <ListGroup flush
-            style={{
-                overflowY: 'auto',
-            }} >
+        <ListGroup flush style={{ overflowY: 'auto' }} >
             {logs.map((log, index) => {
                 const displayName = log.includes('-') ? log.split('-').slice(1).join('-') : log;
                 const tooltipId = `tooltip-${index}`;
+
+                const isTicketLog = log === "tickets.log";
+                const isActive = selectedLog === log;
+                const itemStyle = {
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    backgroundColor: isTicketLog && !isActive ? '#8CFDFF' : undefined,
+                };
+                const textStyle = {
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '70%',
+                    display: 'inline-block',
+                    verticalAlign: 'middle',
+                    color: isTicketLog && !isActive ? '#0d3b66' : undefined,
+                    fontWeight: isTicketLog ? 'bold' : undefined,
+                };
 
                 return (
                     <ListGroupItem
                         key={log}
                         action
-                        active={selectedLog === log}
-                        onClick={() => onSelectLog(log)}
-                        style={{
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
-                        }}
+                        active={isActive}
+                        onClick={() => onSelectLog(log, isTicketLog )}
+                        style={itemStyle}
                     >
-                        <span
-                            id={tooltipId}
-                            style={{
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                maxWidth: '70%',  
-                                display: 'inline-block',
-                                verticalAlign: 'middle'
-                            }}
-                        >
+                        <span id={tooltipId} style={textStyle}>
                             <FontAwesomeIcon icon={faFileAlt} className="me-2" />
                             {displayName}
                         </span>
@@ -89,3 +91,4 @@ export default function LogListComponent({ logs, selectedLog, onSelectLog, onDow
         </ListGroup>
     );
 }
+       

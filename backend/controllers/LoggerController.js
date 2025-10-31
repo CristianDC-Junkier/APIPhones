@@ -138,22 +138,38 @@ class LoggerController {
     // -----------------------------
     // Logs de acciones de tickets
     // -----------------------------
-
-    /**
-     * Registra una acción sobre un ticket
-     * Ejemplo de uso: READ, RESOLVE, WARN
-     * @param {Object} params
-     * @param {number|string} params.ticketId - ID del ticket
-     * @param {string} params.action - Acción realizada
-     * @param {number|string} params.userId - ID del usuario que realiza la acción
-     */
     static ticketAction({ ticketId, action, userId }) {
+        const filePath = path.join(this.logsTicketDir, `tickets.log`);
         const timestamp = this._getTimestamp();
-        const logLine = `${ticketId} | "${action}" | ${userId} | ${timestamp}`;
-        const filePath = path.join(this.logsTicketDir, `${new Date().toISOString().slice(0, 10)}.log`);
-        this._writeToFile(filePath, logLine);
-        this._cleanupOldLogs(this.logsTicketDir);
+
+        // Definir ancho fijo de columnas
+        const ticketColWidth = 10;  // ID Ticket
+        const actionColWidth = 25;  // Acción
+        const userColWidth = 10;    // ID Usuario
+        const dateColWidth = 20;    // Fecha y Hora
+
+        // Crear encabezado si el archivo no existe
+        if (!fs.existsSync(filePath)) {
+            const header =
+                'ID Ticket'.padEnd(ticketColWidth) + ' | ' +
+                'Acción'.padEnd(actionColWidth) + ' | ' +
+                'ID Usuario'.padEnd(userColWidth) + ' | ' +
+                'Fecha y Hora'.padEnd(dateColWidth);
+            fs.writeFileSync(filePath, header + '\n');
+        }
+
+        // Formatear línea del log con mismo ancho de columnas
+        const logLine =
+            String(ticketId).padEnd(ticketColWidth) + ' | ' +
+            String(action).padEnd(actionColWidth) + ' | ' +
+            String(userId).padEnd(userColWidth) + ' | ' +
+            timestamp.padEnd(dateColWidth);
+
+        fs.appendFile(filePath, logLine + '\n', err => {
+            if (err) console.error('Error escribiendo log de ticket:', err);
+        });
     }
+
 }
 
 // Inicializa automáticamente el LoggerController al cargar el módulo

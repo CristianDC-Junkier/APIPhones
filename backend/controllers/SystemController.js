@@ -28,11 +28,15 @@ const SystemController = {
      */
     getLogs: (req, res) => {
         try {
-            const logs = fs
-                .readdirSync(logBasePath, { withFileTypes: true })
-                .filter((dirent) => dirent.isFile())
-                .map((dirent) => dirent.name)
+            const allFiles = fs.readdirSync(logBasePath, { withFileTypes: true })
+                .filter(dirent => dirent.isFile())
+                .map(dirent => dirent.name)
                 .sort((a, b) => b.localeCompare(a));
+
+            const ticketsPath = path.join(logBasePath, 'tickets', 'tickets.log');
+            const ticketLog = fs.existsSync(ticketsPath) ? ['tickets.log'] : [];
+
+            const logs = [...ticketLog, ...allFiles];
 
             return res.json(logs);
         } catch (error) {
@@ -53,11 +57,18 @@ const SystemController = {
         try {
             const { log } = req.params;
             const logPath = path.resolve(logBasePath, log);
+            const ticketsLogPath = path.resolve(logBasePath, "tickets", log);
+            let content = null;
 
-            if (!fs.existsSync(logPath)) {
+            if (fs.existsSync(logPath)) {
+                content = fs.readFileSync(logPath, "utf-8");
+            } else if (fs.existsSync(ticketsLogPath)) {
+                content = fs.readFileSync(ticketsLogPath, "utf-8");
+            }
+            else {
                 return res.status(404).json({ error: "Archivo log no encontrado" });
             }
-            const content = fs.readFileSync(logPath, "utf-8");
+
             return res.type("text/plain").send(content);
 
         } catch (error) {

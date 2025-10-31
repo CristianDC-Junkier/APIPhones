@@ -43,7 +43,7 @@ export default function DashboardTickets() {
         fetchTickets();
     }, [tickets]);
 
-    // 📩 Seleccionar ticket
+    // Seleccionar ticket
     const handleSelectTicket = (id) => {
         setSelectedTicket(id);
 
@@ -57,7 +57,7 @@ export default function DashboardTickets() {
         }
     };
 
-    // 🧮 Filtrado
+    // Filtrado
     const filteredTickets =
         currentView === "resolved"
             ? ticketsResolved

@@ -34,7 +34,16 @@ const ProfileUser = () => {
                 setProfile(profileResponse.data);
             }
 
-            // Obtener datos solo si el usuario tiene departamento
+            fetchList();
+            
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchList = async () => {
+        setLoading(true);
+        try {
             if (user.department) {
                 const dataResponse = await getWorkerDataList(user.department);
                 if (dataResponse.success) {
@@ -45,6 +54,7 @@ const ProfileUser = () => {
             setLoading(false);
         }
     };
+
 
     /**
      * Recargar perfil cuando cambia la versión del usuario globalmente
@@ -58,7 +68,7 @@ const ProfileUser = () => {
 
     const totalPages = (data?.length || 0);
 
-    //Create Ticket
+    // Enviar ticket
     const handleTicket = async (dataItem) => {
         try {
             await CreateTicketComponent({
@@ -70,6 +80,7 @@ const ProfileUser = () => {
                     } else {
                         Swal.fire("Error", result.error || "No se pudo mandar el ticket", "error");
                     }
+                    fetchList();
                 }
             })
         } catch (err) {
@@ -77,7 +88,7 @@ const ProfileUser = () => {
         }
     }
 
-    // Modify profile
+    // Modificar el Usuario
     const handleModify = async () => {
         try {
             await ModifyUserAccountComponent({
@@ -163,17 +174,22 @@ const ProfileUser = () => {
                                         <Col md="6"><strong>Departamento:</strong></Col>
                                         <Col md="6">{profile.departmentName || "-"}</Col>
                                     </Row>
-                                    <Row className="mb-2">
+                                    {!isUser && <Row className="mb-2">
                                         <Col md="6"><strong>Tipo de Usuario:</strong></Col>
                                         <Col md="6">{profile.usertype || "-"}</Col>
-                                    </Row>
+                                    </Row>}
+                                    {isUser && <Row className="mb-2">
+                                        <Col md="12">
+                                            <div style={{ height: '20px' }}></div>
+                                        </Col>
+                                    </Row>}
                                     <Row className="mb-2">
                                         <Col md="6"><FaCalendarAlt className="me-2" /> Fecha de creación:</Col>
-                                        <Col md="6">{formatDate(profile.createdAt)}</Col>
+                                        <Col md="6" className="text-primary fw-semibold">{formatDate(profile.createdAt)}</Col>
                                     </Row>
                                     <Row className="mb-2">
                                         <Col md="6"><FaCalendarAlt className="me-2" /> Última modificación:</Col>
-                                        <Col md="6">{formatDate(profile.updatedAt)}</Col>
+                                        <Col md="6" className="text-primary fw-semibold">{formatDate(profile.updatedAt)}</Col>
                                     </Row>
                                 </div>
                                 {!isUser && <div className="d-flex justify-content-between mt-4 flex-wrap gap-2">
@@ -197,15 +213,51 @@ const ProfileUser = () => {
                                     data.map((us, idx) => (
                                         <CardBody key={idx} className="d-flex flex-column justify-content-between p-4">
                                             <div>
-                                                <h4 className="mb-4 text-success d-flex align-items-center position-relative">
-                                                    <FaBuilding className="me-2" /> Datos Personales
-                                                    <Button
-                                                        color="warning"
-                                                        className="rounded-pill px-4 position-absolute top-1 end-0 me-4"
-                                                        onClick={() => handleTicket(us)}
-                                                    >
-                                                        <FaTicketAlt className="me-2" /> Mandar Ticket
-                                                    </Button>
+                                                <h4 className="mb-4 text-success d-flex align-items-center justify-content-between">
+                                                    <span className="d-flex align-items-center">
+                                                        <FaBuilding className="me-2" /> Datos del Departamento
+                                                    </span>
+
+                                                    {!us.ticket ? (
+                                                        // Botón verde activo
+                                                        <Button
+                                                            className="text-success px-3 py-1 border border-success rounded-pill d-flex align-items-center justify-content-center"
+                                                            style={{
+                                                                backgroundColor: 'transparent',
+                                                                fontSize: '0.85rem',
+                                                                fontWeight: '500',
+                                                                lineHeight: '1rem',
+                                                                transition: 'all 0.2s ease',
+                                                            }}
+                                                            onMouseEnter={(e) => {
+                                                                e.currentTarget.style.backgroundColor = '#198754';
+                                                                e.currentTarget.style.setProperty('color', 'white', 'important');
+                                                            }}
+                                                            onMouseLeave={(e) => {
+                                                                e.currentTarget.style.backgroundColor = 'transparent';
+                                                                e.currentTarget.style.setProperty('color', '#198754', 'important');
+                                                            }}
+                                                            onClick={() => handleTicket(us)}
+                                                        >
+                                                            <FaTicketAlt className="me-2 mt-1" size={15} /> Mandar Ticket
+                                                        </Button>
+                                                    ) : (
+                                                        // Botón rojo deshabilitado
+                                                        <Button
+                                                            color="danger"
+                                                            className="px-3 py-1 rounded-pill"
+                                                            style={{
+                                                                fontSize: '0.85rem',
+                                                                fontWeight: '500',
+                                                                lineHeight: '1rem',
+                                                                cursor: 'not-allowed',
+                                                            }}
+                                                            disabled
+                                                        >
+                                                            Ya hay un Ticket Asignado
+                                                        </Button>
+                                                    )}
+
                                                 </h4>
                                                 <Row className="mb-2">
                                                     <Col md="6"><FaUser className="me-2" /> Nombre:</Col>
@@ -228,12 +280,11 @@ const ProfileUser = () => {
                                                     <Col md="6">{us.subdepartmentName || "-"}</Col>
                                                 </Row>
                                             </div>
-                                            <div className="mt-3" style={{ minHeight: '40px' }}>
+                                            <div className="mt-3" >
                                                 {totalPages > 1 ? (
                                                     <PaginationComponent currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-                                                ) : (
-                                                    <div style={{ height: '40px' }}></div>
-                                                )}
+                                                ) : null
+                                                }
                                             </div>
                                         </CardBody>
                                     ))

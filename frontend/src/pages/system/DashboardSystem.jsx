@@ -30,6 +30,7 @@ function formatUptime(totalSeconds) {
 export default function DashboardSystem() {
     const [logs, setLogs] = useState([]);
     const [selectedLog, setSelectedLog] = useState(null);
+    const [isTicketLog, setIsTicketLog] = useState(false);
     const [logContent, setLogContent] = useState('Selecciona un archivo para ver su contenido');
 
     const [loading, setLoading] = useState(false);
@@ -71,8 +72,9 @@ export default function DashboardSystem() {
     }, []);
 
     //Función encargada de mostrar la información del log seleccionado
-    const handleSelectLog = async (log) => {
+    const handleSelectLog = async (log, isTLog) => {
         setSelectedLog(log);
+        setIsTicketLog(isTLog);
         const res = await getLog(log);
         if (res.success) {
             setLogContent(res.data);
@@ -183,7 +185,7 @@ export default function DashboardSystem() {
                         paddingLeft: '1rem'
                     }}
                 >
-                    <LogViewerComponent content={logContent} />
+                    <LogViewerComponent content={logContent} isTicketLog={isTicketLog} />
                 </Col>
             </Row>
 
@@ -197,7 +199,7 @@ export default function DashboardSystem() {
                         overflowY: 'auto'
                     }}
                 >
-                    <LogViewerComponent content={logContent} />
+                    <LogViewerComponent content={logContent} isTicketLog={isTicketLog} />
                 </Col>
                 <Col xs="12">
                     <hr/>

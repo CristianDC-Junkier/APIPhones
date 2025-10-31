@@ -24,27 +24,27 @@ export default function DashboardTickets() {
 
     // 🔄 Cargar tickets desde el backend
     useEffect(() => {
-        const fetchTickets = async () => {
-            setLoading(true);
-            try {
-                const res = await getTicketList();
-                if (res.success) {
-                    setTickets(res.data.tickets);
-                    setTicketsResolved(tickets.filter((t) => { t.status === "RESOLVED" || t.status === "WARNED" }));
-                    setTicketsUnresolved(tickets.filter((t) => { t.status !== "RESOLVED" || t.status !== "WARNED" }));
-                }
-                else
-                    Swal.fire("Error", "No se pudieron obtener los tickets.", "error");
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchTickets();
     }, []);
 
+    const fetchTickets = async () => {
+        setLoading(true);
+        try {
+            const res = await getTicketList();
+            if (res.success) {
+                setTickets(res.data.tickets);
+                setTicketsResolved(tickets.filter((t) => { t.status === "RESOLVED" || t.status === "WARNED" }));
+                setTicketsUnresolved(tickets.filter((t) => { t.status !== "RESOLVED" || t.status !== "WARNED" }));
+            }
+            else
+                Swal.fire("Error", "No se pudieron obtener los tickets.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Seleccionar ticket
-    const handleSelectTicket = (id) => {
+    const handleSelectTicket = async (id) => {
         setSelectedTicket(id);
 
         // Busca el ticket dentro del array local de tickets

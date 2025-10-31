@@ -7,7 +7,7 @@ import SpinnerComponent from "../../components/utils/SpinnerComponent";
 import TicketListComponent from "../../components/ticket/TicketListComponent";
 import TicketViewerComponent from "../../components/ticket/TicketViewerComponent"
 
-import { getTicketList } from "../../services/TicketService";
+import { getTicketList, markTicket } from "../../services/TicketService";
 
 /**
  * Página encargada de mostrar la bandeja de tickets
@@ -49,8 +49,16 @@ export default function DashboardTickets() {
 
         // Busca el ticket dentro del array local de tickets
         const ticket = tickets.find((t) => t.id === id);
+        const ticketIdx = tickets.findIndex((t) => t.id === id);
 
         if (ticket) {
+            if (ticket.status === "OPEN") {
+                const response = await markTicket({ id, read: true, warned: false, resolved: false });
+                if (response.success) {
+                    tickets[ticketIdx].status = "READ";
+                    ticket.status = "READ";
+                }
+            }
             setTicketContent(ticket);
         } else {
             Swal.fire("Error", "No se encontró el ticket seleccionado.", "error");
@@ -116,7 +124,7 @@ export default function DashboardTickets() {
                 </Col>
             </Row>
 
-            {/* 🖥️ Escritorio */}
+            {/* Escritorio */}
             <Row className="d-none d-lg-flex flex-grow-1" style={{ display: "flex", flexDirection: "row", flex: 1, height: "auto", overflow: "hidden", }}>
                 <Col lg="4" style={{height: "calc(65vh)", overflowY: "auto", paddingRight: "0.5rem",}}>
                     <TicketListComponent
@@ -127,14 +135,14 @@ export default function DashboardTickets() {
                 </Col>
 
                 <Col lg="8" style={{ height: "calc(65vh)", overflowY: "auto", paddingLeft: "1rem", }}>
-                    <TicketViewerComponent ticket={ticketContent} />
+                    <TicketViewerComponent ticket={ticketContent} updateTickets={fetchTickets} />
                 </Col>
             </Row>
 
             {/* Móvil */}
             <Row className="d-flex d-lg-none flex-column">
                 <Col xs="12" style={{marginBottom: "0.5rem", maxHeight: "50vh", overflowY: "auto", }}>
-                    <TicketViewerComponent ticket={ticketContent} />
+                    <TicketViewerComponent ticket={ticketContent} updateTickets={fetchTickets} />
                 </Col>
                 <Col xs="12">
                     <hr />

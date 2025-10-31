@@ -1,20 +1,7 @@
 ﻿import React, { useState, useMemo } from "react";
-import {
-    ListGroup,
-    ListGroupItem,
-    Tooltip,
-    Badge,
-    ButtonGroup,
-    Button,
-} from "reactstrap";
+import { ListGroup, ListGroupItem, Tooltip, Badge, ButtonGroup, Button, } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faEnvelope,
-    faEnvelopeOpen,
-    faSortAmountDown,
-    faSortAmountUp,
-    faFilter,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faEnvelopeOpen, faSortAmountDown, faSortAmountUp, } from "@fortawesome/free-solid-svg-icons";
 
 /**
  * Lista de tickets con apariencia de bandeja de correo.
@@ -38,11 +25,11 @@ export default function TicketListComponent({
         setTooltipOpen((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
-    // 🧠 Filtro + ordenamiento
+    // Filtro + ordenamiento
     const filteredTickets = useMemo(() => {
         let result = [...tickets];
-        if (filter === "read") result = result.filter((t) => t.readAt);
-        if (filter === "unread") result = result.filter((t) => !t.readAt);
+        if (filter === "read") result = result.filter((t) => t.status !== "OPEN");
+        if (filter === "unread") result = result.filter((t) => t.status === "OPEN");
 
         result.sort((a, b) => {
             const dateA = new Date(a.createdAt || a.readAt || 0);
@@ -58,7 +45,7 @@ export default function TicketListComponent({
 
     return (
         <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-            {/* 🔍 Controles de filtro y orden */}
+            {/* Controles de filtro y orden */}
             <div
                 className="d-flex justify-content-between align-items-center p-2 border-bottom bg-light"
                 style={{ flexShrink: 0 }}
@@ -96,7 +83,7 @@ export default function TicketListComponent({
                 </Button>
             </div>
 
-            {/* 📋 Lista de tickets */}
+            {/* Lista de tickets */}
                 <ListGroup
                     flush
                     style={{ overflowY: "auto", flex: 1, backgroundColor: "white" }}
@@ -104,7 +91,7 @@ export default function TicketListComponent({
                     {!isEmpty ? (filteredTickets.map((ticket) => {
                         const tooltipId = `tooltip-${ticket.id}`;
                         const isSelected = selectedTicket === ticket.id;
-                        const isRead = !!ticket.readAt;
+                        const isRead = ticket.status !== "OPEN";
                         return (
                             <ListGroupItem
                                 key={ticket.id}

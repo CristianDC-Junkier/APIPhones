@@ -3,19 +3,37 @@ import { Card, CardBody, Badge, UncontrolledDropdown, DropdownToggle, DropdownMe
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
 
+import { markTicket } from "../../services/TicketService";
+
 /**
  * Visualizador del contenido del ticket (similar a un correo abierto)
  *
  * Props:
  * - ticket: { topic, information, status, readAt, createdAt, resolvedAt }
  */
-export default function TicketViewerComponent({ ticket }) {
+export default function TicketViewerComponent({ ticket, updateTickets }) {
     if (!ticket)
         return (
             <div className="p-4 text-muted" style={{ fontStyle: "italic" }}>
                 Selecciona un ticket para ver su contenido
             </div>
         );
+
+    const handleMenu = async (action) => {
+        if (action === "NotRead") {
+            const response = await markTicket({ id: ticket.id, read: false, warned: false, resolved: false });
+            if (response.success) {
+                console.log(action + " Successful");
+                updateTickets();
+            }
+        } else if (action === "Resolved") {
+            const response = await markTicket({ id: ticket.id, read: false, warned: false, resolved: true });
+            if (response.success) {
+                console.log(action + " Successful");
+                updateTickets();
+            }
+        }
+    }
 
     const getStatusColor = (status) => {
         switch (status) {
@@ -47,13 +65,13 @@ export default function TicketViewerComponent({ ticket }) {
                     <h5 className="mb-0">{ticket.topic}</h5>
                     <UncontrolledDropdown direction="start">
                         <DropdownToggle color="none">
-                            <FontAwesomeIcon icon={faEllipsisVertical}/>
+                            <FontAwesomeIcon icon={faEllipsisVertical} />
                         </DropdownToggle>
                         <DropdownMenu>
-                            <DropdownItem>
+                            <DropdownItem onClick={() => handleMenu("NotRead")}>
                                 Marcar como No Leído
                             </DropdownItem>
-                            <DropdownItem>
+                            <DropdownItem onClick={() => handleMenu("Resolved")}>
                                 Marcar como Resuelto
                             </DropdownItem>
                         </DropdownMenu>
@@ -69,7 +87,7 @@ export default function TicketViewerComponent({ ticket }) {
                             {new Date(ticket.readAt).toLocaleString()}
                         </>
                     )}
-                    <Badge className="align-items-end" color={getStatusColor(ticket.status)}>{ticket.status}</Badge>
+                    <Badge className="position-absolute end-0 me-4" color={getStatusColor(ticket.status)}>{ticket.status}</Badge>
 
                 </div>
                 <hr />

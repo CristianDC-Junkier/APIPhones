@@ -18,7 +18,7 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
 
     // Tipos de usuario disponibles según permisos del usuario actual
     const topics = [
-        { label: "-- Seleccionar --", value: null },
+        { label: "-- Seleccionar --", value: "" },
         { label: "Error en la información del listín", value: "Error" },
         { label: "Solicitud de cambios en la información del listín", value: "Change" },
         { label: "Eliminación de mi información", value: "Delete" },
@@ -65,6 +65,7 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
         preConfirm: () => {
             const topic = document.getElementById("swal-topic").value;
             const text = document.getElementById("swal-text").value.trim();
+
             if (!topic) { Swal.showValidationMessage("Debe elegir un asunto"); return false; }
             if (!text) { Swal.showValidationMessage("Detalle cual es el motivo del ticket"); return false; }
 

@@ -25,6 +25,7 @@ class TicketController {
                 topic: ticket.topic,
                 information: ticket.information,
                 status: ticket.status,
+                createdAt: ticket.createdAt,
                 readAt: ticket.readAt,
                 resolvedAt: ticket.resolvedAt,
                 warnedAt: ticket.warnedAt,
@@ -73,6 +74,7 @@ class TicketController {
                 idAffectedData,
                 userRequesterId: requesterId,
                 status: "OPEN",
+                createdAt: new Date(),
                 readAt: null,
                 resolvedAt: null,
                 warnedAt: null

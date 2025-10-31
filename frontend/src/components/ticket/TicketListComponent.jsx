@@ -32,9 +32,7 @@ export default function TicketListComponent({
     const [tooltipOpen, setTooltipOpen] = useState({});
     const [sortOrder, setSortOrder] = useState("desc"); // asc | desc
     const [filter, setFilter] = useState("all"); // all | read | unread
-
-    if (!tickets || tickets.length === 0)
-        return <p className="p-3 text-muted">No hay tickets disponibles</p>;
+    let isEmpty = false;
 
     const toggleTooltip = (id) => {
         setTooltipOpen((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -54,6 +52,9 @@ export default function TicketListComponent({
 
         return result;
     }, [tickets, sortOrder, filter]);
+
+    if (filteredTickets.length === 0)
+        isEmpty = true;
 
     return (
         <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -96,83 +97,82 @@ export default function TicketListComponent({
             </div>
 
             {/* 📋 Lista de tickets */}
-            <ListGroup
-                flush
-                style={{ overflowY: "auto", flex: 1, backgroundColor: "white" }}
-            >
-                {filteredTickets.map((ticket) => {
-                    const tooltipId = `tooltip-${ticket.id}`;
-                    const isSelected = selectedTicket === ticket.id;
-                    const isRead = !!ticket.readAt;
-
-                    return (
-                        <ListGroupItem
-                            key={ticket.id}
-                            action
-                            active={isSelected}
-                            onClick={() => onSelectTicket(ticket.id)}
-                            style={{
-                                cursor: "pointer",
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                padding: "0.75rem 1rem",
-                                backgroundColor: isSelected
-                                    ? "#e9f5ff"
-                                    : isRead
-                                        ? "#f8f9fa"
-                                        : "white",
-                                borderLeft: isSelected ? "4px solid #0d6efd" : "4px solid transparent",
-                                transition: "background 0.2s",
-                            }}
-                        >
-                            <div
-                                id={tooltipId}
+                <ListGroup
+                    flush
+                    style={{ overflowY: "auto", flex: 1, backgroundColor: "white" }}
+                >
+                    {!isEmpty ? (filteredTickets.map((ticket) => {
+                        const tooltipId = `tooltip-${ticket.id}`;
+                        const isSelected = selectedTicket === ticket.id;
+                        const isRead = !!ticket.readAt;
+                        return (
+                            <ListGroupItem
+                                key={ticket.id}
+                                action
+                                active={isSelected}
+                                onClick={() => onSelectTicket(ticket.id)}
                                 style={{
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                    flex: 1,
-                                    minWidth: 0,
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    padding: "0.75rem 1rem",
+                                    backgroundColor: isSelected
+                                        ? "#e9f5ff"
+                                        : isRead
+                                            ? "#f8f9fa"
+                                            : "white",
+                                    borderLeft: isSelected ? "4px solid #0d6efd" : "4px solid transparent",
+                                    transition: "background 0.2s",
                                 }}
                             >
-                                <FontAwesomeIcon
-                                    icon={isRead ? faEnvelopeOpen : faEnvelope}
-                                    className="me-2"
-                                    color={isRead ? "#6c757d" : "#0d6efd"}
-                                />
-                                <strong
+                                <div
+                                    id={tooltipId}
                                     style={{
-                                        color: isRead ? "#6c757d" : "#212529",
-                                        fontWeight: isRead ? "normal" : "bold",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                        flex: 1,
+                                        minWidth: 0,
                                     }}
                                 >
+                                    <FontAwesomeIcon
+                                        icon={isRead ? faEnvelopeOpen : faEnvelope}
+                                        className="me-2"
+                                        color={isRead ? "#6c757d" : "#0d6efd"}
+                                    />
+                                    <strong
+                                        style={{
+                                            color: isRead ? "#6c757d" : "#212529",
+                                            fontWeight: isRead ? "normal" : "bold",
+                                        }}
+                                    >
+                                        {ticket.topic}
+                                    </strong>
+                                    <div className="text-muted small">
+                                        Estado: {ticket.status}
+                                    </div>
+                                </div>
+
+                                <Tooltip
+                                    placement="top"
+                                    isOpen={tooltipOpen[tooltipId]}
+                                    target={tooltipId}
+                                    toggle={() => toggleTooltip(tooltipId)}
+                                >
                                     {ticket.topic}
-                                </strong>
-                                <div className="text-muted small">
-                                    Estado: {ticket.status}
+                                </Tooltip>
+                                <div className="text-end ms-2">
+                                    <div className="text-muted small">
+                                        {new Date(ticket.createdAt).toLocaleDateString()}
+                                    </div>
+                                    {!isRead && <Badge color="primary">Nuevo</Badge>}
                                 </div>
-                            </div>
-
-                            <Tooltip
-                                placement="top"
-                                isOpen={tooltipOpen[tooltipId]}
-                                target={tooltipId}
-                                toggle={() => toggleTooltip(tooltipId)}
-                            >
-                                {ticket.topic}
-                            </Tooltip>
-
-                            <div className="text-end ms-2">
-                                <div className="text-muted small">
-                                    {new Date(ticket.createdAt).toLocaleDateString()}
-                                </div>
-                                {!isRead && <Badge color="primary">Nuevo</Badge>}
-                            </div>
-                        </ListGroupItem>
-                    );
-                })}
-            </ListGroup>
+                            </ListGroupItem>
+                        );
+                    })) : (<p className="p-3 text-muted">No hay tickets disponibles</p>)}
+                </ListGroup>
+            
         </div>
     );
 }

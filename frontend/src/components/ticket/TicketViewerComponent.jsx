@@ -1,5 +1,7 @@
 ﻿import React from "react";
-import { Card, CardBody, Badge } from "reactstrap";
+import { Card, CardBody, Badge, UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from "reactstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
 
 /**
  * Visualizador del contenido del ticket (similar a un correo abierto)
@@ -43,7 +45,19 @@ export default function TicketViewerComponent({ ticket }) {
             <CardBody style={{ fontFamily: "system-ui", padding: "1.5rem" }}>
                 <div className="d-flex justify-content-between align-items-center mb-2">
                     <h5 className="mb-0">{ticket.topic}</h5>
-                    <Badge color={getStatusColor(ticket.status)}>{ticket.status}</Badge>
+                    <UncontrolledDropdown direction="start">
+                        <DropdownToggle color="none">
+                            <FontAwesomeIcon icon={faEllipsisVertical}/>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem>
+                                Marcar como No Leído
+                            </DropdownItem>
+                            <DropdownItem>
+                                Marcar como Resuelto
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                 </div>
                 <div className="text-muted small mb-3">
                     <strong>Creado:</strong>{" "}
@@ -55,6 +69,8 @@ export default function TicketViewerComponent({ ticket }) {
                             {new Date(ticket.readAt).toLocaleString()}
                         </>
                     )}
+                    <Badge className="align-items-end" color={getStatusColor(ticket.status)}>{ticket.status}</Badge>
+
                 </div>
                 <hr />
                 <div style={{ whiteSpace: "pre-wrap", fontFamily: "monospace" }}>

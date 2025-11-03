@@ -39,7 +39,6 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
     const selectStyle = 'flex:1; width:100%; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
     const textareaStyle = 'flex:1; width:100%; height:120px; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
-    let currentLength = 0;
 
     const stepHtml = `
     <div>
@@ -51,8 +50,8 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
             <label style="${labelStyle}">Mensaje <span style="color:red">*</span></label>
             <textarea id="swal-text" style="${textareaStyle}" placeholder="Detalle el problema aquí"></textarea>
         </div>
-        <div style="font-size:0.75rem; text-align:right;"> ${currentLength}/500</div>
-        <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
+            <div id="char-counter" style="font-size:0.75rem; text-align:right;">0/500</div>
+            <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;
     
     const swalStep = await Swal.fire({
@@ -64,8 +63,13 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
         cancelButtonText: "Cancelar",
         confirmButtonText: "Enviar",
         didRender: () => {
-            const text = document.getElementById("swal-text").value.trim();
-            currentLength = text.length;
+            const textarea = document.getElementById("swal-text");
+            const counter = document.getElementById("char-counter");
+
+            textarea.addEventListener("input", () => {
+                const len = textarea.value.trim().length;
+                counter.innerHTML = `${len}/500`;
+            });
         },
         preConfirm: () => {
             const topic = document.getElementById("swal-topic").value;
@@ -73,7 +77,7 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
 
             if (!topic) { Swal.showValidationMessage("Debe elegir un asunto"); return false; }
             if (!text) { Swal.showValidationMessage("Detalle cual es el motivo del ticket"); return false; }
-            if (text.length > 10) { Swal.showValidationMessage(`Ha superado el límite de carácteres permitido. ${text.length}/500`); return false; }
+            if (text.length > 500) { Swal.showValidationMessage(`Ha superado el límite de carácteres permitido. ${text.length}/500`); return false; }
 
             return { topic, information: text, idAffectedData: dataItem.id };
         }

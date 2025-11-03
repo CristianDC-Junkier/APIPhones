@@ -88,7 +88,6 @@ const SystemController = {
     downloadLog: (req, res) => {
         try {
             const { log } = req.params;
-            console.log(log);
 
             const logPath = path.resolve(logBasePath,log);
             const ticketsLogPath = path.resolve(logBasePath, "tickets", log);

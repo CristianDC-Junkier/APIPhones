@@ -329,8 +329,6 @@ class UserDataController {
                 return res.status(404).json({ error: "Usuario no encontrado" });
             }
 
-            console.log(user.ticketsRequested);
-
             // Actualizar tickets a WARNED y loguear
             await Promise.all(
                 user.ticketsRequested.map(async (ticket) => {

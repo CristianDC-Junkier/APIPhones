@@ -18,20 +18,20 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
 
     // Tipos de usuario disponibles según permisos del usuario actual
     const topics = [
-        { label: "-- Seleccionar --", value: "" },
-        { label: "Error en la información del listín", value: "Error" },
-        { label: "Solicitud de cambios en la información del listín", value: "Change" },
-        { label: "Eliminación de mi información", value: "Delete" },
-        { label: "Mi información no debería a parecer en el listín", value: "NotVisible" },
-        { label: "Otro", value: "Other" }
+        { value: "-- Seleccionar --"},
+        { value: "Error en la información del listín"},
+        { value: "Solicitud de cambios en la información del listín"},
+        { value: "Eliminación de mi información"},
+        { value: "Mi información no debería a parecer en el listín"},
+        { value: "Otro"}
     ];
 
     // HTML para selects y opciones
     const optionsHtml = topics.map(t => {
-        if (t.value === null) {
-            return `<option value="" selected disabled>${t.label}</option>`;
+        if (t.value.slice(0, 3) === "-- ") {
+            return `<option value="" selected disabled>${t.value}</option>`;
         }
-        return `<option value="${t.value}">${t.label}</option>`;
+        return `<option value="${t.value}">${t.value}</option>`;
     }).join("");
 
     // Estilos
@@ -39,9 +39,9 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
     const labelStyle = 'width:180px; font-weight:bold; text-align:left;';
     const selectStyle = 'flex:1; width:100%; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
     const textareaStyle = 'flex:1; width:100%; height:120px; padding:0.35rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;';
+    let currentLength = 0;
 
     const stepHtml = `
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <div>
         <div style="${rowStyle}">
             <label style="${labelStyle}">Asunto<span style="color:red">*</span></label>
@@ -51,10 +51,11 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
             <label style="${labelStyle}">Mensaje <span style="color:red">*</span></label>
             <textarea id="swal-text" style="${textareaStyle}" placeholder="Detalle el problema aquí"></textarea>
         </div>
+        <div style="font-size:0.75rem; text-align:right;"> ${currentLength}/500</div>
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;
-
-    const swalStep1 = await Swal.fire({
+    
+    const swalStep = await Swal.fire({
         title: "Ticket",
         html: stepHtml,
         focusConfirm: false,
@@ -62,19 +63,24 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
         showCancelButton: true,
         cancelButtonText: "Cancelar",
         confirmButtonText: "Enviar",
+        didRender: () => {
+            const text = document.getElementById("swal-text").value.trim();
+            currentLength = text.length;
+        },
         preConfirm: () => {
             const topic = document.getElementById("swal-topic").value;
             const text = document.getElementById("swal-text").value.trim();
 
             if (!topic) { Swal.showValidationMessage("Debe elegir un asunto"); return false; }
             if (!text) { Swal.showValidationMessage("Detalle cual es el motivo del ticket"); return false; }
+            if (text.length > 10) { Swal.showValidationMessage(`Ha superado el límite de carácteres permitido. ${text.length}/500`); return false; }
 
             return { topic, information: text, idAffectedData: dataItem.id };
         }
     });
 
-    if (!swalStep1.value) return;
-    const stepValues = swalStep1.value;
+    if (!swalStep.value) return;
+    const stepValues = swalStep.value;
 
     onConfirm(stepValues);
 

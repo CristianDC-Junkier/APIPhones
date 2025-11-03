@@ -105,7 +105,7 @@ const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPag
     };
 
     const isSmallScreen = useIsSmallScreen(770);
-    //console.log(currentDepartments);
+
     return (
         <>
             <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-0">

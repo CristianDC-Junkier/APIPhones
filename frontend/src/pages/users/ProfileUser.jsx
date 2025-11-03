@@ -161,6 +161,7 @@ const ProfileUser = () => {
 
     const isUser = user.usertype === "USER";
     const haveDepartment = Boolean(user.department);
+    const currentData = data.slice((currentPage - 1), currentPage);
 
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
@@ -225,7 +226,7 @@ const ProfileUser = () => {
                             <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
                                 {totalPages > 0 ? (
                                     // Si hay datos, los mostramos
-                                    data.map((us, idx) => (
+                                    currentData.map((us, idx) => (
                                         <CardBody key={idx} className="d-flex flex-column justify-content-between p-4">
                                             <div>
                                                 <h4 className="mb-4 text-success d-flex align-items-center justify-content-between">
@@ -307,7 +308,7 @@ const ProfileUser = () => {
                                     // Si no hay datos, mostrar mensaje centrado
                                     <CardBody className="d-flex justify-content-center align-items-center p-4" style={{ minHeight: '200px' }}>
                                         <h5 className="text-muted text-center">
-                                            No existe ningún tipo de datos de usuario en el departamento
+                                            Este departamento no tiene ningún perfil de datos asociado
                                         </h5>
                                     </CardBody>
                                 )}

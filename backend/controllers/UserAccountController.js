@@ -205,7 +205,7 @@ class UserAccountController {
             if (["ADMIN", "SUPERADMIN"].includes(req.user.usertype)) {
                 targetUser.usertype = userAccount.usertype;
             }
-            console.log(userAccount.password);
+
             //Comprobar si se a escrito una nueva contraseña
             if (userAccount.password) {
                 if (userAccount.password !== "") {

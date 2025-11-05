@@ -56,6 +56,13 @@ export default function TicketViewerComponent({ ticket, updateTickets }) {
                             {new Date(ticket.readAt).toLocaleString()}
                         </>
                     )}
+                    {ticket.resolvedAt && (
+                        <>
+                            {" | "}
+                            <strong>Resuelto:</strong>{" "}
+                            {new Date(ticket.resolvedAt).toLocaleString()}
+                        </>
+                    )}
                 </div>
                 <div>
                     <Badge color={getStatusColor(ticket.status)}>{ticket.status}</Badge>

@@ -1,160 +1,426 @@
 ﻿/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, CardBody, CardTitle, CardText } from "reactstrap";
-import Swal from "sweetalert2";
+import {
+    Container,
+    Row,
+    Col,
+    Input,
+    Button,
+    Badge,
+} from "reactstrap";
+import {
+    faEnvelope,
+    faEnvelopeOpen,
+    faCheckCircle,
+    faExclamationTriangle,
+    faSortAmountUp,
+    faSortAmountDown,
+    faSearch,
+    faSyncAlt,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { FaArrowLeft } from 'react-icons/fa';
 
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import SpinnerComponent from "../../components/utils/SpinnerComponent";
 import TicketListComponent from "../../components/ticket/TicketListComponent";
-import TicketViewerComponent from "../../components/ticket/TicketViewerComponent"
-
+import TicketViewerComponent from "../../components/ticket/TicketViewerComponent";
+import TicketDropdownMenuComponent from "../../components/ticket/TicketDropdownMenuComponent";
 import { getTicketList, markTicket } from "../../services/TicketService";
 
-/**
- * Página encargada de mostrar la bandeja de tickets
- * Permite filtrar entre todos, no resueltos y resueltos.
- */
 export default function DashboardTickets() {
     const [tickets, setTickets] = useState([]);
     const [ticketsResolved, setTicketsResolved] = useState([]);
-    const [ticketsUnresolved, setTicketsUnresolved] = useState([]);
+    const [ticketsWarned, setTicketsWarned] = useState([]);
+    const [ticketsRead, setTicketsRead] = useState([]);
+    const [ticketsUnread, setTicketsUnread] = useState([]);
+
+    const [selectedIds, setSelectedIds] = useState([]);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [ticketContent, setTicketContent] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [currentView, setCurrentView] = useState("tickets"); // all | unresolved | resolved
 
-    //Cargar tickets desde el backend
+    const [loading, setLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [currentView, setCurrentView] = useState("open");
+    const [sortOrder, setSortOrder] = useState("desc");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isMobileView, setIsMobileView] = useState(window.innerWidth < 992);
+
+    // Detectar tamaño de pantalla
+    useEffect(() => {
+        const handleResize = () => setIsMobileView(window.innerWidth < 992);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
     useEffect(() => {
         fetchTickets(true);
     }, []);
 
     const fetchTickets = async (init = false) => {
         if (init) setLoading(true);
+        else setRefreshing(true);
+
         try {
             const res = await getTicketList();
             if (res.success) {
-                setTickets(res.data.tickets);
-                setTicketsResolved(res.data.tickets.filter((t) => t.status === "RESOLVED" || t.status === "WARNED" ));
-                setTicketsUnresolved(res.data.tickets.filter((t) => t.status !== "RESOLVED" && t.status !== "WARNED" ));
+                const list = res.data.tickets;
+                setTickets(list);
+                setTicketsResolved(list.filter((t) => t.status === "RESOLVED"));
+                setTicketsWarned(list.filter((t) => t.status === "WARNED"));
+                setTicketsRead(list.filter((t) => t.status === "READ"));
+                setTicketsUnread(list.filter((t) => t.status === "OPEN"));
+                return list;
             }
+        } finally {
             if (init) setLoading(false);
-        } catch (error) {
-            if (init) setLoading(false);
-            Swal.fire("Error", "No se pudieron obtener los tickets. " + error, "error");
+            setRefreshing(false);
         }
     };
 
-    // Seleccionar ticket
+    const handleMarkTicket = async (idList, newStatus) => {
+        let read = false, resolved = false, currentview = "open";
+        if (newStatus === "READ") {
+            currentview = "read";
+            read = true;
+        }
+        if (newStatus === "RESOLVED") {
+            currentview = "resolved";
+            read = true;
+            resolved = true;
+        }
+
+        const response = await markTicket({
+            idList,
+            read,
+            resolved,
+            warned: false,
+        });
+
+        if (response.success) {
+            const updatedList = await fetchTickets();
+            setCurrentView(currentview);
+
+            if (currentview !== "open") {
+                const updated = updatedList.find((t) => t.id === selectedTicket);
+                setTicketContent(updated);
+            } else {
+                setSelectedTicket(null);
+                setTicketContent(null);
+            }
+            setSelectedIds([]);
+        }
+    };
+
     const handleSelectTicket = async (id) => {
-        setSelectedTicket(id);
-
-        // Busca el ticket dentro del array local de tickets
-        let ticket = tickets.find((t) => t.id === id);
-        if (ticket) {
-            if (ticket.status === "OPEN") {
-                const response = await markTicket({ id, read: true, warned: false, resolved: false });
-                if (response.success) {
-                    fetchTickets();
-                }
-            }
-            setTicketContent(ticket);
+        const ticket = tickets.find((t) => t.id === id);
+        if (ticket.status === "OPEN") {
+            await handleMarkTicket([id], "READ");
         } else {
-            Swal.fire("Error", "No se encontró el ticket seleccionado.", "error");
+            setSelectedTicket(id);
+            setTicketContent(ticket);
         }
     };
 
-    // Filtrado
-    const filteredTickets =
-        currentView === "resolved"
-            ? ticketsResolved
-            : currentView === "unresolved"
-                ? ticketsUnresolved
-                : tickets;
+    const handleChangeView = (view) => {
+        setCurrentView(view);
+        setSelectedIds([]);
+    };
+
+    const filteredTickets = (() => {
+        let base =
+            currentView === "resolved"
+                ? ticketsResolved
+                : currentView === "warned"
+                    ? ticketsWarned
+                    : currentView === "read"
+                        ? ticketsRead
+                        : ticketsUnread;
+
+        if (searchTerm) {
+            base = base.filter((t) =>
+                (`#${t.id} - ${t.topic}`).toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        return base.sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
+        });
+    })();
 
     if (loading) return <SpinnerComponent />;
 
-    return (
-        <Container className="mt-4 d-flex flex-column" style={{ minHeight: "70vh" }}>
+    // ================= MOBILE VIEW =================
+    if (isMobileView) {
+        return (
+            <div className="d-flex flex-column flex-lg-row ">
 
-            {/* Botón Volver */}
+
+                {!ticketContent ? (
+                    <Container
+                        fluid
+                        className="d-flex flex-column bg-light"
+                        style={{
+                            marginTop: "3.5rem",
+                            marginBottom: "1rem",
+                            minHeight: "78vh",
+                        }}
+                    >
+                        {/*  Botón fijo de volver al home */}
+                        <div className="position-absolute top-0 start-0">
+                            <BackButtonComponent back="/home" />
+                        </div>
+                        {/* ====== Encabezado ====== */}
+                        <Row className="bg-white border-bottom align-items-center p-2">
+                            <Col xs="8">
+                                <h5 className="mb-0 fw-bold text-primary">Tickets</h5>
+                            </Col>
+                            <Col xs="4" className="text-end">
+                                <Button
+                                    color="link"
+                                    size="sm"
+                                    onClick={() => fetchTickets(false)}
+                                    title="Actualizar"
+                                    disabled={refreshing}
+                                >
+                                    <FontAwesomeIcon icon={faSyncAlt} spin={refreshing} />
+                                </Button>
+                            </Col>
+                        </Row>
+
+                        {/* ====== Buscador + orden ====== */}
+                        <Row className="bg-light align-items-center gx-1 gy-0 p-2">
+                            {/* Buscador */}
+                            <Col xs={selectedIds.length === 0 ? "11" : "10"} className="position-relative">
+                                <div className="position-relative w-100">
+                                    <Input
+                                        bsSize="sm"
+                                        type="text"
+                                        placeholder="Buscar ticket..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-100 pe-4"
+                                        style={{ height: "32px" }}
+                                    />
+                                    <FontAwesomeIcon
+                                        icon={faSearch}
+                                        className="position-absolute top-50 end-0 translate-middle-y text-muted me-2 fa-sm"
+                                    />
+                                </div>
+                            </Col>
+
+                            {/* Botón de orden */}
+                            <Col xs={selectedIds.length === 0 ? "1" : "1"} className="text-end p-0">
+                                <Button
+                                    size="sm"
+                                    color="light"
+                                    onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                                    style={{ height: "32px", width: "32px", padding: 0 }}
+                                >
+                                    <FontAwesomeIcon
+                                        icon={sortOrder === "asc" ? faSortAmountUp : faSortAmountDown}
+                                    />
+                                </Button>
+                            </Col>
+
+                            {/* Menú de acciones */}
+                            <Col xs="1" className="text-end p-0">
+                                <TicketDropdownMenuComponent
+                                    selectedIds={selectedIds}
+                                    onMarkTicket={handleMarkTicket}
+                                    disabled={selectedIds.length === 0}
+                                />
+                            </Col>
+                        </Row>
+
+
+                        {/* ====== Filtros por estado ====== */}
+                        <Row className="bg-white border-top border-bottom mt-1 p-2 g-2 text-center">
+                            {[
+                                { key: "open", icon: faEnvelope, label: "Nuevos", color: "primary", count: ticketsUnread.length },
+                                { key: "read", icon: faEnvelopeOpen, label: "Leídos", color: "info", count: ticketsRead.length },
+                                { key: "resolved", icon: faCheckCircle, label: "Contestados", color: "success", count: ticketsResolved.length },
+                                { key: "warned", icon: faExclamationTriangle, label: "Avisados", color: "warning", count: ticketsWarned.length },
+                            ].map((item) => (
+                                <Col xs="6" key={item.key}>
+                                    <Button
+                                        color="white"
+                                        outline={currentView !== item.key}
+                                        size="sm"
+                                        className={`w-100 d-flex justify-content-between align-items-center ${currentView === item.key ? "btn-outline-primary" : "btn-light"}`}
+                                        onClick={() => handleChangeView(item.key)}
+                                    >
+                                        <span className="d-flex align-items-center">
+                                            <FontAwesomeIcon icon={item.icon} className="me-1" />
+                                            {item.label}
+                                        </span>
+                                        <Badge color={item.color}>{item.count}</Badge>
+                                    </Button>
+                                </Col>
+                            ))}
+                        </Row>
+
+
+                        {/* ====== Lista de tickets ====== */}
+                        <Row className="flex-grow-1">
+                            <Col className="p-0">
+                                <div style={{ height: "100%" }}>
+                                    <TicketListComponent
+                                        tickets={filteredTickets}
+                                        selectedTicket={selectedTicket}
+                                        onSelectTicket={handleSelectTicket}
+                                        selectedIds={selectedIds}
+                                        onSelectionChange={setSelectedIds}
+                                    />
+                                </div>
+                            </Col>
+                        </Row>
+                    </Container>
+                ) : (
+                    // ======== Vista del ticket en móvil ========
+                    <Container
+                        fluid
+                        className="d-flex flex-column"
+                        style={{
+                            marginTop: "3.5rem",
+                            minHeight: "80vh",
+                        }}
+                    >
+                        {/*  Botón fijo de volver al home */}
+                        <div className="position-absolute top-0 start-0">
+                            <Button
+                                onClick={() => {
+                                    setSelectedTicket(null);
+                                    setTicketContent(null);
+                                }}
+                                style={{
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    boxShadow: 'none',
+                                    fontSize: '1.5rem',
+                                    color: 'inherit',
+                                }}
+                                onMouseOver={(e) => (e.currentTarget.style.color = '#999')}
+                                onMouseOut={(e) => (e.currentTarget.style.color = 'inherit')}
+                            >
+                                <FaArrowLeft size={32} />
+                            </Button>
+                        </div>
+
+                        <Row className="m-0 mb-2">
+                            <Col xs="12" className="flex-grow-1 overflow-auto p-0 mb-2">
+                                <div style={{ maxHeight: "100%", overflowY: "auto" }}>
+                                    <TicketViewerComponent
+                                        ticket={ticketContent}
+                                        onMarkTicket={handleMarkTicket}
+                                    />
+                                </div>
+                            </Col>
+                        </Row>
+                    </Container>
+                )}
+
+            </div>
+        );
+    }
+
+
+    // ================= DESKTOP VIEW =================
+    return (
+        <div className="d-flex flex-column flex-lg-row bg-light rounded shadow-sm" style={{ minHeight: "80vh" }}>
             <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />
             </div>
 
+            {/* Panel lateral */}
+            <div className="bg-white border-end d-flex flex-column" style={{ width: "100%", maxWidth: "300px" }}>
+                <div className="d-flex justify-content-between align-items-center border-bottom p-2 bg-light">
+                    <h5 className="mb-0 fw-bold text-primary">Tickets</h5>
+                    <Button
+                        color="link"
+                        size="sm"
+                        onClick={() => fetchTickets(false)}
+                        title="Actualizar"
+                        disabled={refreshing}
+                    >
+                        <FontAwesomeIcon icon={faSyncAlt} spin={refreshing} />
+                    </Button>
+                </div>
 
-            {/* Tarjetas para cambiar de vista solo para ADMIN/SUPERADMIN */}
-            <Row className="mb-3 mt-4 justify-content-center g-3">
-                <Col xs={6} sm={6} md={4} l={3} xl={3}>
-                    <Card
-                        className={`shadow-lg mb-2 border-2 ${currentView === "tickets" ? "border-primary" : ""}`}
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setCurrentView("tickets")}
-                    >
-                        <CardBody className="text-center pt-3">
-                            <CardTitle tag="h6">Todos</CardTitle>
-                            <CardText className="fs-4 fw-bold">{tickets.length}</CardText>
-                        </CardBody>
-                    </Card>
-                </Col>
-                <Col xs={6} sm={6} md={4} l={3} xl={3}>
-                    <Card
-                        className={`shadow-lg mb-2 border-2 ${currentView === "unresolved" ? "border-primary" : ""}`}
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setCurrentView("unresolved")}
-                    >
-                        <CardBody className="text-center pt-3">
-                            <CardTitle tag="h6">No Resueltos</CardTitle>
-                            <CardText className="fs-4 fw-bold">{ticketsUnresolved.length}</CardText>
-                        </CardBody>
-                    </Card>
-                </Col>
-                <Col xs={6} sm={6} md={4} l={3} xl={3}>
-                    <Card
-                        className={`shadow-lg mb-2 border-2 ${currentView === "resolved" ? "border-primary" : ""}`}
-                        style={{ cursor: 'pointer' }}
-                        onClick={() => setCurrentView("resolved")}
-                    >
-                        <CardBody className="text-center pt-3">
-                            <CardTitle tag="h6">Resueltos</CardTitle>
-                            <CardText className="fs-4 fw-bold">{ticketsResolved.length}</CardText>
-                        </CardBody>
-                    </Card>
-                </Col>
-            </Row>
+                <div className="d-flex flex-column border-bottom p-2">
+                    {[
+                        { key: "open", icon: faEnvelope, label: "Nuevos", color: "primary", count: ticketsUnread.length },
+                        { key: "read", icon: faEnvelopeOpen, label: "Leídos", color: "info", count: ticketsRead.length },
+                        { key: "resolved", icon: faCheckCircle, label: "Contestados", color: "success", count: ticketsResolved.length },
+                        { key: "warned", icon: faExclamationTriangle, label: "Avisados", color: "warning", count: ticketsWarned.length },
+                    ].map((item) => (
+                        <button
+                            key={item.key}
+                            className={`btn btn-sm text-start d-flex align-items-center justify-content-between mb-1 ${currentView === item.key ? "btn-outline-primary" : "btn-light"}`}
+                            onClick={() => handleChangeView(item.key)}
+                        >
+                            <span>
+                                <FontAwesomeIcon icon={item.icon} className="me-2" /> {item.label}
+                            </span>
+                            <Badge color={item.color}>{item.count}</Badge>
+                        </button>
+                    ))}
+                </div>
 
-            {/* Escritorio */}
-            <Row className="d-none d-lg-flex flex-grow-1" style={{ display: "flex", flexDirection: "row", flex: 1, height: "auto", overflow: "hidden", }}>
-                <Col lg="4" style={{height: "calc(65vh)", overflowY: "auto", paddingRight: "0.5rem",}}>
+                <div className="d-flex align-items-center p-2 border-bottom bg-light">
+                    <div className="position-relative flex-grow-1 me-2">
+                        <Input
+                            bsSize="sm"
+                            type="text"
+                            placeholder="Buscar ticket..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            style={{ paddingRight: "28px", height: "32px" }}
+                        />
+                        <FontAwesomeIcon
+                            icon={faSearch}
+                            className="position-absolute top-50 end-0 translate-middle-y text-muted me-2 fa-sm"
+                        />
+                    </div>
+
+                    <Button
+                        size="sm"
+                        color="light"
+                        onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                        style={{ height: "32px", width: "32px", padding: 0 }}
+                    >
+                        <FontAwesomeIcon icon={sortOrder === "asc" ? faSortAmountUp : faSortAmountDown} />
+                    </Button>
+
+                    <TicketDropdownMenuComponent
+                        selectedIds={selectedIds}
+                        onMarkTicket={handleMarkTicket}
+                        disabled={selectedIds.length === 0}
+                    />
+                </div>
+
+                <div className="flex-grow-1 overflow-auto">
                     <TicketListComponent
                         tickets={filteredTickets}
                         selectedTicket={selectedTicket}
                         onSelectTicket={handleSelectTicket}
-                        updateTickets={fetchTickets}
+                        selectedIds={selectedIds}
+                        onSelectionChange={setSelectedIds}
                     />
-                </Col>
+                </div>
+            </div>
 
-                <Col lg="8" style={{ height: "calc(65vh)", overflowY: "auto", paddingLeft: "1rem", }}>
-                    <TicketViewerComponent ticket={ticketContent} updateTickets={fetchTickets} />
-                </Col>
-            </Row>
-
-            {/* Móvil */}
-            <Row className="d-flex d-lg-none flex-column">
-                <Col xs="12" style={{marginBottom: "0.5rem", maxHeight: "50vh", overflowY: "auto", }}>
-                    <TicketViewerComponent ticket={ticketContent} updateTickets={fetchTickets} />
-                </Col>
-                <Col xs="12">
-                    <hr />
-                </Col>
-                <Col xs="12" style={{paddingTop: "0.5rem", marginBottom: "1rem", maxHeight: "50vh", overflowY: "auto",}}>
-                    <TicketListComponent
-                        tickets={filteredTickets}
-                        selectedTicket={selectedTicket}
-                        onSelectTicket={handleSelectTicket}
-                        updateTickets={fetchTickets}
+            {/* Panel de lectura */}
+            <div className="flex-grow-1 bg-white overflow-auto">
+                <div style={{ maxHeight: "100%", overflowY: "auto" }}>
+                    <TicketViewerComponent
+                        ticket={ticketContent}
+                        onMarkTicket={handleMarkTicket}
                     />
-                </Col>
-            </Row>
-        </Container>
+                </div>
+            </div>
+        </div>
     );
 }

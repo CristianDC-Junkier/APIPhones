@@ -2,37 +2,31 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical } from "@fortawesome/free-solid-svg-icons";
 
-import { markTicket } from "../../services/TicketService";
-
-export default function TicketDropdownMenuComponent({ ticketId, updateTickets }) {
+export default function TicketDropdownMenuComponent({ selectedIds = [], onMarkTicket, disabled = false }) {
     const handleMenu = async (action) => {
-        if (action === "NotRead") {
-            const response = await markTicket({ id: ticketId, read: false, warned: false, resolved: false });
-            if (response.success) {
-                updateTickets();
-            }
-        } else if (action === "Resolved") {
-            const response = await markTicket({ id: ticketId, read: false, warned: false, resolved: true });
-            if (response.success) {
-                updateTickets();
-            }
-        }
-    }
+        onMarkTicket(selectedIds, action);
+    };
+
+    if (disabled) return null;
 
     return (
-        <UncontrolledDropdown direction="start">
-            <DropdownToggle color="none" size="sm" onClick={(e) => e.stopPropagation() }>
+        <UncontrolledDropdown direction="start" container="body">
+            <DropdownToggle
+                color="none"
+                size="sm"
+                onClick={(e) => e.stopPropagation()}
+                title="Acciones sobre tickets"
+            >
                 <FontAwesomeIcon icon={faEllipsisVertical} />
             </DropdownToggle>
             <DropdownMenu>
-                <DropdownItem onClick={(e) => { e.stopPropagation(); handleMenu("NotRead"); }}>
-                    Marcar como <strong>No Leído</strong>
+                <DropdownItem onClick={(e) => { e.stopPropagation(); handleMenu("OPEN"); }}>
+                    Marcar como <strong>No leído</strong>
                 </DropdownItem>
-                <DropdownItem onClick={(e) => { e.stopPropagation(); handleMenu("Resolved"); }}>
+                <DropdownItem onClick={(e) => { e.stopPropagation(); handleMenu("RESOLVED"); }}>
                     Marcar como <strong>Resuelto</strong>
                 </DropdownItem>
             </DropdownMenu>
         </UncontrolledDropdown>
     );
-
 }

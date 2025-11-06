@@ -1,4 +1,4 @@
-﻿const { Ticket, UserAccount } = require("../models/Relations");
+﻿const { Ticket, UserAccount, UserData, Department, SubDepartment  } = require("../models/Relations");
 const LoggerController = require("../controllers/LoggerController");
 const { Op } = require('sequelize');
 
@@ -18,10 +18,43 @@ class TicketController {
      */
     static async ticketList(req, res) {
         try {
-            const tickets = await Ticket.findAll();
+            const tickets = await Ticket.findAll({
+                include: [
+                    // Usuario que creó el ticket
+                    {
+                        model: UserAccount,
+                        as: "requester",
+                        attributes: ["username"],
+                    },
+                    // Usuario que resolvió el ticket
+                    {
+                        model: UserAccount,
+                        as: "resolver",
+                        attributes: ["username"],
+                    },
+                    // Datos afectados
+                    {
+                        model: UserData,
+                        as: "affectedData",
+                        include: [
+                            {
+                                model: SubDepartment,
+                                as: "subdepartment",
+                                attributes: ["id", "name"]
+                            },
+                            {
+                                model: Department,
+                                as: "department",
+                                attributes: ["id", "name"],
+                            }
+                        ],
+                    },
+                ],
+                order: [["createdAt", "DESC"]],
+            });
 
-            // Formateamos el resultado, descifrando topic e information
-            const formatted = tickets.map(ticket => ({
+            // Formateo del resultado
+            const formatted = tickets.map((ticket) => ({
                 id: ticket.id,
                 topic: ticket.topic,
                 information: ticket.information,
@@ -32,15 +65,21 @@ class TicketController {
                 warnedAt: ticket.warnedAt,
                 userRequesterId: ticket.userRequesterId,
                 userResolverId: ticket.userResolverId,
-                idAffectedData: ticket.idAffectedData
+                idAffectedData: ticket.idAffectedData,
+                affectedDepartment: ticket.affectedData?.department?.name,
+                affectedSubDepartment: ticket.affectedData?.subdepartment?.name,
+                userRequesterName: ticket.requester?.username || null,
+                userResolverName: ticket.resolver?.username || null,
             }));
 
-            res.json({ tickets: formatted });
+            return res.json({ success: true, tickets: formatted });
         } catch (error) {
-            LoggerController.error(`Error obteniendo la lista de tickets: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error recogiendo los tickets por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
+
 
     /**
      * Cuenta todos los ticket que no estén resueltos
@@ -58,8 +97,9 @@ class TicketController {
 
             res.json(count);
         } catch (error) {
-            LoggerController.error("Error contando los tickets " + error.message)
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error contando los tickets por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -95,56 +135,77 @@ class TicketController {
 
             res.status(201).json({ ticket });
         } catch (error) {
-            LoggerController.error(`Error creando ticket: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error creando un ticket por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
     /**
-     * Marcar un ticket (read, warned, resolved)
-     * @param {Object} req.body - { id, read, warned, resolved }
+     * Marcar tickets (read, warned, resolved)
+     * idList puede ser uno o varios
+     * @param {Object} req.body - { idList, read, warned, resolved }
      */
     static async markAs(req, res) {
         try {
-            const { id, read, warned, resolved } = req.body;
+            const { idList, read, warned, resolved } = req.body;
             const userId = req.user.id;
 
-            const ticket = await Ticket.findByPk(id);
-            if (!ticket) return res.status(404).json({ error: "Ticket no encontrado" });
+            if (idList.length === 0)
+                return res.status(400).json({ error: "Debe especificar al menos un id o lista de ids" });
 
-            // Actualizamos status y fechas
-            if (resolved) {
-                ticket.status = "RESOLVED";
-                ticket.readAt = new Date();
-                ticket.resolvedAt = new Date();
-                ticket.userResolverId = userId;
-            } else if (warned) {
-                ticket.status = "WARNED";
-                ticket.warnedAt = new Date();
-            } else if (read) {
-                ticket.status = "READ";
-                ticket.readAt = new Date();
-            } else {
-                ticket.status = "OPEN";
-                ticket.readAt = null;
-                ticket.resolvedAt = null;
-                ticket.warnedAt = null;
-            }
-
-            await ticket.save();
-
-            // Log de ticket
-            const action = resolved ? "RESOLVE" : warned ? "WARN" : read ? "READ" : "OPEN";
-            LoggerController.ticketAction({
-                ticketId: ticket.id,
-                action,
-                userId
+            const tickets = await Ticket.findAll({
+                where: { id: idList },
             });
 
-            res.json(ticket);
+            if (!tickets.length)
+                return res.status(404).json({ error: "Ningún ticket encontrado" });
+
+            const updatedTickets = [];
+
+            for (const ticket of tickets) {
+                if (resolved) {
+                    ticket.status = "RESOLVED";
+                    ticket.readAt = new Date();
+                    ticket.resolvedAt = new Date();
+                    ticket.userResolverId = userId;
+                } else if (warned) {
+                    ticket.status = "WARNED";
+                    ticket.warnedAt = new Date();
+                } else if (read) {
+                    ticket.status = "READ";
+                    ticket.readAt = new Date();
+                } else {
+                    ticket.status = "OPEN";
+                    ticket.readAt = null;
+                    ticket.resolvedAt = null;
+                    ticket.warnedAt = null;
+                }
+
+                await ticket.save();
+
+                const action = resolved
+                    ? "RESOLVE"
+                    : warned
+                        ? "WARN"
+                        : read
+                            ? "READ"
+                            : "OPEN";
+
+                LoggerController.ticketAction({
+                    ticketId: ticket.id,
+                    action,
+                    userId,
+                });
+
+                updatedTickets.push(ticket);
+            }
+
+            res.json({ count: updatedTickets.length });
         } catch (error) {
-            LoggerController.error(`Error marcando ticket: ${error.message}`);
-            res.status(500).json({ error: error.message });
+            LoggerController.error('Error modificado un ticket por el usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 

@@ -82,7 +82,7 @@ export default function LogListComponent({ logs, selectedLog, onSelectLog, onDow
                                 e.stopPropagation();
                                 if (onDownloadLog) onDownloadLog(log);
                             }}
-                            onMouseEnter={e => (e.currentTarget.style.color = 'green')}
+                            onMouseEnter={e => (e.currentTarget.style.color = '#ff7700')}
                             onMouseLeave={e => (e.currentTarget.style.color = '#6c757d')}
                         />
                     </ListGroupItem>

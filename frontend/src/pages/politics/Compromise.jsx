@@ -1,9 +1,14 @@
-﻿import React from "react";
+﻿import { useEffect } from "react";
 import { Container, Row, Col } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import BackButtonComponent from '../../components/utils/BackButtonComponent';
 
 const Compromise = () => {
+
+    useEffect(() => {
+        document.title = "Compromiso con la Protección de Datos - Listín telefónico - Ayuntamiento de Almonte";
+    }, [])
+
     return (
         <Container fluid className="my-4 position-relative" style={{ paddingLeft: 0, paddingRight: 0 }}>
 

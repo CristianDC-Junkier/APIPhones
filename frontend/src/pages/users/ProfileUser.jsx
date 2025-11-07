@@ -1,5 +1,5 @@
 ﻿/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
@@ -24,6 +24,10 @@ const ProfileUser = () => {
 
     const navigate = useNavigate();
     const { version, logout, update, user } = useAuth();
+
+    useEffect(() => {
+        document.title = "Mi Perfil - Listín telefónico - Ayuntamiento de Almonte";
+    }, []);
 
     const fetchData = async () => {
         setLoading(true);

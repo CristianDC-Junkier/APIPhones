@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input } from "reactstrap";
 import Swal from "sweetalert2";
 
@@ -27,6 +27,10 @@ const DashboardDepartment = () => {
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
+
+    useEffect(() => {
+        document.title = "Panel de control de Departamentos - Listín telefónico - Ayuntamiento de Almonte";
+    }, [])
 
     /** Ajusta el número de filas según altura de ventana */
     useEffect(() => {

@@ -50,6 +50,7 @@ api.interceptors.request.use((config) => {
 //#region variables de control de concurrencia
 
 let isRefreshing = false;   // Indica si hay un refresh de token en curso
+let isWarning = false;      // Indica si hay un SweetAlert en curso
 let failedQueue = [];       // Cola de promesas para peticiones que esperan un token nuevo
 
 /**
@@ -120,16 +121,20 @@ api.interceptors.response.use(
                     processQueue(error, null);
                     clearAccessToken();
 
-                    await Swal.fire({
-                        icon: "warning",
-                        title: "Sesión expirada",
-                        html: "Por motivos de seguridad su sesión expiró.<br>Por favor, vuelve a iniciar sesión.",
-                        confirmButtonText: "Aceptar",
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                    });
+                    if (!isWarning) {
+                        isWarning = true;
+                        await Swal.fire({
+                            icon: "warning",
+                            title: "Sesión expirada",
+                            html: "Por motivos de seguridad su sesión expiró.<br>Por favor, vuelve a iniciar sesión.",
+                            confirmButtonText: "Aceptar",
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                        });
 
-                    window.location.href = `${BASE_URL}/login`;
+                        window.location.href = `${BASE_URL}/login`;
+                        isWarning = false;
+                    }
                     return Promise.reject(error);
                 }
             } catch (err) {

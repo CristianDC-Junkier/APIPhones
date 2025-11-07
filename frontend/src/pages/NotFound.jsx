@@ -1,12 +1,15 @@
-﻿import React from 'react';
+﻿import { useEffect } from 'react';
 import logo from '../assets/ayto_almonte.png';
 
 /**
  * Página comodín usada para aparecer en caso de poner una dirección
  * que no ha sido definida en el AppRouter
  */
-
 const NotFound = () => {
+
+    useEffect(() => {
+        document.title = "Página no encontrada 404 - Listín telefónico - Ayuntamiento de Almonte";
+    }, []);
 
     return (
         <div class="row vh-80 d-flex align-items-center justify-content-center">

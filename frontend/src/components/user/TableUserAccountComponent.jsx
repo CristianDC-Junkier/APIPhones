@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
@@ -8,16 +8,7 @@ import AddModifyUserComponent from "./AddModifyUserComponent";
 import PaginationComponent from "../PaginationComponent";
 import PWDAskComponent from "./PWDAskComponent";
 
-const TableUserAccountComponent = ({
-    users,
-    search,
-    selectedDepartment,
-    rowsPerPage,
-    currentPage,
-    setCurrentPage,
-    currentUser,
-    refreshData
-}) => {
+const TableUserAccountComponent = ({ users, search, selectedDepartment, rowsPerPage, currentPage, setCurrentPage, refreshData, currentUser }) => {
 
     const filteredUsers = useMemo(() => {
         return users.filter(u => {
@@ -129,14 +120,14 @@ const TableUserAccountComponent = ({
     };
 
     const tipoLabels = {
-        ADMIN: "Administrador",
-        SUPERADMIN: "Superadministrador",
+        ADMIN: "Admin",
+        SUPERADMIN: "Super Admin",
         USER: "Usuario"
     };
 
     return (
         <>
-            <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-0">
+            <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-3">
                 <thead className="table-primary">
                     <tr>
                         <th className="text-center">ID</th>
@@ -174,7 +165,21 @@ const TableUserAccountComponent = ({
                         return (
                             <tr key={idx} >
                                 <td className="text-center"> {userItem.id}</td>
-                                <td className="text-center"> {userItem.username}</td>
+                                <td
+                                    className="text-center text-truncate"
+                                    style={{
+                                        maxWidth: '90px',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title={userItem.username}
+                                >
+                                    {userItem.username || '-'}
+                                </td>
+
                                 <td className="text-center"> {tipoLabels[userItem.usertype]}</td>
                                 <td className="text-center"> {userItem.departmentName !== undefined ? userItem.departmentName : " - "}</td>
                                 <td className="text-center">

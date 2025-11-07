@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input } from "reactstrap";
 import Swal from "sweetalert2";
@@ -22,18 +22,18 @@ const DashboardUser = () => {
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(true);
-
     const [departments, setDepartments] = useState([]);
     const [userAccounts, setUserAccounts] = useState([]);
     const [userData, setUserData] = useState([]);
-
     const [statsType, setStatsType] = useState("Accounts");
-
     const [selectedUser, setSelectedUser] = useState("");
     const [selectedDepartment, setSelectedDepartment] = useState("");
-
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
+
+    useEffect(() => {
+        document.title = "Panel de control de Usuarios - Listín telefónico - Ayuntamiento de Almonte";
+    }, []);
 
     // Ajuste filas según altura de ventana
     useEffect(() => {
@@ -87,10 +87,9 @@ const DashboardUser = () => {
                 }
 
             }
-        } catch {
-            Swal.fire("Error", "No se pudo obtener la lista de usuarios", 'error');
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,10 +105,9 @@ const DashboardUser = () => {
                 setDepartments(depts);
             }
 
-        } catch (err) {
-            Swal.fire("Error", "No se pudo obtener la lista de departamentos", err);
+        } finally  {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

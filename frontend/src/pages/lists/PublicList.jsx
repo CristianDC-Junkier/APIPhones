@@ -1,11 +1,10 @@
-﻿import React, { useRef, useState, useEffect, useMemo } from "react";
+﻿import { useRef, useState, useEffect, useMemo, useNavigate } from "react";
 import { Col, Button, Spinner, Input } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useNavigate } from 'react-router-dom';
 import { faFilePdf, faUserCircle, faHome } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 
-import { exportPDF } from "./ExportList";
+import { exportPDF } from "../../utils/ExportList";
 import { useAuth } from '../../hooks/UseAuth';
 import { getPublicList } from "../../services/UserService";
 import { getDepartmentsList } from "../../services/DepartmentService";
@@ -19,9 +18,20 @@ const PublicList = () => {
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [users, setUsers] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
     const { date, user } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        document.title = "Lista Pública - Listín telefónico - Ayuntamiento de Almonte";
+    }, [])
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     useEffect(() => {
         const fetchDate = async () => {
@@ -138,70 +148,144 @@ const PublicList = () => {
     }
 
     return (
-        <div className="container-fluid my-4">
-            <div style={{ position: "absolute", top: "10px", left: "10px" }}>
-                <Button
-                    color="primary"
-                    style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
-                    onClick={() => navigate('/login')}
-                >
-                    <FontAwesomeIcon icon={user ? faHome : faUserCircle} /> {user ? "Ir al menú" : "Iniciar Sesión"}
-                </Button>
+        <div className="container-fluid my-4" style={{ position: "relative" }}>
+            {/* Botón flotante redondo con tooltip */}
+            <div
+                style={{
+                    position: "fixed",
+                    bottom: isMobile ? "120px" : "80px",
+                    right: "20px",
+                    zIndex: 1000,
+                    padding: isMobile ? "0 20px" : "0 25px",
+                }}
+            >
+                <div className="position-relative d-inline-block">
+                    <Button
+                        color="primary"
+                        onClick={() => navigate("/login")}
+                        style={{
+                            width: isMobile ? "52px" : "60px",
+                            height: isMobile ? "52px" : "60px",
+                            borderRadius: "50%",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 0,
+                        }}
+                    >
+                        <FontAwesomeIcon
+                            icon={user ? faHome : faUserCircle}
+                            size={isMobile ? "lg" : "xl"}
+                        />
+                    </Button>
+
+                    {/* Tooltip personalizado */}
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: "-30px",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            backgroundColor: "#333",
+                            color: "#fff",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            fontSize: "0.75rem",
+                            whiteSpace: "nowrap",
+                            opacity: 0.9,
+                        }}
+                    >
+                        {user ? "Ir al menú" : "Iniciar sesión"}
+                    </div>
+                </div>
             </div>
 
+            {/* Título */}
             <div className="text-center my-4">
-                <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
-                    Ayuntamiento de Almonte - Listín Telefónico - Última Actualización: {lastUpdate}
+                <h2
+                    style={{
+                        fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
+                        fontWeight: "bold",
+                    }}
+                >
+                    Ayuntamiento de Almonte - Listín Telefónico - Última Actualización:{" "}
+                    {lastUpdate}
                 </h2>
             </div>
 
             {/* Buscador y botón exportar */}
-            <div className="d-flex justify-content-between mb-2">
-                <div className="d-flex gap-2" style={{ marginLeft: "26px" }}>
-                    {/* Departamento */}
+            <div
+                className="d-flex justify-content-between flex-wrap mb-2"
+                style={{
+                    gap: "10px",
+                    padding: isMobile ? "0 20px" : "0 25px",
+                }}
+            >
+                <div className="d-flex gap-2 flex-wrap">
                     <Input
                         type="select"
                         value={selectedDepartment || ""}
-                        onChange={e => setSelectedDepartment(Number(e.target.value))}
-                        style={{ minWidth: "200px" }}
+                        onChange={(e) => setSelectedDepartment(Number(e.target.value))}
+                        style={{
+                            minWidth: "160px",
+                            maxWidth: "240px",
+                            flex: "1 1 auto",
+                            fontSize: "clamp(0.8rem, 2vw, 1rem)",
+                        }}
                     >
                         <option value="">Todos los departamentos</option>
-                        {departments.map(d => (
+                        {departments.map((d) => (
                             <option key={d.id} value={d.id}>
                                 {d.name}
                             </option>
                         ))}
                     </Input>
                 </div>
-                <div className="d-flex gap-2" style={{ marginRight: "28px" }}>
+
+                <div className="d-flex gap-2 flex-wrap">
                     <Button
                         color="secondary"
                         disabled={loading}
-                        style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
-                        onClick={() => exportPDF({ colCount, listRef, lastUpdate, setLoading })}
+                        style={{
+                            fontWeight: 500,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            fontSize: "clamp(0.8rem, 2vw, 1rem)",
+                        }}
+                        onClick={() =>
+                            exportPDF({ colCount, listRef, lastUpdate, setLoading })
+                        }
                     >
-                        {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
+                        {loading ? (
+                            <Spinner size="sm" color="light" />
+                        ) : (
+                            <FontAwesomeIcon icon={faFilePdf} />
+                        )}
                         {loading ? " Generando..." : " Exportar PDF"}
                     </Button>
                 </div>
             </div>
 
-
-            <div ref={listRef} className="row mx-3">
+            {/* Listado de departamentos */}
+            <div ref={listRef} className="row mx-2 mx-md-3">
                 {columns.map((col, colIdx) => (
                     <Col
                         key={colIdx}
                         xs="12"
                         md="4"
-                        className={colIdx < colCount - 1 ? "pe-1" : ""}
+                        className={colIdx < colCount - 1 ? "pe-md-1" : ""}
                     >
                         {col.map((dep, depIdx) => (
                             <PhoneDepartmentComponent
                                 key={depIdx}
                                 departmentName={dep.name}
                                 departmentWorkers={dep.workers}
-                                subdepartmentNames={dep.subdepartments.map(sd => sd.name)}
-                                subdepartmentWorkers={dep.subdepartments.map(sd => sd.workers)}
+                                subdepartmentNames={dep.subdepartments.map((sd) => sd.name)}
+                                subdepartmentWorkers={dep.subdepartments.map(
+                                    (sd) => sd.workers
+                                )}
                                 showPhones={true}
                                 publicAccess={true}
                             />

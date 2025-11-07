@@ -20,7 +20,7 @@ const HomeButtonComponent = ({ label, icon, onClick, count }) => (
         {/*Burbuja encima del botón de tickets*/}
         {count > 0 && label.includes("Tickets") &&
             <div className="position-absolute top-0 end-0">
-                <Badge color="danger" pill style={{ width: "40px", height: "35px", fontSize: "large" }} className="d-flex align-items-center justify-content-center">
+                <Badge color="danger" pill style={{ marginTop: "5px", marginRight: "5px", width: "35px", height: "35px", fontSize: "large" }} className="d-flex align-items-center justify-content-center">
                     {count}
                 </Badge>
             </div>}

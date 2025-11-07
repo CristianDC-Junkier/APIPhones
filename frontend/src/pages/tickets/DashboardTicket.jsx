@@ -1,23 +1,7 @@
 ﻿/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useState, useEffect } from "react";
-import {
-    Container,
-    Row,
-    Col,
-    Input,
-    Button,
-    Badge,
-} from "reactstrap";
-import {
-    faEnvelope,
-    faEnvelopeOpen,
-    faCheckCircle,
-    faExclamationTriangle,
-    faSortAmountUp,
-    faSortAmountDown,
-    faSearch,
-    faSyncAlt,
-} from "@fortawesome/free-solid-svg-icons";
+import { useState, useEffect } from "react";
+import { Container, Row, Col, Input, Button, Badge } from "reactstrap";
+import { faEnvelope, faEnvelopeOpen, faCheckCircle, faExclamationTriangle, faSortAmountUp, faSortAmountDown, faSearch, faSyncAlt} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FaArrowLeft } from 'react-icons/fa';
 
@@ -51,6 +35,10 @@ export default function DashboardTickets() {
         const handleResize = () => setIsMobileView(window.innerWidth < 992);
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    useEffect(() => {
+        document.title = "Panel de control de Reportes - Listín telefónico - Ayuntamiento de Almonte";
     }, []);
 
     useEffect(() => {

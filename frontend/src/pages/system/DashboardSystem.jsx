@@ -1,15 +1,12 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText } from 'reactstrap';
 import Swal from 'sweetalert2';
 
 import { getLogs, getLog, downloadLog, getSystemMetrics } from '../../services/SystemService';
-
 import BackButtonComponent from '../../components/utils/BackButtonComponent';
 import LogListComponent from '../../components/system/LogListComponent';
 import LogViewerComponent from '../../components/system/LogViewerComponent';
 import SpinnerComponent from '../../components/utils/SpinnerComponent';
-
-
 
 /**
  * Función que da formato a una cantidad de tiempo recibida
@@ -32,13 +29,15 @@ export default function DashboardSystem() {
     const [selectedLog, setSelectedLog] = useState(null);
     const [isTicketLog, setIsTicketLog] = useState(false);
     const [logContent, setLogContent] = useState('');
-
     const [loading, setLoading] = useState(false);
-
     const [cpuUsage, setCpuUsage] = useState(null);
     const [memoryUsed, setMemoryUsed] = useState(null);
     const [threadsCount, setThreadsCount] = useState(null);
     const [uptimeSeconds, setUptimeSeconds] = useState(null);
+
+    useEffect(() => {
+        document.title = "Panel de Métricas - Listín telefónico - Ayuntamiento de Almonte";
+    }, [])
 
     //Función encargada de obtener la información para la tabla
     useEffect(() => {
@@ -109,14 +108,14 @@ export default function DashboardSystem() {
 
     return (
         <Container className="mt-4 d-flex flex-column" style={{ minHeight: '70vh' }}>
-            <h3 className="text-center mb-4">Estadísticas del Servidor</h3>
+            <h3 className="text-center mb-4">Métricas del Servidor</h3>
 
             <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />
             </div>
 
             {/* Métricas */}
-            <Row className="mb-2 mt-4 text-center g-2">
+            <Row className="mb-2 mt-0 text-center g-2">
                 {[
                     { label: "Uso de la CPU (%)", value: cpuUsage, type: "warning" },
                     { label: "Memoria Usada (MB)", value: memoryUsed, type: "warning" },

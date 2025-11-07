@@ -1,7 +1,8 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Alert, Badge } from 'reactstrap';
+import { Container, Row, Col } from 'reactstrap';
 import { faUserAlt, faBriefcase, faAddressBook, faUsers, faScroll, faStickyNote } from '@fortawesome/free-solid-svg-icons';
+
 import { useAuth } from '../hooks/useAuth';
 import { getCount } from '../services/TicketService';
 import HomeButtonComponent from '../components/utils/HomeButtonComponent';
@@ -15,7 +16,11 @@ const Home = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
-    //Acciones disponibles según el tipo de usuario
+    useEffect(() => {
+        document.title = "Inicio - Listín telefónico - Ayuntamiento de Almonte";
+    }, []);
+
+    // Acciones disponibles según el tipo de usuario
     const actions = (() => {
         switch (user.usertype) {
             case 'USER': return [
@@ -32,6 +37,7 @@ const Home = () => {
             ]
         }
     })();
+
 
     useEffect(() => {
         const getUnresolved = async () => {

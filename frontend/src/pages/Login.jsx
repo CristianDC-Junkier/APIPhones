@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Label, Row, Col, Card, CardBody, Form, FormGroup, Button, Input } from "reactstrap";
+import { useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { createRoot } from 'react-dom/client';
 
@@ -21,6 +22,10 @@ const Login = () => {
 
     const navigate = useNavigate();
     const { login } = useAuth();
+
+    useEffect(() => {
+        document.title = "Inicio de Sesión - Listín telefónico - Ayuntamiento de Almonte";
+    }, []);
 
     //Función que gestiona el Captcha
     const showCaptcha = () => {

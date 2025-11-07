@@ -93,7 +93,7 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, selectedDepa
 
     return (
         <>
-            <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-0">
+            <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-3">
                 <thead className="table-primary">
                     <tr>
                         <th className="text-center">ID</th>

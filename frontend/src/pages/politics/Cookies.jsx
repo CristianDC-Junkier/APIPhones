@@ -1,4 +1,4 @@
-﻿import React from "react";
+﻿import { useEffect } from "react";
 import { Container, Row, Col } from "reactstrap";
 import BackButtonComponent from '../../components/utils/BackButtonComponent';
 
@@ -7,6 +7,11 @@ import BackButtonComponent from '../../components/utils/BackButtonComponent';
  * @returns {JSX.Element} Componente de React con la política de cookies
  */
 const Cookies = () => {
+
+    useEffect(() => {
+        document.title = "Política de Cookies - Listín telefónico - Ayuntamiento de Almonte";
+    }, [])
+
     return (
         <Container fluid className="my-4 position-relative" style={{ paddingLeft: 0, paddingRight: 0 }}>
 

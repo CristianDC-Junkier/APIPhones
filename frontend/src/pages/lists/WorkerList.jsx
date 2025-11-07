@@ -1,20 +1,16 @@
-﻿import React, { useRef, useState, useEffect } from "react";
-import { Col, Button, Spinner, Input, Row } from "reactstrap";
+﻿import { useRef, useState, useEffect } from "react";
+import { Col, Button, Spinner, Input, Container, Row } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 
-
-import { exportPDF } from "./ExportList";
+import { exportPDF } from "../../utils/ExportList";
 import { useAuth } from '../../hooks/UseAuth';
 import { getWorkerDataList } from "../../services/UserService";
 import { getDepartmentsList } from "../../services/DepartmentService";
 
 import PhoneDepartmentComponent from "../../components/lists/PhoneDepartmentComponent";
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
-
-//import { generateMockUsers } from "./generate";
-
 
 const WorkerList = () => {
     const listRef = useRef();
@@ -25,7 +21,18 @@ const WorkerList = () => {
     const [users, setUsers] = useState([]);
     const [lastUpdate, setLastUpdate] = useState(null);
     const [showPhones, setShowPhones] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const { date } = useAuth();
+
+    useEffect(() => {
+        document.title = "Lista Privada - Listín telefónico - Ayuntamiento de Almonte";
+    }, []);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     useEffect(() => {
         const fetchDate = async () => {
@@ -33,18 +40,15 @@ const WorkerList = () => {
             const result = await date();
             setLastUpdate(result);
         };
-
         fetchDate();
     }, [date, loading]);
 
     useEffect(() => {
         const fetchUsers = async () => {
             setLoading(true);
-            //const mockData = generateMockUsers(100); // genera 100 empleados
-            //setUsers(mockData);
             const result = await getWorkerDataList();
             if (result.success) {
-              setUsers(result.data.users);
+                setUsers(result.data.users);
             }
             setLoading(false);
         };
@@ -67,22 +71,15 @@ const WorkerList = () => {
 
     useEffect(() => { fetchDepartments(); }, []);
 
-    // Construir departamentos a partir de users
+    // --- Procesar departamentos ---
     const departmentsArray = Object.values(
         users.filter(u => u && u.departmentId)
             .reduce((acc, u) => {
                 const depId = u.departmentId;
                 const subdepId = u.subdepartmentId;
-
                 if (!acc[depId]) {
-                    acc[depId] = {
-                        id: depId,
-                        name: u.departmentName || "Sin nombre",
-                        workers: [],
-                        subdepartments: {}
-                    };
+                    acc[depId] = { id: depId, name: u.departmentName || "Sin nombre", workers: [], subdepartments: {} };
                 }
-
                 if (subdepId) {
                     if (!acc[depId].subdepartments[subdepId]) {
                         acc[depId].subdepartments[subdepId] = {
@@ -95,68 +92,36 @@ const WorkerList = () => {
                 } else {
                     acc[depId].workers.push(u);
                 }
-
                 return acc;
             }, {})
-    )
-        .map(dep => {
-            // Ordenar trabajadores del departamento principal
-            const sortedWorkers = dep.workers.sort((a, b) =>
-                a.name.localeCompare(b.name)
-            );
+    ).map(dep => {
+        const sortedWorkers = dep.workers.sort((a, b) => a.name.localeCompare(b.name));
+        const sortedSubdeps = Object.values(dep.subdepartments)
+            .map(sub => ({
+                ...sub,
+                workers: sub.workers.sort((a, b) => a.name.localeCompare(b.name))
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        return { ...dep, workers: sortedWorkers, subdepartments: sortedSubdeps };
+    }).sort((a, b) => a.name.localeCompare(b.name));
 
-            // Convertir subdepartamentos a array y ordenar
-            const sortedSubdeps = Object.values(dep.subdepartments)
-                .map(sub => ({
-                    ...sub,
-                    workers: sub.workers.sort((a, b) =>
-                        a.name.localeCompare(b.name)
-                    )
-                }))
-                .sort((a, b) => a.name.localeCompare(b.name));
-
-            return {
-                ...dep,
-                workers: sortedWorkers,
-                subdepartments: sortedSubdeps
-            };
-        })
-        // Finalmente ordenar departamentos
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-    // Filtrar departamentos según búsqueda
+    // --- Filtros ---
     const filteredDepartments = departmentsArray.filter(dep => {
-        // Si searchDepartment tiene texto, comprobar coincidencia
         const matchDept = selectedDepartment ? dep.id === selectedDepartment : true;
-
-        // Si searchUser tiene texto, comprobar coincidencia
-        let matchMain;
-        if (dep.workers.length > 0) {
-            matchMain = searchUser
-                ? dep.workers.some(t =>
-                    t.name.toLowerCase().includes(searchUser.toLowerCase())
-                )
-                : true;
-        } else {
-            for (var i = 0; i < dep.subdepartments.length; i++) {
-                matchMain = searchUser
-                    ? dep.subdepartments[i].workers.some(t =>
-                        t.name.toLowerCase().includes(searchUser.toLowerCase())
-                    )
-                    : true;
-                if (matchMain) break;
-            }
-        }
-        // Un departamento entra si cumple ambos filtros activos
-        return matchDept && matchMain;
+        const term = searchUser.toLowerCase();
+        const matchUser = searchUser
+            ? dep.workers.some(t => t.name.toLowerCase().includes(term)) ||
+            dep.subdepartments.some(sd =>
+                sd.workers.some(t => t.name.toLowerCase().includes(term))
+            )
+            : true;
+        return matchDept && matchUser;
     });
 
-
-    // Distribución vertical-first sobre los filtrados
+    // --- Distribución vertical ---
     const colCount = 3;
     const columns = Array.from({ length: colCount }, () => []);
     const perColumn = Math.ceil(filteredDepartments.length / colCount);
-
     for (let i = 0; i < colCount; i++) {
         const start = i * perColumn;
         const end = start + perColumn;
@@ -164,27 +129,42 @@ const WorkerList = () => {
     }
 
     return (
-        <div className="container-fluid my-4">
-            <div style={{ position: "absolute", top: "10px", left: "10px" }}>
+        <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
+            {/* Botón Volver */}
+            <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />
             </div>
 
+            {/* Título */}
             <div className="text-center my-4">
-                <h2 style={{ fontSize: "1.5rem", fontWeight: "bold" }}>
+                <h2
+                    style={{
+                        fontSize: "clamp(1rem, 2.5vw, 1.5rem)",
+                        fontWeight: "bold",
+                        padding: isMobile ? "0 15px" : "0",
+                    }}
+                >
                     Ayuntamiento de Almonte - Listín Telefónico - Última Actualización: {lastUpdate}
                 </h2>
             </div>
 
-            {/* Buscador y botón exportar */}
-            <Row className="d-flex justify-content-between mb-2">
-
-                <Col xs="11" md="5" className="d-flex gap-2" style={{ marginLeft: "20px", marginBottom: "10px"  }}>
-                    {/* Departamento */}
+            {/* Fila de filtros y botones */}
+            <Row
+                className="align-items-center justify-content-between flex-wrap mb-3"
+                style={{ gap: "10px", padding: isMobile ? "0 15px" : "0 25px" }}
+            >
+                {/* Select departamento */}
+                <Col xs="12" lg="4" className="d-flex align-items-center">
                     <Input
                         type="select"
                         value={selectedDepartment || ""}
                         onChange={e => setSelectedDepartment(Number(e.target.value))}
-                        style={{ minWidth: "200px" }}
+                        style={{
+                            flex: 1,
+                            minWidth: "180px",
+                            height: "38px", // 🔹 altura uniforme
+                            fontSize: "clamp(0.8rem, 2vw, 1rem)",
+                        }}
                     >
                         <option value="">Todos los departamentos</option>
                         {departments.map(d => (
@@ -193,20 +173,36 @@ const WorkerList = () => {
                             </option>
                         ))}
                     </Input>
-                    {/* Usuario */}
-                    <input
+                </Col>
+
+                {/* Input búsqueda */}
+                <Col xs="12" lg="4" className="d-flex align-items-center">
+                    <Input
                         type="text"
-                        className="form-control"
                         placeholder="Buscar usuario..."
                         value={searchUser}
-                        onChange={(e) => setSearchUser(e.target.value)}
+                        onChange={e => setSearchUser(e.target.value)}
+                        style={{
+                            flex: 1,
+                            minWidth: "160px",
+                            height: "38px", // 🔹 igual que el select
+                            fontSize: "clamp(0.8rem, 2vw, 1rem)",
+                        }}
                     />
                 </Col>
-                <Col xs="11" md="4" className="d-flex gap-2 justify-content-end" style={{ marginLeft: "10px", marginRight: "20px", marginBottom: "9px" }}>
+
+                {/* Botones de acción */}
+                <Col xs="12" lg="3" className="d-flex justify-content-lg-end justify-content-center align-items-center gap-2">
                     <Button
                         color={showPhones ? "primary" : "secondary"}
                         onClick={() => setShowPhones(true)}
-                        style={{ fontWeight: 500 }}
+                        style={{
+                            fontWeight: 500,
+                            fontSize: "clamp(0.8rem, 2vw, 1rem)",
+                            height: "38px", // 🔹 misma altura que inputs
+                            lineHeight: "1",
+                            padding: "0 12px",
+                        }}
                     >
                         Teléfonos
                     </Button>
@@ -214,7 +210,13 @@ const WorkerList = () => {
                     <Button
                         color={!showPhones ? "primary" : "secondary"}
                         onClick={() => setShowPhones(false)}
-                        style={{ fontWeight: 500 }}
+                        style={{
+                            fontWeight: 500,
+                            fontSize: "clamp(0.8rem, 2vw, 1rem)",
+                            height: "38px",
+                            lineHeight: "1",
+                            padding: "0 12px",
+                        }}
                     >
                         Correos
                     </Button>
@@ -222,24 +224,35 @@ const WorkerList = () => {
                     <Button
                         color="secondary"
                         disabled={loading}
-                        style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: "5px" }}
-                        onClick={() => exportPDF({ showEmails: !showPhones, colCount, listRef, lastUpdate, setLoading })}
+                        style={{
+                            fontWeight: 500,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            height: "38px",
+                            lineHeight: "1",
+                            padding: "0 12px",
+                            fontSize: "clamp(0.8rem, 2vw, 1rem)",
+                        }}
+                        onClick={() =>
+                            exportPDF({ showEmails: !showPhones, colCount, listRef, lastUpdate, setLoading })
+                        }
                     >
-                        {loading ? <Spinner size="sm" color="light" /> : <FontAwesomeIcon icon={faFilePdf} />}
+                        {loading ? (
+                            <Spinner size="sm" color="light" />
+                        ) : (
+                            <FontAwesomeIcon icon={faFilePdf} />
+                        )}
                         {loading ? " Generando..." : " Exportar PDF"}
                     </Button>
                 </Col>
             </Row>
 
 
-            <div ref={listRef} className="row mx-3">
+            {/* Lista */}
+            <div ref={listRef} className="row mx-2 mx-md-3">
                 {columns.map((col, colIdx) => (
-                    <Col
-                        key={colIdx}
-                        xs="12"
-                        md="4"
-                        className={colIdx < colCount - 1 ? "pe-1" : ""}
-                    >
+                    <Col key={colIdx} xs="12" md="4" className={colIdx < colCount - 1 ? "pe-md-1" : ""}>
                         {col.map((dep, depIdx) => (
                             <PhoneDepartmentComponent
                                 key={depIdx}
@@ -254,7 +267,7 @@ const WorkerList = () => {
                     </Col>
                 ))}
             </div>
-        </div>
+        </Container>
     );
 };
 

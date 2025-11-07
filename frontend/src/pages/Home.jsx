@@ -60,34 +60,12 @@ const Home = () => {
             className="d-flex flex-column py-4"
             style={{ minHeight: '80vh' }}
         >
-
-
-
             {/* Botón de cierre de sesión */}
             <Row className="align-items-center m-0 p-0">
                 <Col className="d-flex justify-content-start">
                     <LogoutButton onClick={handleLogout} loading={loadingLogout} />
                 </Col>
             </Row>
-
-            {/*Información de tickets sin resolver*/}
-            {count > 0 && (
-                <Row className="justify-content-center mb-3">
-                    <Col xs="auto">
-                        <span className=" fs-5 d-flex align-items-center gap-2 fw-bold text-dark">
-                            <span>
-                                {count === 1 ? 'Existe' : 'Existen'}{' '}
-                                <Badge color="danger" pill>
-                                    {count}
-                                </Badge>{' '}
-                                {count === 1 ? 'ticket sin resolver' : 'tickets sin resolver'}
-                            </span>
-                        </span>
-                    </Col>
-                </Row>
-            )}
-
-
 
             {/* Botones con las acciones definidas */}
             <div className="d-flex flex-column justify-content-center align-items-center" style={{ flexGrow: 1 }}>
@@ -98,7 +76,7 @@ const Home = () => {
                             xs={12} sm={8} md={6} lg={4} xl={3}
                             className="d-flex justify-content-center"
                         >
-                            <HomeButtonComponent label={label} icon={icon} onClick={action} />
+                            <HomeButtonComponent label={label} icon={icon} onClick={action} count={count} />
                         </Col>
                     ))}
                 </Row>

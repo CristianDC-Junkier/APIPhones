@@ -69,6 +69,8 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
             textarea.addEventListener("input", () => {
                 const len = textarea.value.trim().length;
                 counter.innerHTML = `${len}/500`;
+                if (len > 500) { counter.style.color = "red"; }
+                else { counter.style.color = ""; }
             });
         },
         preConfirm: () => {
@@ -77,7 +79,7 @@ const CreateTicketComponent = async ({ dataItem, onConfirm }) => {
 
             if (!topic) { Swal.showValidationMessage("Debe elegir un asunto"); return false; }
             if (!text) { Swal.showValidationMessage("Detalle cual es el motivo del ticket"); return false; }
-            if (text.length > 500) { Swal.showValidationMessage(`Ha superado el límite de carácteres permitido. ${text.length}/500`); return false; }
+            else if (text.length > 500) { Swal.showValidationMessage(`Ha superado el límite de carácteres permitido. ${text.length}/500`); return false; }
 
             return { topic, information: text, idAffectedData: dataItem.id };
         }

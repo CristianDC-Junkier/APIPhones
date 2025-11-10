@@ -11,7 +11,7 @@ const JWT_SECRET_RFH = process.env.JWT_SECRET_RFH;
 * @param {string|number} [expiresIn='15m']
 * @returns {string} accessToken
 */
-function generateAccessToken(payload, expiresIn = '10s') {
+function generateAccessToken(payload, expiresIn = '15m') {
     return jwt.sign(payload, JWT_SECRET_ACS, { expiresIn });
 }
 

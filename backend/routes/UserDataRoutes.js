@@ -32,7 +32,7 @@ router.get("/worker-department", isAuthenticated, UserDataController.workerListB
 router.get("/profile", isAuthenticated, UserDataController.getProfile);
 
 router.post("/", adminOnly, UserDataController.create);
-router.put("/:id", adminOnly, canModifyUser, UserDataController.update);
+router.put("/:id", adminOnly, UserDataController.update);
 router.delete("/:id", adminOnly, UserDataController.delete);
 
 

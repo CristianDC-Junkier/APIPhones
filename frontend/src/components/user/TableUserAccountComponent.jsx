@@ -38,7 +38,7 @@ const TableUserAccountComponent = ({ users, search, selectedDepartment, rowsPerP
         Swal.fire({
             title: `Eliminar el Usuario`,
             html: container,
-            showConfirmButton: true,
+            showConfirmButton: false,
             confirmButtonText: 'Continuar',
             showCancelButton: true,
             cancelButtonText: 'Cancelar',

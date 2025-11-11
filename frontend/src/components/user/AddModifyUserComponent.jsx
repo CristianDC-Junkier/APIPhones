@@ -85,6 +85,19 @@ const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm
         <div style="font-size:0.75rem; color:red; text-align:right;">* Campos obligatorios</div>
     </div>`;
 
+    const step2Html = `
+    <div>
+        <div style="${rowStyle} margin-top: 5vh">
+            <label style="${labelStyle}">Correo Electrónico</label>
+            <input id="swal-mail" style="${inputStyle}" placeholder="Email" value="${userItem?.mail || ""}">
+        </div>
+        ${action !== 'modify' ?  `
+        <div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
+            Incluya un correo si quiere que esta persona sea notificada cuando se creé un nuevo ticket. <br>
+            Se recomienda incluirlo en caso de que esta persona vaya a participar de forma activa en la administración de la página.
+        </div>` : ''}
+    </div>`;
+
     // Paso 1
     const swalStep1 = await Swal.fire({
         title: "Cuenta de Usuario",
@@ -115,14 +128,37 @@ const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm
             if (!username) { Swal.showValidationMessage("El nombre de usuario no puede estar vacío"); return false; }
             //if (!password) { Swal.showValidationMessage("La contraseña no puede estar vacía"); return false; }
 
-            return { username, password, usertype, departmentId, version: userItem?.version ? userItem.version : 0 };
+            return { username, password, mail: null, usertype, departmentId, version: userItem?.version ? userItem.version : 0 };
         }
     });
 
     if (!swalStep1.value) return;
     const step1Values = swalStep1.value;
 
-    
+    let swalStep2;
+    if (step1Values.usertype !== "USER") {
+        swalStep2 = await Swal.fire({
+            title: "Añadir Email",
+            html: step2Html,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            width: '600px',
+            showCancelButton: false,
+            cancelButtonText: "Cancelar",
+            confirmButtonText: "Aceptar",
+            preConfirm: () => {
+                const mail = document.getElementById("swal-mail").value.trim();
+
+                if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
+
+                return mail === "" ? null : mail;
+            }
+        }); 
+    }
+    console.log(swalStep2?.value);
+    if (swalStep2?.value != undefined) step1Values.mail = swalStep2?.value;
+    console.log(step1Values);
+
     if (action === "modify" && !step1Values.password) {
         onConfirm({ userAccount: step1Values, userAccountId: userItem?.userAccountId || null });
     } else {

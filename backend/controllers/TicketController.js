@@ -1,5 +1,6 @@
 ﻿const { Ticket, UserAccount, UserData, Department, SubDepartment  } = require("../models/Relations");
 const LoggerController = require("../controllers/LoggerController");
+const MailerController = require("./MailerController");
 const { Op } = require('sequelize');
 
 /**
@@ -132,6 +133,8 @@ class TicketController {
                 action: "CREATE",
                 userId: requesterId
             });
+
+            await MailerController.sendNotif();
 
             res.status(201).json({ ticket });
         } catch (error) {

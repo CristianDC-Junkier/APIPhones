@@ -119,7 +119,7 @@ export const modifyUser = async (id, user) => {
  */
 export const modifyUserData = async (id, user) => {
     try {
-        const res = await api.put(`/data/${id}`, user, {});
+        const res = await api.put(`/data/${id}`, user);
         return { success: true, data: res.data };
     } catch (error) {
         return { success: false, error: error.response?.data?.error };

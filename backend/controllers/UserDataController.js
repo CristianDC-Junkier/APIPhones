@@ -240,7 +240,7 @@ class UserDataController {
 
             await userdata.save();
 
-            LoggerController.info('Datos de usuario con id ' + user.id + ' actualizado correctamente por el usuario con id ' + req.user.id);
+            LoggerController.info('Datos de usuario con id ' + id + ' actualizado correctamente por el usuario con id ' + req.user.id);
 
             return res.json({
                 user: {
@@ -258,14 +258,14 @@ class UserDataController {
 
 
         } catch (error) {
-            LoggerController.error('Error modificando al usuario con id ' + user.id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error modificando los datos con id ' + req.body.id + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }
     }
 
     /**
-    * Permite al usuario autenticado eliminar datos asociados.
+    * Permite al usuario autenticado eliminar datos.
     * 
     * @param {Object} req - Objeto de petición { param: { user }, query: { version }}
     * @param {Object} res
@@ -282,17 +282,15 @@ class UserDataController {
 
             await data.destroy();
 
-            LoggerController.info('Datos de usuario con id ' + user.id + ' eliminado por el usuario con id ' + req.user.id);
-            return res.json({ id });
+            LoggerController.info('Datos de usuario con id ' + userDataId + ' eliminado por el usuario con id ' + req.user.id);
+            return res.json({ userDataId });
 
         } catch (error) {
-            LoggerController.error('Error eliminando los datos de usuario con id ' + id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error eliminando los datos de usuario con id ' + userDataId + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }
     }
-    //#endregion
-
     //#endregion
 
     /**

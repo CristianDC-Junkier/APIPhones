@@ -71,7 +71,7 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
             onConfirm: async (formValues) => {
                 const result = await modifyUserData(userItem.id, formValues.userData);
                 if (result.success) {
-                    Swal.fire("Éxito", "Usuario modificado correctamente", "success");
+                    Swal.fire("Éxito", "Datos modificados correctamente", "success");
                 } else {
                     Swal.fire("Error", result.error || "No se pudo modificar el usuario", "error");
                 }

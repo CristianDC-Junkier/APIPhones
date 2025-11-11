@@ -35,6 +35,15 @@ const UserAccount = sequelize.define("UserAccount", {
             return encrypted ? decrypt(encrypted) : null;
         },
     },
+    mail: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        set(value) { this.setDataValue("mail", value ? encrypt(value) : null)},
+        get() {
+            const encrypted = this.getDataValue("mail");
+            return encrypted ? decrypt(encrypted) : null;
+        },
+    },
     usertype: {
         type: DataTypes.STRING,
         allowNull: false,

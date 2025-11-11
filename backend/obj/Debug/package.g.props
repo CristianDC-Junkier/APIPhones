@@ -16,6 +16,7 @@
     <PackageJsonDependenciesExpress Condition="$(PackageJsonDependenciesExpress) == ''">^5.1.0</PackageJsonDependenciesExpress>
     <PackageJsonDependenciesJsonwebtoken Condition="$(PackageJsonDependenciesJsonwebtoken) == ''">^9.0.2</PackageJsonDependenciesJsonwebtoken>
     <PackageJsonDependenciesMysql2 Condition="$(PackageJsonDependenciesMysql2) == ''">^3.14.5</PackageJsonDependenciesMysql2>
+    <PackageJsonDependenciesNodemailer Condition="$(PackageJsonDependenciesNodemailer) == ''">^7.0.10</PackageJsonDependenciesNodemailer>
     <PackageJsonDependenciesSequelize Condition="$(PackageJsonDependenciesSequelize) == ''">^6.37.7</PackageJsonDependenciesSequelize>
     <PackageJsonDependenciesSqlite3 Condition="$(PackageJsonDependenciesSqlite3) == ''">^5.1.7</PackageJsonDependenciesSqlite3>
     <PackageJsonDependenciesUuid Condition="$(PackageJsonDependenciesUuid) == ''">^13.0.0</PackageJsonDependenciesUuid>

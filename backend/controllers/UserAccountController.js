@@ -4,6 +4,7 @@ const LoggerController = require("./LoggerController");
 const { Op } = require("sequelize");
 
 
+
 /**
  * Controlador de autenticación y gestión de usuarios.
  * 
@@ -21,7 +22,7 @@ class UserAccountController {
 
     //#region Métodos recuperación de usuarios
     /**
-    * Listar todos los usuarios con su UserData y relaciones.
+    * Listar todos los usuarios con sus relaciones.
     * 
     * @param {Object} req - req.user viene del middleware isAuthenticated
     * @param {Object} res
@@ -49,6 +50,7 @@ class UserAccountController {
             const formatted = users.map(user => ({
                 id: user.id,
                 username: user.username,
+                mail: user.mail,
                 usertype: user.usertype,
                 forcePwdChange: user.forcePwdChange,
                 departmentId: user.departmentId,
@@ -105,6 +107,7 @@ class UserAccountController {
             const formatted = usersInDepartment.map(user => ({
                 id: user.id,
                 username: user.username,
+                mail: user.mail,
                 usertype: user.usertype,
                 forcePwdChange: user.forcePwdChange,
                 departmentId: user.departmentId,
@@ -121,14 +124,15 @@ class UserAccountController {
             return res.status(500).json({ error: error.message });
         }
     }
+
+ 
     //#endregion
 
     //#region Métodos CRUD de usuarios
     /**
     * Crea una nueva cuenta de usuario.
     * 
-    * @param {Object} req - { body: 
-    * { userAccount: { username, password, usertype, departmentId } } }
+    * @param {Object} req - { body: { userAccount: { username, password, usertype, departmentId } } }
     * @param {Object} res
     */
     static async create(req, res) {
@@ -153,6 +157,7 @@ class UserAccountController {
             const user = await UserAccount.create({
                 username: userAccount.username,
                 password: userAccount.password,
+                mail: userAccount.mail,
                 usertype: userAccount.usertype,
                 forcePwdChange: userAccount.usertype === "USER" ? false : true,
                 departmentId: userAccount.departmentId
@@ -177,7 +182,6 @@ class UserAccountController {
     static async update(req, res) {
 
         try {
-
             const targetUserId = req.params.id;
             const { userAccount } = req.body;
 
@@ -216,12 +220,14 @@ class UserAccountController {
                 }
             }
 
+            targetUser.mail = userAccount.mail;
+
             await targetUser.save();
 
-            LoggerController.info('Usuario con id ' + user.id + ' actualizado correctamente por el usuario con id ' + req.user.id);
+            LoggerController.info('Usuario con id ' + targetUserId + ' actualizado correctamente por el usuario con id ' + req.user.id);
             return res.json({ id: targetUserId });
         } catch (error) {
-            LoggerController.error('Error modificando al usuario con id ' + user.id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error modificando al usuario con id ' + targetUserId + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }

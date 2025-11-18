@@ -1,6 +1,6 @@
 ﻿const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const { encrypt, decrypt } = require("../utils/Crypto");
+const { encrypt, decrypt, hash } = require("../utils/Crypto");
 
 /**
  * Modelo Sequelize para departamentos.
@@ -9,6 +9,7 @@ const { encrypt, decrypt } = require("../utils/Crypto");
  * Campos:
  * - id   → Identificador único autoincremental.
  * - name → Nombre del departamento (cifrado).
+ * - name_hash → Hash del nombre para búsquedas rápidas y únicas.
  */
 const Department = sequelize.define("Department", {
     id: {
@@ -19,11 +20,21 @@ const Department = sequelize.define("Department", {
     name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
-        set(value) { this.setDataValue("name", encrypt(value)); },
+        set(value) {
+            this.setDataValue("name", encrypt(value));
+            this.setDataValue("name_hash", hash(value));
+        },
         get() {
             const val = this.getDataValue("name");
             return val ? decrypt(val) : null;
+        },
+    },
+    name_hash: {
+        type: DataTypes.STRING(64),
+        allowNull: false,
+        unique: {
+            name: 'unique_departmentname',
+            msg: 'Nombre del departamento ya existente'
         },
     },
 });

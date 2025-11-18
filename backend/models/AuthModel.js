@@ -24,7 +24,10 @@ const UserAccount = sequelize.define("UserAccount", {
     username: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+            name: 'unique_username',
+            msg: 'Nombre de usuario ya existente'
+        },
     },
     password: {
         type: DataTypes.STRING,

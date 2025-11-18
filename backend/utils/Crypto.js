@@ -1,6 +1,7 @@
 ﻿const crypto = require("crypto");
 
-const SECRET_KEY = process.env.AES_SECRET;
+const SECRET_AES = process.env.AES_SECRET;
+const SECRET_PEPPER = process.env.PEPPER_SECRET;
 const IV_LENGTH = 16; // Longitud del vector de inicialización en bytes
 
 /**
@@ -10,7 +11,7 @@ const IV_LENGTH = 16; // Longitud del vector de inicialización en bytes
  */
 function encrypt(text) {
     const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(SECRET_KEY), iv);
+    const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(SECRET_AES), iv);
     let encrypted = cipher.update(text, "utf8", "hex");
     encrypted += cipher.final("hex");
     return iv.toString("hex") + ":" + encrypted;
@@ -25,10 +26,22 @@ function decrypt(text) {
     const parts = text.split(":");
     const iv = Buffer.from(parts[0], "hex");
     const encryptedText = parts[1];
-    const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(SECRET_KEY), iv);
+    const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(SECRET_AES), iv);
     let decrypted = decipher.update(encryptedText, "hex", "utf8");
     decrypted += decipher.final("utf8");
     return decrypted;
 }
 
-module.exports = { encrypt, decrypt };
+/**
+ * Hashea el código junto a un pepper para hacer las comparaci0nes por el.
+ * @param {string} text - Texto a hashear.
+ * @returns {string} Texto descifrado.
+ */
+function hash(text) {
+    return crypto
+        .createHash("sha256")
+        .update(SECRET_PEPPER + text.toLowerCase().trim())
+        .digest("hex")
+}
+
+module.exports = { encrypt, decrypt, hash };

@@ -1,6 +1,6 @@
 ﻿const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db");
-const { encrypt, decrypt } = require("../utils/Crypto");
+const { encrypt, decrypt, hash } = require("../utils/Crypto");
 
 
 /**
@@ -9,7 +9,8 @@ const { encrypt, decrypt } = require("../utils/Crypto");
  * 
  * Campos:
  * - id              → Identificador único autoincremental.
- * - name            → Nombre completo del usuario.
+ * - name            → Nombre completo del usuario (cifrado).
+ * - name_hash       → Hash del nombre para búsquedas rápidas y únicas.
  * - extension       → Extensión telefónica (cifrada, validado como número).
  * - number          → Número de teléfono (cifrado, validado con teléfono).
  * - email           → Correo electrónico (cifrado, validado como email).
@@ -36,8 +37,23 @@ const UserData = sequelize.define("UserData", {
     },
     name: {
         type: DataTypes.STRING,
+        allowNull: false,
+        set(value) {
+            this.setDataValue("name", encrypt(value));
+            this.setDataValue("name_hash", hash(value));
+        },
+        get() {
+            const val = this.getDataValue("name");
+            return val ? decrypt(val) : null;
+        },
+    },
+    name_hash: {
+        type: DataTypes.STRING(64),
         allowNull: true,
-        unique: true
+        unique: {
+            name: 'unique_userdataname',
+            msg: 'Nombre del trabajador ya existente'
+        },
     },
     extension: {
         type: DataTypes.STRING,

@@ -134,7 +134,8 @@ class TicketController {
                 userId: requesterId
             });
 
-            await MailerController.sendNotif();
+            // Envio de notificaciones
+            await MailerController.sendNotif(ticket);
 
             res.status(201).json({ ticket });
         } catch (error) {

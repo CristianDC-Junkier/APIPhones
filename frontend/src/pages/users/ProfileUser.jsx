@@ -53,7 +53,7 @@ const ProfileUser = () => {
                 }
             }
 
-            fetchList();
+            await fetchList();
 
         } finally {
             setLoading(false);
@@ -93,7 +93,9 @@ const ProfileUser = () => {
             await CreateTicketComponent({
                 dataItem,
                 onConfirm: async (formValues) => {
+                    setLoading(true);
                     const result = await createNewTicket(formValues);
+                    setLoading(false);
                     if (result.success) {
                         Swal.fire("Éxito", "Ticket enviado correctamente", "success");
                     } else {

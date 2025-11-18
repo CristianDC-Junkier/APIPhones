@@ -168,22 +168,26 @@ class TicketController {
             const updatedTickets = [];
 
             for (const ticket of tickets) {
-                if (resolved) {
-                    ticket.status = "RESOLVED";
-                    ticket.readAt = new Date();
-                    ticket.resolvedAt = new Date();
-                    ticket.userResolverId = userId;
-                } else if (warned) {
+                if (warned) {
                     ticket.status = "WARNED";
                     ticket.warnedAt = new Date();
+                } else if (resolved) {
+                    ticket.status = "RESOLVED";
+                    ticket.resolvedAt = new Date();
+                    ticket.userResolverId = userId;
                 } else if (read) {
                     ticket.status = "READ";
                     ticket.readAt = new Date();
+                    ticket.warnedAt = null;
+                    ticket.resolvedAt = null;
+                    ticket.userResolverId = null;
                 } else {
                     ticket.status = "OPEN";
                     ticket.readAt = null;
                     ticket.resolvedAt = null;
                     ticket.warnedAt = null;
+                    ticket.resolvedAt = null;
+                    ticket.userResolverId = null;
                 }
 
                 await ticket.save();

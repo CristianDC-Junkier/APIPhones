@@ -34,8 +34,7 @@ export default function TicketViewerComponent({ ticket, onMarkTicket }) {
             style={{
                 display: "flex",
                 flexDirection: "column",
-                height: "75vh",
-                overflow: "hidden",
+                overflow: "auto",
                 borderLeft: "1px solid #dee2e6",
                 borderRadius: "0.5rem",
             }}
@@ -78,7 +77,13 @@ export default function TicketViewerComponent({ ticket, onMarkTicket }) {
                         <Col xs="6" md="6">
                             <span className="text-muted d-block">Resuelto por</span>
                             <span className="fw-semibold">
-                                {ticket.userResolverName || `ID #${ticket.userResolverId}`}
+                                {
+                                    ticket.userResolverName
+                                        ? ticket.userResolverName
+                                        : ticket.userResolverId != null
+                                            ? `ID #${ticket.userResolverId}`
+                                            : <em>Aún no resuelto</em>
+                                }
                             </span>
                         </Col>
                         <Col xs="6" md="6">

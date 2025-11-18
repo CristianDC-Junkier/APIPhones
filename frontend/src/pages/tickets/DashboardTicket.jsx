@@ -68,9 +68,15 @@ export default function DashboardTickets() {
 
     const handleMarkTicket = async (idList, newStatus) => {
         let read = false, resolved = false, currentview = "open";
+        if (newStatus === "OPEN") {
+            currentview = "open";
+            read = false;
+            resolved = false;
+        }
         if (newStatus === "READ") {
             currentview = "read";
             read = true;
+            resolved = false;
         }
         if (newStatus === "RESOLVED") {
             currentview = "resolved";
@@ -88,9 +94,9 @@ export default function DashboardTickets() {
         if (response.success) {
             const updatedList = await fetchTickets();
             setCurrentView(currentview);
-
-            if (currentview !== "open") {
-                const updated = updatedList.find((t) => t.id === selectedTicket);
+            if (newStatus === "READ") {
+                const updated = updatedList.find((t) => t.id === idList);
+                setSelectedTicket(idList);
                 setTicketContent(updated);
             } else {
                 setSelectedTicket(null);
@@ -103,7 +109,7 @@ export default function DashboardTickets() {
     const handleSelectTicket = async (id) => {
         const ticket = tickets.find((t) => t.id === id);
         if (ticket.status === "OPEN") {
-            await handleMarkTicket([id], "READ");
+            await handleMarkTicket(id, "READ");
         } else {
             setSelectedTicket(id);
             setTicketContent(ticket);
@@ -244,7 +250,7 @@ export default function DashboardTickets() {
                                             <FontAwesomeIcon icon={item.icon} className="me-1" />
                                             {item.label}
                                         </span>
-                                        <Badge color={item.color}>{item.count}</Badge>
+                                        <Badge style={{ "--bs-badge-padding-x": "0.75em" }} color={item.color}>{item.count}</Badge>
                                     </Button>
                                 </Col>
                             ))}
@@ -317,7 +323,7 @@ export default function DashboardTickets() {
 
     // ================= DESKTOP VIEW =================
     return (
-        <div className="d-flex flex-column flex-lg-row bg-light rounded shadow-sm" style={{ minHeight: "80vh" }}>
+        <div className="d-flex flex-column flex-lg-row bg-light rounded shadow-sm" style={{ minHeight: "80vh", maxHeight: "80vh" }}>
             <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />
             </div>
@@ -352,7 +358,7 @@ export default function DashboardTickets() {
                             <span>
                                 <FontAwesomeIcon icon={item.icon} className="me-2" /> {item.label}
                             </span>
-                            <Badge color={item.color}>{item.count}</Badge>
+                            <Badge style={{ "--bs-badge-padding-x": "0.75em" }} color={item.color}>{item.count}</Badge>
                         </button>
                     ))}
                 </div>

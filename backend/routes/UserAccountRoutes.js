@@ -3,6 +3,7 @@ const router = express.Router();
 
 const UserAccountController = require("../controllers/UserAccountController");
 const { adminOnly, isAuthenticated, canModifyUser } = require("../middlewares/Auth");
+const UserAccount = require("../models/AuthModel");
 
 /**
  * - GET    /list               → Listar todos los datos de usuario usuario logueado.
@@ -30,6 +31,7 @@ router.get("/list-department", adminOnly, isAuthenticated, UserAccountController
 router.put("/profile-update", isAuthenticated, UserAccountController.updateMyAccount);
 router.delete("/profile-del", isAuthenticated, UserAccountController.deleteMyAccount);
 router.patch("/profile-PWD", isAuthenticated, UserAccountController.forcedPasswordChange);
+router.patch("/profile-mail", isAuthenticated, UserAccountController.mailProfileChange);
 
 router.post("/", adminOnly, UserAccountController.create);
 router.put("/:id", adminOnly, canModifyUser, UserAccountController.update);

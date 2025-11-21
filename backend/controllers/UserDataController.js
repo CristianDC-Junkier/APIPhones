@@ -359,6 +359,7 @@ class UserDataController {
                 username: user.username,
                 usertype: user.usertype,
                 forcePwdChange: user.forcePwdChange,
+                mail: user.mail,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,

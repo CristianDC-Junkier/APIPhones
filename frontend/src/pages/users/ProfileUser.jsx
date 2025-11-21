@@ -6,11 +6,12 @@ import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
 import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
 
 import { useAuth } from "../../hooks/useAuth";
-import { deleteProfileAcc, getProfile, modifyProfileAcc, getWorkerDataList } from "../../services/UserService";
+import { deleteProfileAcc, getProfile, modifyProfileAcc, getWorkerDataList, changeMailProfile } from "../../services/UserService";
 import { createNewTicket } from "../../services/TicketService";
 
 import BackButtonComponent from "../../components/utils/BackButtonComponent";
 import ModifyUserAccountComponent from '../../components/user/ModifyUserAccountComponent';
+import AddModifyMailProfileComponent from '../../components/user/AddModifyMailProfileComponent';
 import CreateTicketComponent from '../../components/ticket/CreateTicketComponent';
 import SpinnerComponent from '../../components/utils/SpinnerComponent';
 import PaginationComponent from "../../components/PaginationComponent";
@@ -66,6 +67,7 @@ const ProfileUser = () => {
             if (user.department) {
                 const dataResponse = await getWorkerDataList(user.department);
                 if (dataResponse.success) {
+                    
                     setData(dataResponse.data.datalist);
                 }
             }
@@ -158,6 +160,27 @@ const ProfileUser = () => {
         }
     };
 
+    //Cambiar correo
+    const handleMail = async () => {
+        try {
+            await AddModifyMailProfileComponent({
+                profile,
+                onConfirm: async (mail) => {
+                    const result = await changeMailProfile(mail, version);
+                    if (result.success) {
+                        Swal.fire("Éxito", "Correo modificado correctamente", "success");
+                        update(result.data.user, result.data.token);
+                    } else {
+                        Swal.fire("Error", result.error || "No se pudo modificar el correo", "error");
+                    }
+                }
+            })
+        }
+        catch (err) {
+            Swal.fire("Error", err.message || "Error al cambiar el correo", "error");
+        }
+    }
+
     // Función para formatear fecha
     const formatDate = (dateString) => {
         if (!dateString) return "-";
@@ -181,7 +204,7 @@ const ProfileUser = () => {
                 <Row className="mb-3 mt-4 justify-content-center g-3 w-100">
 
                     {/* BLOQUE 1: Información de la cuenta */}
-                    <Col xs="12" md="5" className="d-flex justify-content-center">
+                    <Col xs="12" md="7" className="d-flex justify-content-center">
                         <Card className="h-100 shadow-lg rounded-4 bg-light border-0 mx-auto w-100">
                             <CardBody className="d-flex flex-column justify-content-between p-4">
                                 <div>
@@ -199,6 +222,28 @@ const ProfileUser = () => {
                                     {!isUser && <Row className="mb-2">
                                         <Col md="6"><strong>Tipo de Usuario:</strong></Col>
                                         <Col md="6">{profile.usertype || "-"}</Col>
+                                    </Row>}
+                                    {!isUser && <Row className="mb-2">
+                                        <Col md="6"><strong>Correo de notificaciones:</strong></Col>
+                                        <Col md="6">
+                                            {profile.mail || ""}
+                                            <span
+                                                onClick={() => handleMail() }
+                                                style={{
+                                                    display: "inline-block",
+                                                    padding: "2px 6px",
+                                                    borderRadius: "50px",
+                                                    backgroundColor: `${ profile.mail ? "blue" : "green" }`,
+                                                    color: "#fff",
+                                                    fontWeight: 500,
+                                                    fontSize: "0.8rem",
+                                                    whiteSpace: "nowrap",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                {profile.mail ? "Cambiar" : "+ Añadir"}
+                                            </span>
+                                        </Col>
                                     </Row>}
                                     {isUser && <Row className="mb-2">
                                         <Col md="12">

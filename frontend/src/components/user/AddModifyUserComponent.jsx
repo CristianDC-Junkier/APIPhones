@@ -91,6 +91,11 @@ const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm
             <label style="${labelStyle}">Correo Electrónico</label>
             <input id="swal-mail" style="${inputStyle}" placeholder="Email" value="${userItem?.mail || ""}">
         </div>
+        ${action === 'modify' ?  `
+        <div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:right;">
+            Deje el espacio vacio en caso de querer quitar el correo
+        </div>
+        </div>` : ''}
         ${action !== 'modify' ?  `
         <div style="margin-bottom:1rem; font-size:0.75rem; color:gray; text-align:left;">
             Incluya un correo si quiere que esta persona sea notificada cuando se creé un nuevo ticket. <br>
@@ -155,9 +160,7 @@ const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm
             }
         }); 
     }
-    console.log(swalStep2?.value);
     if (swalStep2?.value != undefined) step1Values.mail = swalStep2?.value;
-    console.log(step1Values);
 
     if (action === "modify" && !step1Values.password) {
         onConfirm({ userAccount: step1Values, userAccountId: userItem?.userAccountId || null });

@@ -324,18 +324,18 @@ class UserAccountController {
             const updates = {};
 
             // --- Contraseña ---
-            if (!oldPassword || !newPassword) {
-                return res.status(400).json({ error: "Ambas contraseñas son requeridas para actualizar" });
-            }
-            if (!isAdmin && (oldPassword === newPassword)) {
-                return res.status(400).json({ error: "La contraseña nueva debe ser diferente a la actual" });
-            }
-            if (user.password !== oldPassword) {
-                return res.status(400).json({ error: "La contraseña actual no es correcta" });
-            }
+            if (oldPassword && newPassword) {
+                if (!isAdmin && (oldPassword === newPassword)) {
+                    return res.status(400).json({ error: "La contraseña nueva debe ser diferente a la actual" });
+                }
+                if (user.password !== oldPassword) {
+                    return res.status(400).json({ error: "La contraseña actual no es correcta" });
+                }
 
-            updates.password = newPassword;
-            updates.forcePwdChange = false;
+                updates.password = newPassword;
+                updates.forcePwdChange = false;
+            }
+            
 
 
             // --- Username ---
@@ -457,7 +457,56 @@ class UserAccountController {
             return res.json({ id: userId });
 
         } catch (error) {
-            LoggerController.error('Error actualizando su propia contraseña del usuario con id ' + id);
+            LoggerController.error('Error actualizando su propia contraseña del usuario con id ' + req.user.id);
+            LoggerController.error('Error - ' + error.message);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    /**
+    * Permite al usuario autenticado cambiar o eliminar su correo designado para notificaciones.
+    * 
+    * @param {Object} req - Objeto de petición con { params: { id }, body: { mail } }.
+    * @param {Object} res
+    */
+    static async mailProfileChange(req, res) {
+        try {
+            const userId = req.user.id;
+            const { mail } = req.body;
+            const { version } = req.query;
+
+            const user = await UserAccount.findByPk(userId);
+
+            //Comprobar versión
+            if (user.version != version) {
+                return res.status(409).json({
+                    error: "Su usuario ha sido modificado anteriormente",
+                    latestUser: {
+                        id: user.id,
+                        username: user.username,
+                        usertype: user.usertype,
+                        forcePwdChange: user.forcePwdChange,
+                        department: user.departmentId,
+                        version: user.version,
+                    },
+                });
+            }
+
+            // Actualizar correo
+            user.mail = mail ? mail : null;
+            await user.save();
+
+            LoggerController.info(`Usuario ${userId} cambió su correo`);
+            return res.json({
+                user: {
+                    id: user.id,
+                    mail: user.mail,
+                    version: user.version,
+                }
+            });
+
+        } catch (error) {
+            LoggerController.error('Error actualizando su propio correo del usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }

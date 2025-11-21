@@ -246,6 +246,20 @@ export const modifyProfileAcc = async (useraccount, version) => {
     } catch (error) {
         return { success: false, error: error.response?.data?.error };
     }
+};
+
+/**
+ * Solicitud de cambio de correo de notificaciones del perfil conectado
+ */
+export const changeMailProfile = async (mail, version) => {
+    try {
+        const res = await api.patch(`/acc/profile-mail`, mail, {
+            params: { version },
+        });
+        return { success: true, data: res.data };
+    } catch (error) {
+        return { success: false, error: error.response?.data?.error };
+    }
 }
 
 //#endregion

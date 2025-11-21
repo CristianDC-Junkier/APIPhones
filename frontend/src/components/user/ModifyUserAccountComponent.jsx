@@ -50,7 +50,7 @@ const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
             </div>
 
             <div style="${rowStyle}">
-                <label style="${labelStyle}">Contraseña actual <span style="color:red">*</span></label>
+                <label style="${labelStyle}">Contraseña actual</label>
                 <div style="flex:1; display:flex; align-items:center;">
                     <input id="swal-oldpassword" type="password" style="flex:1; ${inputStyle}" placeholder="Contraseña actual">
                     <button type="button" id="toggle-old" style="margin-left:4px; border:none; background:transparent; cursor:pointer; width:36px; display:flex; justify-content:center; align-items:center;">
@@ -60,7 +60,7 @@ const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
             </div>
 
             <div style="${rowStyle}">
-                <label style="${labelStyle}">Nueva contraseña <span style="color:red">*</span></label>
+                <label style="${labelStyle}">Nueva contraseña</label>
                 <div style="flex:1; display:flex; align-items:center;">
                     <input id="swal-newpassword" type="password" style="flex:1; ${inputStyle}" placeholder="Nueva contraseña">
                     <button type="button" id="toggle-new" style="margin-left:4px; border:none; background:transparent; cursor:pointer; width:36px; display:flex; justify-content:center; align-items:center;">
@@ -121,8 +121,8 @@ const ModifyUserAccountComponent = async ({ profile, onConfirm }) => {
             const result = { username, oldPassword, newPassword };
 
             if (!username) Swal.showValidationMessage("El nombre de usuario es obligatorio");
-            else if (!oldPassword) Swal.showValidationMessage("La contraseña actual es obligatoria");
-            else if (!newPassword) Swal.showValidationMessage("La nueva contraseña es obligatoria");
+            if (!oldPassword && newPassword) Swal.showValidationMessage("La contraseña actual es obligatoria");
+            else if (!newPassword && oldPassword) Swal.showValidationMessage("La nueva contraseña es obligatoria");
             if (isAdmin) {
                 const usertype = document.getElementById("swal-usertype")?.value;
                 const departmentIdRaw = document.getElementById("swal-department")?.value;

@@ -15,6 +15,7 @@
     <PackageJsonDependenciesDotenv Condition="$(PackageJsonDependenciesDotenv) == ''">^17.2.2</PackageJsonDependenciesDotenv>
     <PackageJsonDependenciesExpress Condition="$(PackageJsonDependenciesExpress) == ''">^5.1.0</PackageJsonDependenciesExpress>
     <PackageJsonDependenciesJsonwebtoken Condition="$(PackageJsonDependenciesJsonwebtoken) == ''">^9.0.2</PackageJsonDependenciesJsonwebtoken>
+    <PackageJsonDependenciesMariadb Condition="$(PackageJsonDependenciesMariadb) == ''">^3.4.5</PackageJsonDependenciesMariadb>
     <PackageJsonDependenciesMysql2 Condition="$(PackageJsonDependenciesMysql2) == ''">^3.14.5</PackageJsonDependenciesMysql2>
     <PackageJsonDependenciesNodemailer Condition="$(PackageJsonDependenciesNodemailer) == ''">^7.0.10</PackageJsonDependenciesNodemailer>
     <PackageJsonDependenciesSequelize Condition="$(PackageJsonDependenciesSequelize) == ''">^6.37.7</PackageJsonDependenciesSequelize>

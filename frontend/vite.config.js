@@ -8,13 +8,13 @@ export default () => {
         server: {
             port: 61938,
             proxy: {
-                '/listin-telefonico/api': {
+                '/TelAA/api': {
                     target: 'http://localhost:5001',  
                     changeOrigin: true,
                     secure: false,
                 },
             },
         },
-        base: '/listin-telefonico',
+        base: '/TelAA',
     });
 };

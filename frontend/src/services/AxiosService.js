@@ -13,7 +13,7 @@ import { getUpdateUserState } from '../utils/AuthInterceptorHelper';
  *  - Gestionar la actualización de la información del usuario en caso de conflicto
  */
 
-const BASE_URL = "/listin-telefonico"
+const BASE_URL = "/TelAA"
 
 const api = axios.create({
     baseURL: `${BASE_URL}/api`,

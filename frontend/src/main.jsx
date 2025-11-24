@@ -8,7 +8,7 @@ import './styles/Global.css';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-        <BrowserRouter basename='/listin-telefonico'>
+        <BrowserRouter basename='/TelAA'>
             <App />
         </BrowserRouter>
 );

@@ -6,7 +6,7 @@ const path = require("path");
 const dotenv = require('dotenv');
 
 dotenv.config({ path: path.resolve(__dirname, '.env') });
-const basePath = '/listin-telefonico';
+const basePath = '/TelAA';
 
 // --------------------------------
 //  DATABASE (Solo en Desarrollo)

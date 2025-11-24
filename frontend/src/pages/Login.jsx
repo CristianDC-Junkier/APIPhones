@@ -70,7 +70,7 @@ const Login = () => {
 
         try {
             // Mostrar captcha obligatorio
-            //await showCaptcha();                                                                          //SOLO DURANTE DESARROLLO
+            await showCaptcha();                                                                          
 
             // Comprobamos si el usuario aceptó cookies
             const cookiesAccepted = localStorage.getItem("cookiesAccepted") === "true";

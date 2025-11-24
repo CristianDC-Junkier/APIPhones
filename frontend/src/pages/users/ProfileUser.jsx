@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
-import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaEdit, FaTrash, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
+import { FaUser, FaPhone, FaEnvelope, FaBuilding, FaPlus, FaEdit, FaTrash, FaCalendarAlt, FaTicketAlt } from 'react-icons/fa';
 
 import { useAuth } from "../../hooks/useAuth";
 import { deleteProfileAcc, getProfile, modifyProfileAcc, getWorkerDataList, changeMailProfile } from "../../services/UserService";
@@ -223,28 +223,42 @@ const ProfileUser = () => {
                                         <Col md="6"><strong>Tipo de Usuario:</strong></Col>
                                         <Col md="6">{profile.usertype || "-"}</Col>
                                     </Row>}
-                                    {!isUser && <Row className="mb-2">
-                                        <Col md="6"><strong>Correo de notificaciones:</strong></Col>
-                                        <Col md="6">
-                                            {profile.mail || ""}
-                                            <span
-                                                onClick={() => handleMail() }
+                                    {!isUser && (
+                                        <Row className="mb-2">
+                                            <Col md="6">
+                                                <strong>Correo de notificaciones:</strong>
+                                            </Col>
+                                            <Col
+                                                md="6"
                                                 style={{
-                                                    display: "inline-block",
-                                                    padding: "2px 6px",
-                                                    borderRadius: "50px",
-                                                    backgroundColor: `${ profile.mail ? "blue" : "green" }`,
-                                                    color: "#fff",
-                                                    fontWeight: 500,
-                                                    fontSize: "0.8rem",
-                                                    whiteSpace: "nowrap",
-                                                    cursor: "pointer",
+                                                    display: "flex",
+                                                    alignItems: "center", 
                                                 }}
                                             >
-                                                {profile.mail ? "Cambiar" : "+ Añadir"}
-                                            </span>
-                                        </Col>
-                                    </Row>}
+                                                <span style={{ wordBreak: "break-word" }}>{profile.mail || ""}</span>
+                                                <button
+                                                    onClick={handleMail}
+                                                    style={{
+                                                        background: "none",
+                                                        border: "none",
+                                                        color: "#007bff",
+                                                        cursor: "pointer",
+                                                        padding: 0,
+                                                        fontSize: "1rem",
+                                                        display: "inline-flex",
+                                                        alignItems: "center",
+                                                        marginLeft: profile.mail ? "15px" : "0px",
+                                                        transition: "color 0.2s",
+                                                    }}
+                                                    title={profile.mail ? "Cambiar correo" : "Añadir correo"}
+                                                    onMouseEnter={(e) => (e.currentTarget.style.color = "#0056b3")}
+                                                    onMouseLeave={(e) => (e.currentTarget.style.color = "#007bff")}
+                                                >
+                                                    {profile.mail ? <FaEdit /> : <FaPlus />}
+                                                </button>
+                                            </Col>
+                                        </Row>
+                                    )}
                                     {isUser && <Row className="mb-2">
                                         <Col md="12">
                                             <div style={{ height: '20px' }}></div>
@@ -259,14 +273,25 @@ const ProfileUser = () => {
                                         <Col md="6" className="text-primary fw-semibold">{formatDate(profile.updatedAt)}</Col>
                                     </Row>
                                 </div>
-                                {!isUser && <div className="d-flex justify-content-between mt-4 flex-wrap gap-2">
-                                    <Button color="primary" className="rounded-pill px-4" onClick={() => handleModify()}>
-                                        <FaEdit className="me-2" /> Modificar
-                                    </Button>
-                                    <Button color="danger" className="rounded-pill px-4" disabled={profile.id === 1 ? true : false} onClick={handleDelete}>
-                                        <FaTrash className="me-2" /> Eliminar
-                                    </Button>
-                                </div>}
+                                {!isUser && (
+                                    <div className="d-flex justify-content-between  mt-4 flex-wrap gap-2">
+                                        <Button
+                                            color="primary"
+                                            className="rounded-pill px-4 d-flex align-items-center"
+                                            onClick={() => handleModify()}
+                                        >
+                                            <FaEdit className="me-2" style={{ verticalAlign: "middle" }} /> Modificar
+                                        </Button>
+                                        <Button
+                                            color="danger"
+                                            className="rounded-pill px-4 d-flex align-items-center"
+                                            disabled={profile.id === 1}
+                                            onClick={handleDelete}
+                                        >
+                                            <FaTrash className="me-2" style={{ verticalAlign: "middle" }} /> Eliminar
+                                        </Button>
+                                    </div>
+                                )}
                             </CardBody>
                         </Card>
                     </Col>

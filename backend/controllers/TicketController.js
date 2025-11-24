@@ -67,6 +67,7 @@ class TicketController {
                 userRequesterId: ticket.userRequesterId,
                 userResolverId: ticket.userResolverId,
                 idAffectedData: ticket.idAffectedData,
+                nameAffectedData: ticket.affectedData?.name,
                 affectedDepartment: ticket.affectedData?.department?.name,
                 affectedSubDepartment: ticket.affectedData?.subdepartment?.name,
                 userRequesterName: ticket.requester?.username || null,
@@ -168,13 +169,11 @@ class TicketController {
             const updatedTickets = [];
 
             for (const ticket of tickets) {
-                if (warned) {
-                    ticket.status = "WARNED";
-                    ticket.warnedAt = new Date();
-                } else if (resolved) {
+                if (resolved) {
                     ticket.status = "RESOLVED";
                     ticket.resolvedAt = new Date();
                     ticket.userResolverId = userId;
+                    ticket.readAt = ticket.readAt || new Date();
                 } else if (read) {
                     ticket.status = "READ";
                     ticket.readAt = new Date();
@@ -191,7 +190,6 @@ class TicketController {
                 }
 
                 await ticket.save();
-
                 const action = resolved
                     ? "RESOLVE"
                     : warned

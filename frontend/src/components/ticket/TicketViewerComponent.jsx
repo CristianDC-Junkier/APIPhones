@@ -75,15 +75,9 @@ export default function TicketViewerComponent({ ticket, onMarkTicket }) {
                             </span>
                         </Col>
                         <Col xs="6" md="6">
-                            <span className="text-muted d-block">Resuelto por</span>
+                            <span className="text-muted d-block">Información asociada a</span>
                             <span className="fw-semibold">
-                                {
-                                    ticket.userResolverName
-                                        ? ticket.userResolverName
-                                        : ticket.userResolverId != null
-                                            ? `ID #${ticket.userResolverId}`
-                                            : <em>Aún no resuelto</em>
-                                }
+                                {ticket.nameAffectedData || `ID #${ticket.idAffectedData}`}
                             </span>
                         </Col>
                         <Col xs="6" md="6">
@@ -96,6 +90,18 @@ export default function TicketViewerComponent({ ticket, onMarkTicket }) {
                             <span className="text-muted d-block">Subdepartamento</span>
                             <span className="fw-semibold">
                                 {ticket.affectedSubDepartment || <em>No asignado</em>}
+                            </span>
+                        </Col>
+                        <Col xs="6" md="6">
+                            <span className="text-muted d-block">Resuelto por</span>
+                            <span className="fw-semibold">
+                                {
+                                    ticket.userResolverName
+                                        ? ticket.userResolverName
+                                        : ticket.userResolverId != null
+                                            ? `ID #${ticket.userResolverId}`
+                                            : <em>Aún no resuelto</em>
+                                }
                             </span>
                         </Col>
                     </Row>

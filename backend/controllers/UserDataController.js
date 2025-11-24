@@ -330,7 +330,7 @@ class UserDataController {
             // Actualizar tickets a WARNED y loguear
             await Promise.all(
                 user.ticketsRequested.map(async (ticket) => {
-                    await ticket.update({ status: 'WARNED' });
+                    await ticket.update({ status: 'WARNED', warnedAt: new Date() });
                     LoggerController.ticketAction({
                         ticketId: ticket.id,
                         action: 'WARNED',

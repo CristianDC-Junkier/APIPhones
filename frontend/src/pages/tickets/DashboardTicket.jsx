@@ -53,6 +53,7 @@ export default function DashboardTickets() {
             const res = await getTicketList();
             if (res.success) {
                 const list = res.data.tickets;
+                console.log(list);
                 setTickets(list);
                 setTicketsResolved(list.filter((t) => t.status === "RESOLVED"));
                 setTicketsWarned(list.filter((t) => t.status === "WARNED"));
@@ -146,12 +147,10 @@ export default function DashboardTickets() {
 
     if (loading) return <SpinnerComponent />;
 
-    // ================= MOBILE VIEW =================
+    //#region ================= MOBILE VIEW ==================
     if (isMobileView) {
         return (
             <div className="d-flex flex-column flex-lg-row ">
-
-
                 {!ticketContent ? (
                     <Container
                         fluid
@@ -229,7 +228,6 @@ export default function DashboardTickets() {
                             </Col>
                         </Row>
 
-
                         {/* ====== Filtros por estado ====== */}
                         <Row className="bg-white border-top border-bottom mt-1 p-2 g-2 text-center">
                             {[
@@ -255,7 +253,6 @@ export default function DashboardTickets() {
                                 </Col>
                             ))}
                         </Row>
-
 
                         {/* ====== Lista de tickets ====== */}
                         <Row className="flex-grow-1">
@@ -319,9 +316,9 @@ export default function DashboardTickets() {
             </div>
         );
     }
+    //#endregion
 
-
-    // ================= DESKTOP VIEW =================
+    //#region ================= DESKTOP VIEW =================
     return (
         <div className="d-flex flex-column flex-lg-row bg-light rounded shadow-sm" style={{ minHeight: "80vh", maxHeight: "80vh" }}>
             <div className="position-absolute top-0 start-0">
@@ -417,4 +414,5 @@ export default function DashboardTickets() {
             </div>
         </div>
     );
+    //#endregion
 }

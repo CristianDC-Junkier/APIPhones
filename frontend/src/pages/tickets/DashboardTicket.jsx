@@ -53,7 +53,6 @@ export default function DashboardTickets() {
             const res = await getTicketList();
             if (res.success) {
                 const list = res.data.tickets;
-                console.log(list);
                 setTickets(list);
                 setTicketsResolved(list.filter((t) => t.status === "RESOLVED"));
                 setTicketsWarned(list.filter((t) => t.status === "WARNED"));

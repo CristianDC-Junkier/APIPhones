@@ -69,7 +69,6 @@ const ProfileUser = () => {
                 if (dataResponse.success) {
                     
                     setData(dataResponse.data.datalist);
-                    console.log(dataResponse.data.datalist);
                 }
             }
         } finally {

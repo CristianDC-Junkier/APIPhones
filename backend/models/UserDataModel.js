@@ -37,14 +37,18 @@ const UserData = sequelize.define("UserData", {
     },
     name: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         set(value) {
-            this.setDataValue("name", encrypt(value));
-            this.setDataValue("name_hash", hash(value));
+            this.setDataValue("name", value ? encrypt(value) : null);
+            this.setDataValue("name_hash", value ? hash(value) : null);
         },
         get() {
             const val = this.getDataValue("name");
             return val ? decrypt(val) : null;
+        },
+        unique: {
+            name: 'unique_userdataname',
+            msg: 'Nombre del trabajador ya existente'
         },
     },
     name_hash: {
@@ -70,7 +74,7 @@ const UserData = sequelize.define("UserData", {
     email: {
         type: DataTypes.STRING,
         allowNull: true,
-        set(value) { this.setDataValue("email", encrypt(value)); },
+        set(value) { this.setDataValue("email", value ? encrypt(value) : null); },
         get() { const val = this.getDataValue("email"); return val ? decrypt(val) : null; },
     },
     show: {

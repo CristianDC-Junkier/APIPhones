@@ -73,7 +73,7 @@ const Login = () => {
             await showCaptcha();                                                                          
 
             // Comprobamos si el usuario aceptó cookies
-            const cookiesAccepted = localStorage.getItem("cookiesAccepted") === "true";
+            const cookiesAccepted = localStorage.getItem("TelAART/cookiesAccepted") === "true";
 
             // Si no ha aceptado cookies, forzamos remember a false
             const finalRemember = cookiesAccepted ? remember : false;

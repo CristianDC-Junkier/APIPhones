@@ -55,11 +55,11 @@ class AuthController {
             const refreshToken = await generateRefreshToken(user.id, remember);
 
             // Envía refreshToken en cookie HTTP-only
-            res.cookie("refreshToken", refreshToken, {
+            res.cookie("TelAART", refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "Strict",
-                path: "/listin-telefonico/api/auth",
+                path: "/TelAA/api/auth",
                 maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000,
             });
 
@@ -99,21 +99,21 @@ class AuthController {
             try {
                 payload = verifyToken(token, "refresh");
             } catch {
-                res.clearCookie("refreshToken", {
+                res.clearCookie("TelAART", {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                     sameSite: "Strict",
-                    path: "/listin-telefonico/api/auth"
+                    path: "/TelAA/api/auth"
                 });
                 return res.status(400).json({ error: "Sesión inválida" });
             }
 
             await RefreshToken.destroy({ where: { uuid: payload.uuid } });
-            res.clearCookie("refreshToken", {
+            res.clearCookie("TelAART", {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "Strict",
-                path: "/listin-telefonico/api/auth"
+                path: "/TelAA/api/auth"
             });
 
             LoggerController.info(`Logout exitoso usuario con id ${payload.userId}`);
@@ -157,7 +157,7 @@ class AuthController {
      */
     static async refreshToken(req, res) {
         try {
-            const token = req.cookies?.refreshToken;
+            const token = req.cookies?.TelAART;
             if (!token) return res.status(200).send("No existen tokens");
 
             let payload;

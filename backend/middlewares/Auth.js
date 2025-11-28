@@ -1,6 +1,5 @@
 ﻿const LoggerController = require("../controllers/LoggerController");
 const { verifyToken, decodeToken } = require("../utils/JWT");
-const { UserAccount } = require("../models/Relations");
 
 /**
  * Función auxiliar para validar accessToken del header Authorization
@@ -33,7 +32,7 @@ async function getTokenPayload(req, res) {
 }
 
 /**
- * Middleware: Solo usuarios autenticado.
+ * Middleware: Solo usuarios autenticados
  */
 async function isAuthenticated(req, res, next) {
     const payload = await getTokenPayload(req, res);

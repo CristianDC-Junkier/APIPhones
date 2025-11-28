@@ -19,7 +19,7 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
 
     const filteredUsers = useMemo(() => {
         return users.filter((u) => {
-            const matchesName = u.name.toLowerCase().includes(search.toLowerCase());
+            const matchesName = u.name ? u.name.toLowerCase().includes(search.toLowerCase()) : true;
             const matchesDept = selectedDepartment
                 ? u.departmentId === selectedDepartment
                 : true;

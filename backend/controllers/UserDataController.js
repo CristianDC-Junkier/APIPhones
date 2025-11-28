@@ -160,7 +160,7 @@ class UserDataController {
                     return res.status(400).json({ error: "subdepartmentId no pertenece al departmentId indicado" });
                 }
             }
-
+            console.log("Aqui ");
             const userdata = await UserData.create({
                 name,
                 extension,
@@ -170,7 +170,7 @@ class UserDataController {
                 subdepartmentId: subdepartmentId || null,
                 show,
             });
-
+            console.log("Alli");
             LoggerController.info('Datos de usuario con id ' + userdata.id + ' creado correctamente por el usuario con id ' + req.user.id);
             return res.json({ user: userdata });
 

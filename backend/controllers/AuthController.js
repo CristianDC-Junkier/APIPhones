@@ -194,7 +194,7 @@ class AuthController {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === "production",
                     sameSite: "Strict",
-                    path: "/listin-telefonico/api/auth",
+                    path: "/TelAA/api/auth",
                     maxAge: payload.remember ? 7 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000,
                 });
             }

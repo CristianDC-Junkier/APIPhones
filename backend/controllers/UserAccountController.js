@@ -42,7 +42,8 @@ class UserAccountController {
                                 attributes: ["id", "name"]
                             }
                         ],
-                        attributes: ["id", "name"]
+                        attributes: ["id", "name"],
+                        order: [["name", "ASC"]]
                     }
                 ]
             });
@@ -99,7 +100,8 @@ class UserAccountController {
                                 attributes: ["id", "name"]
                             }
                         ],
-                        attributes: ["id", "name"]
+                        attributes: ["id", "name"],
+                        order: [["name", "ASC"]]
                     }
                 ]
             });

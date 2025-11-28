@@ -32,6 +32,10 @@ const DashboardDepartment = () => {
         document.title = "Panel de control de Departamentos - Listín telefónico - Ayuntamiento de Almonte";
     }, [])
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search]);
+
     /** Ajusta el número de filas según altura de ventana */
     useEffect(() => {
         const updateRows = () => {

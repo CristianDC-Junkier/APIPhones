@@ -35,6 +35,10 @@ const DashboardUser = () => {
         document.title = "Panel de control de Usuarios - Listín telefónico - Ayuntamiento de Almonte";
     }, []);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedUser, selectedDepartment]);
+
     // Ajuste filas según altura de ventana
     useEffect(() => {
         const updateRows = () => {

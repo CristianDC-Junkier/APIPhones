@@ -3,7 +3,6 @@ const LoggerController = require('./LoggerController');
 
 class DepartmentController {
 
-
     /**
      * Listar todos los departamentos
      * 
@@ -21,7 +20,8 @@ class DepartmentController {
                         attributes: ['id', 'name']
                     }
                 ],
-                attributes: ["id", "name"]
+                attributes: ["id", "name"],
+                order: [["name", "ASC"]]
             });
 
             return res.json({ departments });

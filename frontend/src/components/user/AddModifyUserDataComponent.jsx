@@ -58,7 +58,7 @@ const ModifyUserDataComponent = async ({ userItem, action, onConfirm }) => {
             <input id="swal-name" style="${inputStyle}" placeholder="Nombre completo" value="${userItem?.name || ""}">
         </div>
         <div style="${rowStyle}">
-            <label style="${labelStyle}">Extensión <span style="color:red">*</span></label>
+            <label style="${labelStyle}">Extensión </label>
             <input id="swal-extension" style="${inputStyle}" placeholder="Extensión" value="${userItem?.extension || ""}">
         </div>
         <div style="${rowStyle}">
@@ -114,9 +114,8 @@ const ModifyUserDataComponent = async ({ userItem, action, onConfirm }) => {
             const subdepartmentId = subdepartmentIdRaw === "null" ? null : parseInt(subdepartmentIdRaw, 10);
             const show = document.getElementById("swal-show").checked;
 
-            //if (!name) { Swal.showValidationMessage("El nombre completo es obligatorio"); return false; }
             if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Swal.showValidationMessage("Debe ser un email válido"); return false; }
-            if (!extension || !/^[0-9]+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
+            if (extension && !/^[0-9]+$/.test(extension)) { Swal.showValidationMessage("La extensión debe ser un número válido"); return false; }
             if (!number || !/^[0-9]{9,9}$/.test(number)) { Swal.showValidationMessage("El número de teléfono debe ser válido"); return false; }
             if (!departmentId) { Swal.showValidationMessage("Debe elegir un departamento"); return false; }
 

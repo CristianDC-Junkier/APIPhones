@@ -25,7 +25,8 @@ class UserDataController {
         try {
             const allData = await UserData.findAll({
                 include: ["department", "subdepartment"],
-                where: { departmentId: { [Op.ne]: null }, show: true }
+                where: { departmentId: { [Op.ne]: null }, show: true },
+                order: [["name", "ASC"]]
             });
 
             const formatted = allData.map(user => ({
@@ -54,7 +55,8 @@ class UserDataController {
                 include: [
                     { model: Department, as: "department" },
                     { model: SubDepartment, as: "subdepartment" }
-                ]
+                ],
+                order: [["name", "ASC"]]
             });
             const formatted = allData.map(user => ({
                 id: user.id,
@@ -110,7 +112,8 @@ class UserDataController {
                         },
                         required: false
                     }
-                ]
+                ],
+                order: [["name", "ASC"]]
             });
             const formatted = allData.map(user => ({
                 id: user.id,

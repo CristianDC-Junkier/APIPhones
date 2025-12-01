@@ -1,5 +1,5 @@
-﻿import { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+﻿/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, CardBody, CardTitle, CardText, Button, Input } from "reactstrap";
 import Swal from "sweetalert2";
 
@@ -14,12 +14,8 @@ import TableUserDataComponent from "../../components/user/TableUserDataComponent
 import AddModifyUserCommponent from "../../components/user/AddModifyUserComponent";
 import AddModifyUserDataCommponent from "../../components/user/AddModifyUserDataComponent";
 
-/**
-* Página encargada de mostrar la tabla de usuario y las acciones asociadas a la gestión de los mismos
-*/
 const DashboardUser = () => {
-    const { user: currentUser, logout } = useAuth();
-    const navigate = useNavigate();
+    const { user: currentUser } = useAuth();
 
     const [loading, setLoading] = useState(true);
     const [departments, setDepartments] = useState([]);
@@ -30,16 +26,20 @@ const DashboardUser = () => {
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
+    const [sortBy, setSortBy] = useState("name");
+    const [userProfile, setUserProfile] = useState(null);
 
+    // Configurar título
     useEffect(() => {
         document.title = "Panel de control de Usuarios - Listín telefónico - Ayuntamiento de Almonte";
     }, []);
 
+    // Resetear página al cambiar filtros
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedUser, selectedDepartment]);
+    }, [selectedUser, selectedDepartment, statsType]);
 
-    // Ajuste filas según altura de ventana
+    // Ajustar filas según altura de ventana
     useEffect(() => {
         const updateRows = () => {
             const vh = window.innerHeight;
@@ -53,70 +53,72 @@ const DashboardUser = () => {
         return () => window.removeEventListener("resize", updateRows);
     }, []);
 
-    const [user, setUser] = useState([]);
-
+    // Obtener perfil del usuario actual
     useEffect(() => {
         const fetchData = async () => {
             const response = await getProfile(currentUser.version);
-            if (response.success) {
-                setUser(response.data);
-            }
+            if (response.success) setUserProfile(response.data);
         };
         fetchData();
     }, [currentUser.version]);
 
-    const fetchUsers = async () => {
+    // Función para obtener usuarios con orden dinámico
+    const fetchUsers = async (currentSortBy = sortBy) => {
         setLoading(true);
         try {
-            let responseUserData, responseUserAccounts;
-
-            responseUserData = await getWorkerDataList();
-            responseUserAccounts = await getUsersList();
+            const responseUserData = await getWorkerDataList();
+            const responseUserAccounts = await getUsersList();
 
             if (responseUserData.success && responseUserAccounts.success) {
-                setUserData(responseUserData.data.users);
-                setUserAccounts(responseUserAccounts.data.users);
-                if (statsType === "Accounts") {
-                    // Ajustar currentPage si la página actual quedó vacía
-                    const totalPages = Math.ceil(userAccounts.length / rowsPerPage);
-                    if (currentPage > totalPages && totalPages > 0) {
-                        setCurrentPage(totalPages);
-                    }
-                } else {
-                    // Ajustar currentPage si la página actual quedó vacía
-                    const totalPages = Math.ceil(userData.length / rowsPerPage);
-                    if (currentPage > totalPages && totalPages > 0) {
-                        setCurrentPage(totalPages);
-                    }
-                }
+                let usersData = responseUserData.data.users ?? [];
+                let usersAccounts = responseUserAccounts.data.users ?? [];
 
+                // Función de ordenación
+                const sortFn = (a, b) => {
+                    const aVal = a[currentSortBy] ?? "";
+                    const bVal = b[currentSortBy] ?? "";
+                    if (typeof aVal === "number" && typeof bVal === "number") return aVal - bVal;
+                    return aVal.toString().localeCompare(bVal.toString());
+                };
+
+                usersData.sort(sortFn);
+                usersAccounts.sort(sortFn);
+
+                setUserData(usersData);
+                setUserAccounts(usersAccounts);
+
+                // Ajustar currentPage si queda fuera de rango
+                const totalPages = statsType === "Accounts"
+                    ? Math.ceil(usersAccounts.length / rowsPerPage)
+                    : Math.ceil(usersData.length / rowsPerPage);
+
+                if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
             }
         } finally {
             setLoading(false);
         }
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { fetchUsers(); }, [currentUser, logout, navigate]);
-
+    // Función para obtener departamentos
     const fetchDepartments = async () => {
         setLoading(true);
         try {
             const deptResp = await getDepartmentsList();
-
             if (deptResp.success) {
-                const depts = deptResp.data.departments ?? [];
+                let depts = deptResp.data.departments ?? [];
+                depts.sort((a, b) => a.name.localeCompare(b.name));
                 setDepartments(depts);
             }
-
-        } finally  {
+        } finally {
             setLoading(false);
         }
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { fetchDepartments(); }, []);
+    // Cargar datos al inicio o al cambiar filas
+    useEffect(() => { fetchUsers(); }, [sortBy, statsType, rowsPerPage]);
+    useEffect(() => { fetchDepartments(); }, [currentUser, rowsPerPage]);
 
+    // Crear usuario
     const handleCreateUser = async () => {
         await AddModifyUserCommponent({
             currentUser,
@@ -133,6 +135,7 @@ const DashboardUser = () => {
         });
     };
 
+    // Crear datos de usuario
     const handleCreateUserData = async () => {
         await AddModifyUserDataCommponent({
             currentUser,
@@ -153,89 +156,85 @@ const DashboardUser = () => {
 
     return (
         <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
-            {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />
             </div>
 
-            {/* Botón Crear Usuario */}
             <div className="position-absolute top-0 end-0 p-3">
                 {statsType === "Accounts" ?
-                    <Button
-                        color="transparent"
-                        style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
-                        onClick={handleCreateUser}
-                    >
+                    <Button color="transparent" style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
+                        onClick={handleCreateUser}>
                         ➕ Crear Usuario
                     </Button>
                     :
-                    <Button
-                        color="transparent"
-                        style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
-                        onClick={handleCreateUserData}
-                    >
+                    <Button color="transparent" style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
+                        onClick={handleCreateUserData}>
                         ➕ Crear Datos de Usuario
                     </Button>
                 }
             </div>
 
-            {/* Tarjetas de estadísticas */}
             <Row className="mb-3 mt-3 justify-content-center g-3">
-                {[
-                    { label: "Cuentas de Usuario", value: userAccounts.length, type: "Accounts" },
-                    { label: "Datos de Trabajadores", value: userData.length, type: "Data" },
-                ].map((metric, idx) => (
+                {[{ label: "Cuentas de Usuario", value: userAccounts.length, type: "Accounts" },
+                { label: "Datos de Trabajadores", value: userData.length, type: "Data" }].map((metric, idx) => (
                     <Col key={idx} xs={6} sm={4} md={4} l={4} xl={3}>
-                        <Card
-                            className={`shadow-lg mb-2 border-2 ${statsType === metric.type ? "border-primary" : ""}`}
+                        <Card className={`shadow-lg mb-2 border-2 ${statsType === metric.type ? "border-primary" : ""}`}
                             style={{ cursor: 'pointer' }}
-                            onClick={() => { setStatsType(metric.type); setCurrentPage(1); }}
-                        >
+                            onClick={() => { setStatsType(metric.type); setCurrentPage(1); }}>
                             <CardBody className="text-center pt-3">
                                 <CardTitle tag="h6">{metric.label}</CardTitle>
                                 <CardText className="fs-4 fw-bold">{metric.value}</CardText>
                             </CardBody>
                         </Card>
                     </Col>
-                )
-                )}
+                ))}
             </Row>
 
-            {/* Fila con tipo de usuario seleccionado + búsqueda */}
-            <div className="d-flex flex-column flex-md-row justify-content-between mb-2 align-items-start align-items-md-center">
-                {/* título */}
-                <div className="fw-bold fs-6 mb-2 mb-md-0">
+            <div className="d-flex flex-column flex-md-row justify-content-between mb-2 align-items-start align-items-md-center gap-2">
+
+                {/* Título */}
+                <div className="fw-bold fs-6 text-center text-md-start w-100 w-md-auto">
                     {statsType === "Accounts" ? "Cuentas de Usuario" : "Datos de Trabajadores"}
                 </div>
 
-                {/* contenedor de inputs */}
-                <div className="d-flex gap-2">
+                {/* Contenedor inputs + botón */}
+                <div className="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+                    {/* Buscador */}
                     <Input
                         type="text"
                         placeholder="Buscar por usuario..."
                         value={selectedUser}
                         onChange={e => setSelectedUser(e.target.value)}
-                        style={{ minWidth: "200px" }}
+                        className="w-100 w-md-auto"
                     />
+
+                    {/* Filtro departamento */}
                     {currentUser?.usertype !== "DEPARTMENT" && (
                         <Input
                             type="select"
                             value={selectedDepartment || ""}
                             onChange={e => setSelectedDepartment(Number(e.target.value))}
-                            style={{ minWidth: "200px" }}
+                            className="w-100 w-md-auto"
                         >
                             <option value="">Todos los departamentos</option>
                             {departments.map(d => (
-                                <option key={d.id} value={d.id}>
-                                    {d.name}
-                                </option>
+                                <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                         </Input>
                     )}
+
+                    {/* Botón Ordenación */}
+                    <Button
+                        color="secondary"
+                        className="w-100 w-md-auto"
+                        onClick={() => setSortBy(sortBy === "name" ? "id" : "name")}
+                    >
+                        {sortBy === "name" ? "Identificador" : "Nombre"}
+                    </Button>
                 </div>
             </div>
 
-            {/* Tabla de usuarios modular */}
+
             {statsType === "Accounts" ?
                 <TableUserAccountComponent
                     users={userAccounts}
@@ -246,18 +245,18 @@ const DashboardUser = () => {
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     rowsPerPage={rowsPerPage}
-                    refreshData={fetchUsers}
+                    refreshData={() => fetchUsers(sortBy)}
                 /> :
                 <TableUserDataComponent
                     users={userData}
-                    currentUser={user}
+                    currentUser={userProfile}
                     search={selectedUser}
                     selectedDepartment={selectedDepartment}
                     setSearch={setSelectedUser}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     rowsPerPage={rowsPerPage}
-                    refreshData={fetchUsers}
+                    refreshData={() => fetchUsers(sortBy)}
                 />}
         </Container>
     );

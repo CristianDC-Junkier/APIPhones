@@ -13,28 +13,26 @@ import TableSubDepartmentComponent from "../../components/department/TableSubDep
 import AddModifyDepartmentComponent from "../../components/department/AddModifyDepartmentComponent";
 import AddModifySubdepartmentComponent from "../../components/department/AddModifySubDepartmentComponent";
 
-/**
- * Dashboard de gestion de Departamentos y Subdepartamentos 
- */
 const DashboardDepartment = () => {
     const { user: currentUser } = useAuth();
 
     const [loading, setLoading] = useState(true);
     const [departments, setDepartments] = useState([]);
     const [subdepartments, setSubdepartments] = useState([]);
-    const [currentView, setCurrentView] = useState("departments"); // "departments" | "subdepartments"
+    const [currentView, setCurrentView] = useState("departments");
     const [search, setSearch] = useState("");
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
+    const [sortBy, setSortBy] = useState("name");
 
     useEffect(() => {
         document.title = "Panel de control de Departamentos - Listín telefónico - Ayuntamiento de Almonte";
-    }, [])
+    }, []);
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [search]);
+    }, [search, currentView]);
 
     /** Ajusta el número de filas según altura de ventana */
     useEffect(() => {
@@ -58,29 +56,38 @@ const DashboardDepartment = () => {
         try {
             let deptResp, subResp;
 
-            // admin / superadmin
             [deptResp, subResp] = await Promise.all([
                 getDepartmentsList(),
                 getSubDepartmentsList()
             ]);
+
             if (deptResp.success) {
-                const depts = deptResp.data.departments ?? [];
+                let depts = deptResp.data.departments ?? [];
+
+                // Orden dinámico
+                depts = depts.sort((a, b) => {
+                    if (sortBy === "name") return a.name.localeCompare(b.name);
+                    return a.id - b.id;
+                });
+
                 setDepartments(depts);
 
                 const totalPages = Math.ceil(depts.length / rowsPerPage);
-                if (currentPage > totalPages && totalPages > 0) {
-                    setCurrentPage(totalPages);
-                }
+                if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
             }
 
             if (subResp.success) {
-                const subs = subResp.data.subdepartments ?? [];
+                let subs = subResp.data.subdepartments ?? [];
+
+                subs = subs.sort((a, b) => {
+                    if (sortBy === "name") return a.name.localeCompare(b.name);
+                    return a.id - b.id;
+                });
+
                 setSubdepartments(subs);
 
                 const totalPages = Math.ceil(subs.length / rowsPerPage);
-                if (currentPage > totalPages && totalPages > 0) {
-                    setCurrentPage(totalPages);
-                }
+                if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
             }
         } catch (err) {
             Swal.fire("Error", "No se pudo obtener la lista de departamentos", err);
@@ -88,9 +95,10 @@ const DashboardDepartment = () => {
         setLoading(false);
     };
 
+    useEffect(() => {
+        fetchDepartments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { fetchDepartments(); }, [currentUser, rowsPerPage]);
-
+    }, [currentUser, rowsPerPage, sortBy]);
 
 
     /** Crear departamento */
@@ -115,12 +123,11 @@ const DashboardDepartment = () => {
         await AddModifySubdepartmentComponent({
             currentUser,
             action: "create",
-            departments,
+            departments: [...departments].sort((a, b) => a.name.localeCompare(b.name)),
             onConfirm: async (formValues) => {
                 const result = await createSubDepartment(formValues);
                 if (result.success) {
                     Swal.fire("Éxito", "Subdepartamento creado correctamente", "success");
-
                     await fetchDepartments();
                 } else {
                     Swal.fire("Error", result.error || "No se pudo crear el subdepartamento", "error");
@@ -139,37 +146,32 @@ const DashboardDepartment = () => {
                 <BackButtonComponent back="/home" />
             </div>
 
-            {/* Botón Crear Departamento/Subdepartamento */}
+            {/* Botón Crear */}
             <div className="position-absolute top-0 end-0 p-3">
                 <Button
                     color="transparent"
-                    style={{
-                        background: "none",
-                        border: "none",
-                        color: "black",
-                        fontWeight: "bold",
-                        padding: 0
-                    }}
+                    style={{ background: "none", border: "none", color: "black", fontWeight: "bold", padding: 0 }}
                     onClick={currentView === "departments" ? handleCreateDepartment : handleCreateSubdepartment}
                 >
                     ➕ {currentView === "departments" ? "Crear Departamento" : "Crear Subdepartamento"}
                 </Button>
             </div>
 
-            {/* Tarjetas para cambiar de vista solo para ADMIN/SUPERADMIN */}
+            {/* Tarjetas */}
             <Row className="mb-3 mt-4 justify-content-center g-3">
-                    <Col xs={6} sm={6} md={4} l={3} xl={3}>
-                        <Card
-                            className={`shadow-lg mb-2 border-2 ${currentView === "departments" ? "border-primary" : ""}`}
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => setCurrentView("departments")}
-                        >
-                            <CardBody className="text-center pt-3">
-                                <CardTitle tag="h6">Departamentos</CardTitle>
-                                <CardText className="fs-4 fw-bold">{departments.length}</CardText>
-                            </CardBody>
-                        </Card>
-                    </Col>
+                <Col xs={6} sm={6} md={4} l={3} xl={3}>
+                    <Card
+                        className={`shadow-lg mb-2 border-2 ${currentView === "departments" ? "border-primary" : ""}`}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setCurrentView("departments")}
+                    >
+                        <CardBody className="text-center pt-3">
+                            <CardTitle tag="h6">Departamentos</CardTitle>
+                            <CardText className="fs-4 fw-bold">{departments.length}</CardText>
+                        </CardBody>
+                    </Card>
+                </Col>
+
                 <Col xs={6} sm={6} md={4} l={3} xl={3}>
                     <Card
                         className={`shadow-lg mb-2 border-2 ${currentView === "subdepartments" ? "border-primary" : ""}`}
@@ -184,44 +186,58 @@ const DashboardDepartment = () => {
                 </Col>
             </Row>
 
-            {/* Fila con tipo de usuario seleccionado + búsqueda */}
-            <div className="d-flex flex-column flex-md-row justify-content-between mb-2 align-items-start align-items-md-center">
-                {/* título */}
-                <div className="fw-bold fs-6 mb-2 mb-md-0">
+            {/* Buscador + Filtros + Orden */}
+            <div className="d-flex flex-column flex-md-row mb-2 align-items-start align-items-md-center gap-2">
+
+                {/* Título */}
+                <div className="fw-bold fs-6 text-center text-md-start w-100 w-md-auto">
                     {currentView === "subdepartments" ? "Subdepartamentos" : "Departamentos"}
                 </div>
-                <div className="d-flex  gap-2">
-                    {/* Select de filtrado por departamento solo si es subdepartamentos y no DEPARTMENT */}
-                    {currentView === "subdepartments" && (
-                        <Input
-                            type="select"
-                            value={selectedDepartment || ""}
-                            onChange={e => setSelectedDepartment(Number(e.target.value))}
-                            style={{ minWidth: "200px" }}
-                        >
-                            <option value="">Todos los departamentos</option>
-                            {departments.map(d => (
-                                <option key={d.id} value={d.id}>
-                                    {d.name}
-                                </option>
-                            ))}
-                        </Input>
-                    )}
-                    {/* Input de búsqueda siempre visible */}
+
+                {/* Contenedor inputs + botón */}
+                <div className="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+                    {/* Buscador */}
                     <Input
                         type="text"
                         placeholder="Buscar por nombre..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        style={{ minWidth: "200px" }}
+                        className="w-100 w-md-auto"
                     />
 
+                    {/* Filtro Subdepartamentos */}
+                    {currentView === "subdepartments" && (
+                        <Input
+                            type="select"
+                            value={selectedDepartment || ""}
+                            onChange={e => setSelectedDepartment(Number(e.target.value))}
+                            className="w-100 w-md-auto"
+                        >
+                            <option value="">Todos los departamentos</option>
 
+                            {[...departments]
+                                .sort((a, b) => a.name.localeCompare(b.name))
+                                .map(d => (
+                                    <option key={d.id} value={d.id}>
+                                        {d.name}
+                                    </option>
+                                ))}
+                        </Input>
+                    )}
+
+                    {/* Botón Ordenación */}
+                    <Button
+                        color="secondary"
+                        className="w-100 w-md-auto"
+                        onClick={() => setSortBy(sortBy === "name" ? "id" : "name")}
+                    >
+                        {sortBy === "name" ? "Identificador" : "Nombre"}
+                    </Button>
                 </div>
             </div>
 
 
-            {/* Tabla de departamentos */}
+            {/* TABLA */}
             {currentView === "departments" && (
                 <TableDepartmentComponent
                     currentUser={currentUser}
@@ -234,7 +250,6 @@ const DashboardDepartment = () => {
                 />
             )}
 
-            {/* Tabla de subdepartamentos */}
             {currentView === "subdepartments" && (
                 <TableSubDepartmentComponent
                     departments={departments ?? []}

@@ -20,8 +20,7 @@ class SubDepartmentController {
                         attributes: ['id', 'name']
                     }
                 ],
-                attributes: ['id', 'name', 'departmentId'],
-                order: [["name", "ASC"]]
+                attributes: ['id', 'name', 'departmentId']
             });
 
             // Formateamos para devolver el nombre del departamento directamente en cada subdepartamento

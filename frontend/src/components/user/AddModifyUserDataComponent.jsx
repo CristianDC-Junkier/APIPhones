@@ -28,12 +28,14 @@ const ModifyUserDataComponent = async ({ userItem, action, onConfirm }) => {
 
     if (deptResp.success) {
         departments = deptResp.data.departments ?? [];
-        departments.unshift({ id: null, name: "-- Seleccionar --" });
+        departments.sort((a, b) => a.name.localeCompare(b.name));
+        departments = [{ id: null, name: "-- Seleccionar --" }, ...departments];
     }
 
     if (subResp.success) {
         subdepartments = subResp.data.subdepartments ?? [];
-        subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
+        subdepartments.sort((a, b) => a.name.localeCompare(b.name));
+        subdepartments = [{ id: null, name: "-- Seleccionar --" }, ...subdepartments];
     }
 
 

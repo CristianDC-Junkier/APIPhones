@@ -121,13 +121,14 @@ const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPag
                 </thead>
                 <tbody>
                     {currentDepartments.map((dept, idx) => (
-                        <tr key={idx}>
+                        <tr key={idx}>     
                             <td>{dept.id}</td>
                             <td className="text-center">{dept.name}</td>
                             <td className="text-center">
                                 {isSmallScreen ? (
                                     // Pantalla pequeña: solo mostrar botón "Mostrar más" o "+ Añadir"
                                     dept.subdepartment && dept.subdepartment.length > 0 ? (
+
                                         <ShowMoreBadgeComponent
                                             user={dept}
                                             objList={dept.subdepartment}
@@ -138,6 +139,7 @@ const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPag
                                     // Pantalla normal: mostrar badges + "Mostrar más" o "+ Añadir"
                                     <>
                                         {/* Mostrar los primeros dos departamentos */}
+
                                         {dept.subdepartment && dept.subdepartment.length > 0 && dept.subdepartment.slice(0, 3).map(subD => (
                                             <BadgeComponent
                                                 key={subD.id}

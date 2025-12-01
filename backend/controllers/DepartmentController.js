@@ -21,7 +21,6 @@ class DepartmentController {
                     }
                 ],
                 attributes: ["id", "name"],
-                order: [["name", "ASC"]]
             });
 
             return res.json({ departments });

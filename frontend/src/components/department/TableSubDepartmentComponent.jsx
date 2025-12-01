@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from "react";
+﻿import React, { useMemo, useState, useEffect } from "react";
 import { Table, Button } from "reactstrap";
 import { createRoot } from "react-dom/client";
 import Swal from "sweetalert2";
@@ -26,6 +26,19 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, selectedDepa
         });
     }, [subdepartments, search, selectedDepartment]);
 
+
+    // Hook para detectar pantalla pequeña
+    const useIsSmallScreen = (breakpoint = 500) => {
+        const [isSmall, setIsSmall] = useState(window.innerWidth < breakpoint);
+
+        useEffect(() => {
+            const handleResize = () => setIsSmall(window.innerWidth < breakpoint);
+            window.addEventListener("resize", handleResize);
+            return () => window.removeEventListener("resize", handleResize);
+        }, [breakpoint]);
+
+        return isSmall;
+    };
 
     const totalPages = Math.ceil(filteredSubdepartments.length / rowsPerPage);
     const currentSubdepartments = filteredSubdepartments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -91,6 +104,9 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, selectedDepa
         }
     };
 
+    const isSmallScreen = useIsSmallScreen(770);
+
+
     return (
         <>
             <Table striped hover responsive className="shadow-sm rounded flex-grow-1 mb-3">
@@ -98,8 +114,10 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, selectedDepa
                     <tr>
                         <th className="text-center">ID</th>
                         <th className="text-center">Nombre</th>
-                        <th className="text-center">Departamento</th>
-                        <th className="text-center">Acciones</th>
+                        <th className="text-center"
+                            style={{ width: isSmallScreen ? "15%" : "45%" }}> Departamento </th>
+                        <th className="text-center"
+                            style={{ width: isSmallScreen ? "55%" : "15%" }}>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>

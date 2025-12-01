@@ -1,5 +1,5 @@
 ﻿import Swal from "sweetalert2";
-import { getDepartmentsList, getSubDepartmentsList } from "../../services/DepartmentService";
+import { getDepartmentsList } from "../../services/DepartmentService";
 
 /**
  * Componente que permite crear o modificar un usuario mediante un modal de SweetAlert2.
@@ -28,22 +28,19 @@ const AddModifyUserComponent = async ({ userItem, currentUser, action, onConfirm
 
     // Obtener departamentos y subdepartamentos
     let departments = [];
-    let subdepartments = [];
 
-    const [deptResp, subResp] = await Promise.all([
+    const [deptResp] = await Promise.all([
         getDepartmentsList(),
-        getSubDepartmentsList()
     ]);
+
 
     if (deptResp.success) {
         departments = deptResp.data.departments ?? [];
-        departments.unshift({ id: null, name: "-- Seleccionar --" });
+        departments.sort((a, b) => a.name.localeCompare(b.name));
+        departments = [{ id: null, name: "-- Seleccionar --" }, ...departments];
     }
 
-    if (subResp.success) {
-        subdepartments = subResp.data.subdepartments ?? [];
-        subdepartments.unshift({ id: null, name: "-- Seleccionar --" });
-    }
+
 
     // HTML para selects y opciones
     const optionsHtml = types.map(t => `<option value="${t.value}" ${userItem?.usertype === t.value ? "selected" : ""}>${t.label}</option>`).join("");

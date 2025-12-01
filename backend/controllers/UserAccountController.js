@@ -43,7 +43,6 @@ class UserAccountController {
                             }
                         ],
                         attributes: ["id", "name"],
-                        order: [["name", "ASC"]]
                     }
                 ]
             });
@@ -101,7 +100,6 @@ class UserAccountController {
                             }
                         ],
                         attributes: ["id", "name"],
-                        order: [["name", "ASC"]]
                     }
                 ]
             });
@@ -115,7 +113,6 @@ class UserAccountController {
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 version: user.version,
-                
             }));
 
             return res.json({ users: formatted });

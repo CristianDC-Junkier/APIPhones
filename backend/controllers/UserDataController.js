@@ -25,8 +25,7 @@ class UserDataController {
         try {
             const allData = await UserData.findAll({
                 include: ["department", "subdepartment"],
-                where: { departmentId: { [Op.ne]: null }, show: true },
-                order: [["name", "ASC"]]
+                where: { departmentId: { [Op.ne]: null }, show: true }
             });
 
             const formatted = allData.map(user => ({
@@ -56,7 +55,6 @@ class UserDataController {
                     { model: Department, as: "department" },
                     { model: SubDepartment, as: "subdepartment" }
                 ],
-                order: [["name", "ASC"]]
             });
             const formatted = allData.map(user => ({
                 id: user.id,
@@ -70,8 +68,7 @@ class UserDataController {
                 subdepartmentName: user.subdepartment?.name || null,
                 show: user.show,
                 version: user.version
-            })
-            );
+            }));
 
             return res.json({ users: formatted });
         } catch (error) {
@@ -113,7 +110,6 @@ class UserDataController {
                         required: false
                     }
                 ],
-                order: [["name", "ASC"]]
             });
             const formatted = allData.map(user => ({
                 id: user.id,
@@ -128,8 +124,7 @@ class UserDataController {
                 show: user.show,
                 version: user.version,
                 ticket: user.ticketsAffected && user.ticketsAffected.length > 0 ? true : false
-            })
-            );
+            }));
 
             return res.json({ datalist: formatted });
         } catch (error) {
@@ -316,10 +311,10 @@ class UserDataController {
                     },
                     {
                         model: Ticket,
-                        as: 'ticketsRequested',      // ✅ alias correcto
+                        as: 'ticketsRequested',      
                         attributes: ['id', 'status'],
-                        where: { status: 'RESOLVED' }, // solo tickets resueltos
-                        required: false               // permite que user sin tickets también aparezca
+                        where: { status: 'RESOLVED' }, 
+                        required: false               
                     }
                 ]
             });
@@ -366,7 +361,7 @@ class UserDataController {
                 version: user.version,
                 createdAt: user.createdAt,
                 updatedAt: user.updatedAt,
-                ticketsResolvedCount: user.ticketsRequested.length, // ✅ contador de tickets resueltos
+                ticketsResolvedCount: user.ticketsRequested.length, 
             });
 
         } catch (error) {

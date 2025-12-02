@@ -61,6 +61,7 @@ const WorkerList = () => {
             const deptResp = await getDepartmentsList();
             if (deptResp.success) {
                 const depts = deptResp.data.departments ?? [];
+                depts.sort((a, b) => a.name.localeCompare(b.name));
                 setDepartments(depts);
             }
         } catch (err) {
@@ -129,7 +130,7 @@ const WorkerList = () => {
     }
 
     return (
-        <Container fluid className="mt-4 d-flex flex-column" style={{ minHeight: "80vh" }}>
+        <Container fluid className="mt-4 d-flex flex-column" >
             {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />
@@ -192,14 +193,20 @@ const WorkerList = () => {
                 </Col>
 
                 {/* Botones de acción */}
-                <Col xs="12" lg="3" className="d-flex justify-content-lg-end justify-content-center align-items-center gap-2">
+                {/* Botones de acción */}
+                <Col
+                    xs="12"
+                    lg="3"
+                    className="d-flex flex-column flex-lg-row justify-content-lg-end justify-content-center align-items-stretch gap-2"
+                >
                     <Button
                         color={showPhones ? "primary" : "secondary"}
                         onClick={() => setShowPhones(true)}
+                        className="w-100"
                         style={{
                             fontWeight: 500,
                             fontSize: "clamp(0.8rem, 2vw, 1rem)",
-                            height: "38px", // 🔹 misma altura que inputs
+                            height: "38px",
                             lineHeight: "1",
                             padding: "0 12px",
                         }}
@@ -210,6 +217,7 @@ const WorkerList = () => {
                     <Button
                         color={!showPhones ? "primary" : "secondary"}
                         onClick={() => setShowPhones(false)}
+                        className="w-100"
                         style={{
                             fontWeight: 500,
                             fontSize: "clamp(0.8rem, 2vw, 1rem)",
@@ -224,10 +232,12 @@ const WorkerList = () => {
                     <Button
                         color="secondary"
                         disabled={loading}
+                        className="w-100"
                         style={{
                             fontWeight: 500,
                             display: "flex",
                             alignItems: "center",
+                            justifyContent: "center",
                             gap: "5px",
                             height: "38px",
                             lineHeight: "1",
@@ -235,7 +245,13 @@ const WorkerList = () => {
                             fontSize: "clamp(0.8rem, 2vw, 1rem)",
                         }}
                         onClick={() =>
-                            exportPDF({ showEmails: !showPhones, colCount, listRef, lastUpdate, setLoading })
+                            exportPDF({
+                                showEmails: !showPhones,
+                                colCount,
+                                listRef,
+                                lastUpdate,
+                                setLoading
+                            })
                         }
                     >
                         {loading ? (

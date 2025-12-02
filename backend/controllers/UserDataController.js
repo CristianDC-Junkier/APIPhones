@@ -61,7 +61,7 @@ class UserDataController {
                 name: user.name,
                 extension: user.extension,
                 number: user.number,
-                email: user.email,
+                email: (user.email || "").toLowerCase(),
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 subdepartmentId: user.subdepartmentId,

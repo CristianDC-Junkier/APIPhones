@@ -61,6 +61,7 @@ const PublicList = () => {
             const deptResp = await getDepartmentsList();
             if (deptResp.success) {
                 const depts = deptResp.data.departments ?? [];
+                depts.sort((a, b) => a.name.localeCompare(b.name));
                 setDepartments(depts);
             }
         } catch (err) {

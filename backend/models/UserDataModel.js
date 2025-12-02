@@ -46,10 +46,6 @@ const UserData = sequelize.define("UserData", {
             const val = this.getDataValue("name");
             return val ? decrypt(val) : null;
         },
-        unique: {
-            name: 'unique_userdataname',
-            msg: 'Nombre del trabajador ya existente'
-        },
     },
     name_hash: {
         type: DataTypes.STRING(64),

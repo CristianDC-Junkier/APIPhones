@@ -129,7 +129,7 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
                         isMobileView ? (
                             <React.Fragment key={idx}>
                                 {/* Fila 1 */}
-                                <tr key={`${idx}-1`}>
+                                <tr key={`${idx}`}>
                                     {/* Nombre ocupa 2 filas */}
                                     <td rowSpan="2" className="text-center align-middle">
                                         {userItem.name || "-"}
@@ -137,7 +137,9 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
 
                                     {/* Parte superior de los datos */}
                                     <td className="text-center">{userItem.number || "-"}</td>
-                                    <td className="text-center">{userItem.extension || "-"}</td>
+                                    <td className="text-center">
+                                        {(userItem.email || "-").replace("@", "@\u200B")}
+                                    </td>
 
                                     {/* Acciones ocupa 2 filas */}
                                     <td rowSpan="2" className="text-center align-middle">
@@ -165,7 +167,7 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
                                 {/* Fila 2 */}
                                 <tr key={`${idx}-2`}>
                                     {/* Parte inferior de los datos */}
-                                    <td className="text-center">{userItem.email || "-"}</td>
+                                    <td className="text-center">{userItem.extension || "-"}</td>
                                     <td className="text-center">{userItem.departmentName || "-"}</td>
                                 </tr>
                             </React.Fragment>

@@ -223,10 +223,10 @@ class UserAccountController {
 
             await targetUser.save();
 
-            LoggerController.info('Usuario con id ' + targetUserId + ' actualizado correctamente por el usuario con id ' + req.user.id);
+            LoggerController.info('Usuario con id ' + req.params.id + ' actualizado correctamente por el usuario con id ' + req.user.id);
             return res.json({ id: targetUserId });
         } catch (error) {
-            LoggerController.error('Error modificando al usuario con id ' + targetUserId + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error modificando al usuario con id ' + req.params.id + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }
@@ -283,7 +283,7 @@ class UserAccountController {
             LoggerController.info('Usuario con id ' + user.id + ' eliminado por el usuario con id ' + req.user.id);
             return res.json({ id });
         } catch (error) {
-            LoggerController.error('Error eliminando un usuario con id ' + id + ' por el usuario con id ' + req.user.id);
+            LoggerController.error('Error eliminando un usuario con id ' + req.params.id + ' por el usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }
@@ -381,7 +381,7 @@ class UserAccountController {
                 }
             });
         } catch (error) {
-            LoggerController.error('Error modificando su propia cuenta de usuario con id ' + id);
+            LoggerController.error('Error modificando su propia cuenta de usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }
@@ -424,7 +424,7 @@ class UserAccountController {
             LoggerController.info(`Usuario con id ${id} eliminó su perfil`);
             return res.json({ id: id });
         } catch (error) {
-            LoggerController.error('Error eliminando su propia cuenta del usuario con id ' + id);
+            LoggerController.error('Error eliminando su propia cuenta del usuario con id ' + req.user.id);
             LoggerController.error('Error - ' + error.message);
             return res.status(500).json({ error: error.message });
         }

@@ -86,13 +86,13 @@ class AuthController {
     /**
     * Cierra la sesión de un usuario eliminando su cookie HttpOnly.
     *
-    * @param {Object} req - Objeto de petición de Express, con { cookies: { refreshToken } }.
+    * @param {Object} req - Objeto de petición de Express, con { cookies: { TelAART } }.
     * @param {Object} res - Objeto de respuesta de Express.
     * @returns {JSON} - Mensaje de éxito o error.
     */
     static async logout(req, res) {
         try {
-            const token = req.cookies?.refreshToken;
+            const token = req.cookies?.TelAART;
             if (!token) return res.status(400).json({ error: "No hay sesión activa" });
 
             let payload;
@@ -151,7 +151,7 @@ class AuthController {
     /**
      * Devuelve la información del usuario basada en la cookie HttpOnly y la renueva si es necesario.
      * 
-     * @param {Object} req - Objeto de petición de Express, con { cookies: { refreshToken } }.
+     * @param {Object} req - Objeto de petición de Express, con { cookies: { TelAART } }.
      * @param {Object} res - Objeto de respuesta de Express.
      * @returns {JSON} - JSON con nuevo accessToken y datos del usuario, o estado 401 si el token es inválido.
      */

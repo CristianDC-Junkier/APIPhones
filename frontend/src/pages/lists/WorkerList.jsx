@@ -96,41 +96,90 @@ const WorkerList = () => {
                 return acc;
             }, {})
     ).map(dep => {
-        const sortedWorkers = dep.workers.sort((a, b) => a.name.localeCompare(b.name));
+        const sortedWorkers = dep.workers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
         const sortedSubdeps = Object.values(dep.subdepartments)
             .map(sub => ({
                 ...sub,
-                workers: sub.workers.sort((a, b) => a.name.localeCompare(b.name))
+                workers: sub.workers.sort((a, b) => (a.name || "").localeCompare(b.name || ""))
             }))
-            .sort((a, b) => a.name.localeCompare(b.name));
+            .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
         return { ...dep, workers: sortedWorkers, subdepartments: sortedSubdeps };
-    }).sort((a, b) => a.name.localeCompare(b.name));
+    }).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
     // --- Filtros ---
     const filteredDepartments = departmentsArray.filter(dep => {
         const matchDept = selectedDepartment ? dep.id === selectedDepartment : true;
-        const term = searchUser.toLowerCase();
+        const term = (searchUser || "").toLowerCase();
         const matchUser = searchUser
-            ? dep.workers.some(t => t.name.toLowerCase().includes(term)) ||
+            ? dep.workers.some(t => (t.name || "").toLowerCase().includes(term)) ||
             dep.subdepartments.some(sd =>
-                sd.workers.some(t => t.name.toLowerCase().includes(term))
+                sd.workers.some(t => (t.name || "").toLowerCase().includes(term))
             )
             : true;
         return matchDept && matchUser;
     });
 
-    // --- Distribución vertical ---
+    // --- Distribución inicial ---
     const colCount = 3;
-    const columns = Array.from({ length: colCount }, () => []);
     const perColumn = Math.ceil(filteredDepartments.length / colCount);
-    for (let i = 0; i < colCount; i++) {
-        const start = i * perColumn;
-        const end = start + perColumn;
-        columns[i] = filteredDepartments.slice(start, end);
+    let columns = Array.from({ length: colCount }, (_, i) =>
+        filteredDepartments.slice(i * perColumn, (i + 1) * perColumn)
+    );
+
+    // --- Función para calcular peso de una columna ---
+    const getWeight = col =>
+        col.reduce(
+            (sum, dep) =>
+                sum + dep.workers.length + dep.subdepartments.reduce((s, sd) => s + sd.workers.length, 0),
+            0
+        );
+
+    // --- Ajuste dinámico para balancear columnas ---
+    let improved = true;
+    while (improved) {
+        improved = false;
+
+        for (let i = 0; i < colCount - 1; i++) {
+            const colA = columns[i];
+            const colB = columns[i + 1];
+
+            const weightA = getWeight(colA);
+            const weightB = getWeight(colB);
+            const diffBefore = Math.abs(weightA - weightB);
+
+            // Intentar mover 1 del final de A al inicio de B
+            if (colA.length) {
+                const moved = colA[colA.length - 1];
+                const movedWeight = moved.workers.length + moved.subdepartments.reduce((s, sd) => s + sd.workers.length, 0);
+                const diffAfter = Math.abs(weightA - movedWeight - (weightB + movedWeight));
+
+                if (diffAfter < diffBefore) {
+                    colA.pop();
+                    colB.unshift(moved);
+                    improved = true;
+                    continue;
+                }
+            }
+
+            // Intentar mover 1 del inicio de B al final de A
+            if (colB.length) {
+                const moved = colB[0];
+                const movedWeight = moved.workers.length + moved.subdepartments.reduce((s, sd) => s + sd.workers.length, 0);
+                const diffAfter = Math.abs((weightA + movedWeight) - (weightB - movedWeight));
+
+                if (diffAfter < diffBefore) {
+                    colB.shift();
+                    colA.push(moved);
+                    improved = true;
+                    continue;
+                }
+            }
+        }
     }
 
+
     return (
-        <Container fluid className="mt-4 d-flex flex-column" >
+        <Container fluid className="mt-4 d-flex flex-column mb-3" >
             {/* Botón Volver */}
             <div className="position-absolute top-0 start-0">
                 <BackButtonComponent back="/home" />

@@ -29,8 +29,7 @@ class UserDataController {
             });
 
             const formatted = allData.map(user => ({
-                number: user.number,
-                extension: user.extension,
+                extension: user.extension ? user.extension : user.number,
                 departmentId: user.departmentId,
                 departmentName: user.department?.name || null,
                 subdepartmentId: user.subdepartmentId,

@@ -137,16 +137,62 @@ const PublicList = () => {
         });
     }, [departmentsArray, selectedDepartment]);
 
-
-    // Distribución vertical-first sobre los filtrados
+    // --- Distribución inicial ---
     const colCount = 3;
-    const columns = Array.from({ length: colCount }, () => []);
     const perColumn = Math.ceil(filteredDepartments.length / colCount);
+    let columns = Array.from({ length: colCount }, (_, i) =>
+        filteredDepartments.slice(i * perColumn, (i + 1) * perColumn)
+    );
 
-    for (let i = 0; i < colCount; i++) {
-        const start = i * perColumn;
-        const end = start + perColumn;
-        columns[i] = filteredDepartments.slice(start, end);
+    // --- Función para calcular peso de una columna ---
+    const getWeight = col =>
+        col.reduce(
+            (sum, dep) =>
+                sum + dep.workers.length + dep.subdepartments.reduce((s, sd) => s + sd.workers.length, 0),
+            0
+        );
+
+    // --- Ajuste dinámico para balancear columnas ---
+    let improved = true;
+    while (improved) {
+        improved = false;
+
+        for (let i = 0; i < colCount - 1; i++) {
+            const colA = columns[i];
+            const colB = columns[i + 1];
+
+            const weightA = getWeight(colA);
+            const weightB = getWeight(colB);
+            const diffBefore = Math.abs(weightA - weightB);
+
+            // Intentar mover 1 del final de A al inicio de B
+            if (colA.length) {
+                const moved = colA[colA.length - 1];
+                const movedWeight = moved.workers.length + moved.subdepartments.reduce((s, sd) => s + sd.workers.length, 0);
+                const diffAfter = Math.abs(weightA - movedWeight - (weightB + movedWeight));
+
+                if (diffAfter < diffBefore) {
+                    colA.pop();
+                    colB.unshift(moved);
+                    improved = true;
+                    continue;
+                }
+            }
+
+            // Intentar mover 1 del inicio de B al final de A
+            if (colB.length) {
+                const moved = colB[0];
+                const movedWeight = moved.workers.length + moved.subdepartments.reduce((s, sd) => s + sd.workers.length, 0);
+                const diffAfter = Math.abs((weightA + movedWeight) - (weightB - movedWeight));
+
+                if (diffAfter < diffBefore) {
+                    colB.shift();
+                    colA.push(moved);
+                    improved = true;
+                    continue;
+                }
+            }
+        }
     }
 
     return (

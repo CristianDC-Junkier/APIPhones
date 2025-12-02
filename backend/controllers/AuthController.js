@@ -199,7 +199,6 @@ class AuthController {
                 });
             }
 
-            LoggerController.info(`Recarga de access token exitosa para el usuario con id ${user.id}`);
             return res.json({
                 accessToken,
                 user: {

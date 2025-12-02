@@ -212,7 +212,7 @@ const WorkerList = () => {
                         style={{
                             flex: 1,
                             minWidth: "180px",
-                            height: "38px", // 🔹 altura uniforme
+                            height: "38px",
                             fontSize: "clamp(0.8rem, 2vw, 1rem)",
                         }}
                     >
@@ -229,19 +229,18 @@ const WorkerList = () => {
                 <Col xs="12" lg="4" className="d-flex align-items-center">
                     <Input
                         type="text"
-                        placeholder="Buscar usuario..."
+                        placeholder="Buscar trabajador..."
                         value={searchUser}
                         onChange={e => setSearchUser(e.target.value)}
                         style={{
                             flex: 1,
                             minWidth: "160px",
-                            height: "38px", // 🔹 igual que el select
+                            height: "38px", 
                             fontSize: "clamp(0.8rem, 2vw, 1rem)",
                         }}
                     />
                 </Col>
 
-                {/* Botones de acción */}
                 {/* Botones de acción */}
                 <Col
                     xs="12"

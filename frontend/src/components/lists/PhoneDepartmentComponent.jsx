@@ -37,12 +37,15 @@ const DepartamentoComponent = ({
                         <tr key={idx} className="text-center">
                             {showPhones ? (
                                 <>
+                                    {!publicAccess && <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.number}</strong></td>}
                                     <td style={{ width: publicAccess ? "30%" : "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
                                     <td className="text-uppercase"> {publicAccess ? "-" : t.name} </td>
                                 </>
                             ) : (
                                 <>
-                                    <td colSpan="2" className="text-uppercase">{t.name.split(" ").slice(0, 2).join(" ")}</td>
+                                    <td colSpan="2" className="text-uppercase">
+                                        {t.name ? t.name.split(" ").slice(0, 2).join(" ") : "-"}
+                                    </td>
                                     <td
                                         className="text-uppercase email"
                                         style={{ width: "60%", padding: "0.25rem", wordBreak: "break-word", overflowWrap: "break-word" }}
@@ -72,13 +75,15 @@ const DepartamentoComponent = ({
                                 <tr key={tIdx} className="text-center">
                                     {showPhones ? (
                                         <>
+                                            {!publicAccess && <td style={{ width: "10%", padding: "0.25rem" }}><strong>{t.number}</strong></td>}
                                             <td style={{ width: publicAccess ? "30%" : "10%", padding: "0.25rem" }}><strong>{t.extension}</strong></td>
                                             <td className="text-uppercase"> {publicAccess ? "-" : t.name} </td>
                                         </>
                                     ) : (
                                         <>
-                                                <td colSpan="2" className="text-uppercase" >{t.name.split(" ").slice(0, 2).join(" ")}</td>
-                                            <td
+                                            <td colSpan="2" className="text-uppercase">
+                                                {t.name ? t.name.split(" ").slice(0, 2).join(" ") : "-"}
+                                            </td>                                            <td
                                                 className="text-uppercase email"
                                                 style={{ width: "50%", padding: "0.25rem", wordBreak: "break-word", overflowWrap: "break-word" }}
                                             >

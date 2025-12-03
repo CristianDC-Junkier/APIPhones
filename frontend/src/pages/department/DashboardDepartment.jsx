@@ -71,9 +71,6 @@ const DashboardDepartment = () => {
                 });
 
                 setDepartments(depts);
-
-                const totalPages = Math.ceil(depts.length / rowsPerPage);
-                if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
             }
 
             if (subResp.success) {
@@ -86,8 +83,6 @@ const DashboardDepartment = () => {
 
                 setSubdepartments(subs);
 
-                const totalPages = Math.ceil(subs.length / rowsPerPage);
-                if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
             }
         } catch (err) {
             Swal.fire("Error", "No se pudo obtener la lista de departamentos", err);

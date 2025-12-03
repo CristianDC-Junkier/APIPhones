@@ -87,12 +87,6 @@ const DashboardUser = () => {
                 setUserData(usersData);
                 setUserAccounts(usersAccounts);
 
-                // Ajustar currentPage si queda fuera de rango
-                const totalPages = statsType === "Accounts"
-                    ? Math.ceil(usersAccounts.length / rowsPerPage)
-                    : Math.ceil(usersData.length / rowsPerPage);
-
-                if (currentPage > totalPages && totalPages > 0) setCurrentPage(totalPages);
             }
         } finally {
             setLoading(false);

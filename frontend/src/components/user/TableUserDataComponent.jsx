@@ -28,13 +28,13 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
     }, [users, search, selectedDepartment]);
 
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
-    const currentUsers = filteredUsers.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
-    );
+    const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+    }
 
     const showCaptcha = () =>
-        new Promise((resolve, reject) => {
+        new Promise((resolve) => {
             const container = document.createElement("div");
             const reactRoot = createRoot(container);
             let completed = false;
@@ -88,12 +88,6 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
             Swal.fire("Éxito", "Datos de usuario eliminados correctamente", "success");
             await refreshData();
 
-            const remainingUsers = filteredUsers.length;
-            const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
-
-            if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
-                setCurrentPage(totalPagesAfterDelete);
-            }
         } else {
             Swal.fire("Error", result.error || "No se pudo eliminar los datos del usuario", "error");
         }

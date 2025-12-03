@@ -42,6 +42,9 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, selectedDepa
 
     const totalPages = Math.ceil(filteredSubdepartments.length / rowsPerPage);
     const currentSubdepartments = filteredSubdepartments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+    }
 
     const showCaptcha = () => new Promise((resolve) => {
         const container = document.createElement('div');
@@ -98,13 +101,6 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, selectedDepa
         if (result.success) {
             Swal.fire('Éxito', 'Subdepartamento eliminado correctamente', 'success');
             await refreshData();
-
-            const remainingUsers = filteredSubdepartments.length;
-            const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
-
-            if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
-                setCurrentPage(totalPagesAfterDelete);
-            }
 
         } else {
             Swal.fire('Error', result.error || 'No se pudo eliminar el subdepartamento', 'error');

@@ -20,8 +20,11 @@ const TableUserAccountComponent = ({ users, search, selectedDepartment, rowsPerP
 
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const currentUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    if (currentPage > totalPages && totalPages > 0) {
+        setCurrentPage(totalPages);
+    }
 
-    const showCaptcha = () => new Promise((resolve, reject) => {
+    const showCaptcha = () => new Promise((resolve,) => {
         const container = document.createElement('div');
         const reactRoot = createRoot(container);
         let completed = false;

@@ -92,13 +92,17 @@ const TableDepartmentComponent = ({ departments, search, rowsPerPage, currentPag
     };
 
     const handleDelete = async (dept) => {
-        try { await showCaptcha(dept.id); }
-        catch (err) { Swal.fire('Atención', err.message || 'Captcha no completado', 'warning'); return; }
-
+        await showCaptcha(dept.id);
         const result = await deleteDepartment(dept.id);
         if (result.success) {
             Swal.fire('Éxito', 'Departamento eliminado correctamente', 'success');
             await refreshData();
+            const remainingUsers = filteredDepartments.length;
+            const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
+
+            if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
+                setCurrentPage(totalPagesAfterDelete);
+            }
         } else {
             Swal.fire('Error', result.error || 'No se pudo eliminar el departamento', 'error');
         }

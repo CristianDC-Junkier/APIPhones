@@ -24,7 +24,7 @@ const DashboardDepartment = () => {
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(8);
-    const [sortBy, setSortBy] = useState("name");
+    const [sortBy, setSortBy] = useState("id");
 
     useEffect(() => {
         document.title = "Panel de control de Departamentos - Listín telefónico - Ayuntamiento de Almonte";

@@ -81,21 +81,22 @@ const TableUserDataComponent = ({ users, search, selectedDepartment, rowsPerPage
     };
 
     const handleDelete = async (userItem) => {
-        try {
-            await showCaptcha();
-        } catch {
-            Swal.fire("Atención", "Captcha no completado", "warning");
-            return;
-        }
-        let result;
-        result = await deleteUserData(userItem.id, userItem.version);
+        await showCaptcha();
+        const result = await deleteUserData(userItem.id, userItem.version);
+
         if (result.success) {
             Swal.fire("Éxito", "Datos de usuario eliminados correctamente", "success");
+            await refreshData();
+
+            const remainingUsers = filteredUsers.length;
+            const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
+
+            if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
+                setCurrentPage(totalPagesAfterDelete);
+            }
         } else {
             Swal.fire("Error", result.error || "No se pudo eliminar los datos del usuario", "error");
         }
-
-        await refreshData();
     };
 
 

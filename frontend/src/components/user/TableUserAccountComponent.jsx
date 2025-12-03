@@ -74,14 +74,14 @@ const TableUserAccountComponent = ({ users, search, selectedDepartment, rowsPerP
         if (result.success) {
             Swal.fire('Éxito', 'Usuario eliminado correctamente', 'success');
 
-            const remainingUsers = filteredUsers.length - 1; 
+            await refreshData();
+
+            const remainingUsers = filteredUsers.length;
             const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
 
             if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
                 setCurrentPage(totalPagesAfterDelete);
             }
-
-            await refreshData();
 
             if (userItem.id === currentUser.id) {
                 window.location.href = "/listin-telefonico/login";

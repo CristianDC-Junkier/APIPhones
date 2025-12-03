@@ -1,5 +1,6 @@
 ﻿const LoggerController = require("../controllers/LoggerController");
 const { verifyToken, decodeToken } = require("../utils/JWT");
+const { UserAccount } = require("../models/Relations");
 
 /**
  * Función auxiliar para validar accessToken del header Authorization

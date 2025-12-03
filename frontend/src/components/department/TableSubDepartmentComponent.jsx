@@ -92,13 +92,20 @@ const TableSubDepartmentComponent = ({ departments, subdepartments, selectedDepa
     };
 
     const handleDelete = async (sub) => {
-        try { await showCaptcha(sub.id); }
-        catch (err) { Swal.fire('Atención', err.message || 'Captcha no completado', 'warning'); return; }
-
+        await showCaptcha(sub.id); 
         const result = await deleteSubDepartment(sub.id);
+
         if (result.success) {
             Swal.fire('Éxito', 'Subdepartamento eliminado correctamente', 'success');
             await refreshData();
+
+            const remainingUsers = filteredSubdepartments.length;
+            const totalPagesAfterDelete = Math.ceil(remainingUsers / rowsPerPage);
+
+            if (currentPage > totalPagesAfterDelete && totalPagesAfterDelete > 0) {
+                setCurrentPage(totalPagesAfterDelete);
+            }
+
         } else {
             Swal.fire('Error', result.error || 'No se pudo eliminar el subdepartamento', 'error');
         }

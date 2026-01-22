@@ -52,7 +52,7 @@ const FooterComponent = () => {
                     >
                         <small className="footer-links">
                             <a
-                                href="/listin-telefonico/data-compromise"
+                                href="/TelAA/data-compromise"
                                 className={`text-white text-decoration-none ${isActive("/data-compromise") ? "active-link" : ""
                                     }`}
                             >
@@ -60,7 +60,7 @@ const FooterComponent = () => {
                             </a>
                             <span className="mx-1">|</span>
                             <a
-                                href="/listin-telefonico/privacity-politic"
+                                href="/TelAA/privacity-politic"
                                 className={`text-white text-decoration-none ${isActive("/privacity-politic") ? "active-link" : ""
                                     }`}
                             >
@@ -68,7 +68,7 @@ const FooterComponent = () => {
                             </a>
                             <span className="mx-1">|</span>
                             <a
-                                href="/listin-telefonico/cookies-politic"
+                                href="/TelAA/cookies-politic"
                                 className={`text-white text-decoration-none ${isActive("/cookies-politic") ? "active-link" : ""
                                     }`}
                             >
